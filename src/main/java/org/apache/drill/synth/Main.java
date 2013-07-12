@@ -10,10 +10,10 @@ import java.io.IOException;
 
 /**
  * Create a query log with a specified number of log lines and an associated user profile database.
- * <p/>
+ *
  * Command line args include number of log lines to generate, the name of the log file to generate and the
  * name of the file to store the user profile database in.
- * <p/>
+ *
  * Log lines and user profile entries are single line JSON.
  */
 public class Main {
@@ -38,9 +38,12 @@ public class Main {
 
         LogGenerator lg = new LogGenerator(50000);
         BufferedWriter log = Files.newWriter(new File(args[1]), Charsets.UTF_8);
+        long t0 = System.nanoTime();
         for (int i = 0; i < n; i++) {
-            if (i % 10000 == 0) {
-                System.out.printf("%d %d\n", i, lg.getUserCount());
+            if (i % 50000 == 0) {
+                long t1 = System.nanoTime();
+                System.out.printf("%d\t%.3f\n", i, (t1 - t0) / 1e9);
+                t0 = t1;
             }
             log.write(lg.sample().toString());
             log.newLine();
