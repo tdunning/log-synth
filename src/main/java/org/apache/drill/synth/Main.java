@@ -19,6 +19,12 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException {
 
+        if (args.length != 3) {
+          // e.g. use 100K /tmp/logs.txt /tmp/profiles.txt to create 100.000 logs
+          System.err.println("Usage: <numLoglinesG|M|K> <logFile> <profileFile>");
+          System.exit(-1);
+        }
+
         int n = Integer.parseInt(args[0].replaceAll("[KMG]?$", ""));
 
         switch (args[0].charAt(args[0].length() - 1)) {
