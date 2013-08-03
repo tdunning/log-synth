@@ -62,7 +62,7 @@ You can also generate data based on a rough schema.  Schema-driven generation su
 
 To generate data, follow the compilation directions above, but use this main program instead:
 
-    java -cp target/log-synth-0.1-SNAPSHOT-jar-with-dependencies.jar org.apache.drill.synth.Synth --count 1M --schema schema
+    java -cp target/log-synth-0.1-SNAPSHOT-jar-with-dependencies.jar org.apache.drill.synth.Synth -count 1M -schema schema
 
 The allowable arguments include:
 

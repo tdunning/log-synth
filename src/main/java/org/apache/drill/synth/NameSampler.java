@@ -62,14 +62,9 @@ public class NameSampler extends FieldSampler {
     }
 
     public NameSampler(Type type) {
-        init(type);
-
-    }
-
-    private void init(Type type) {
+        this();
         setTypeRaw(type);
     }
-
 
     private String initialCap(String s) {
         return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
@@ -93,7 +88,6 @@ public class NameSampler extends FieldSampler {
 
     public void setTypeRaw(Type type) {
         this.type = type;
-
     }
 
     public void setType(String type) {
