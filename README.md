@@ -66,25 +66,25 @@ To generate data, follow the compilation directions above, but use this main pro
 
 The allowable arguments include:
 
- -count n    Defines how many lines of data to emit.  Default value is 1000.  Suffixes including k, M, and G have customary meanings.
+ `-count n`    Defines how many lines of data to emit.  Default value is 1000.  Suffixes including k, M, and G have customary meanings.
 
- -schema file Defines where to get the schema definition from.  The schema is in JSON format and consists of a list of field specifications.  Each field specification is a JSON object and is required to have the following values
+ `-schema file` Defines where to get the schema definition from.  The schema is in JSON format and consists of a list of field specifications.  Each field specification is a JSON object and is required to have the following values
 
-     class - Defines the distribution that is used to sample values for this field.  Possible values include `address`, `date`, `foreign-key`, `id`, `int`, and `street-name`.  Additional values that may be allowed or required for specific generators are detailed below.
 
-     name - This is the name of the field.  The output will consist of fields ordered as in the schema definition and any header file will contain the names for each field as defined by this value.
+ * class - Defines the distribution that is used to sample values for this field.  Possible values include `address`, `date`, `foreign-key`, `id`, `int`, and `street-name`.  Additional values that may be allowed or required for specific generators are detailed below.
 
- -format CSV | TSV | JSON
+ * name - This is the name of the field.  The output will consist of fields ordered as in the schema definition and any header file will contain the names for each field as defined by this value.
+
+`-format CSV | TSV | JSON` Defines what format the output should use.
 
 The following classes of values are allowed:
 
-address - This distribution generates fairly plausible, if somewhat fanciful street addresses.  There are no additional parameters allowed.
-date - This distribution generates dates which are some time before an epoch date.  Dates shortly before the epoch are more common than those long before.  On average, the dates generated are 100 days before the epoch.  A format field is allowed which takes a format for the data in the style of Java's SimpleDateFormatter.
-
-foreign-key - This distribution generates randomized references to an integer key from another table.  You must specify the size of the table being referenced using the size parameter.  You may optionally specify a skewness factor in the range [0,3].  A value of 0 gives uniform distribution.  A value of 1 gives a classic Zipf distribution.
-id - This distribution returns consecutive integers starting at the value of the start parameter.
-int - This distribution generates random integers that are greater than or equal to the min parameter and less than the max parameter.
-street-name - This distribution generates fanciful three word street names.
+`address` - This distribution generates fairly plausible, if somewhat fanciful street addresses.  There are no additional parameters allowed.
+`date` - This distribution generates dates which are some time before an epoch date.  Dates shortly before the epoch are more common than those long before.  On average, the dates generated are 100 days before the epoch.  A format field is allowed which takes a format for the data in the style of Java's SimpleDateFormatter.
+`foreign-key` - This distribution generates randomized references to an integer key from another table.  You must specify the size of the table being referenced using the size parameter.  You may optionally specify a skewness factor in the range [0,3].  A value of 0 gives uniform distribution.  A value of 1 gives a classic Zipf distribution.
+`id` - This distribution returns consecutive integers starting at the value of the start parameter.
+`int` - This distribution generates random integers that are greater than or equal to the min parameter and less than the max parameter.
+`street-name` - This distribution generates fanciful three word street names.
 
 The following schema generates a typical fact table from a simulated star schema:
 
