@@ -72,8 +72,8 @@ public class Main {
         @Argument()
         List<String> files;
 
-        private static class SizeParser extends IntOptionHandler {
-            protected SizeParser(CmdLineParser parser, OptionDef option, Setter<? super Integer> setter) {
+        public static class SizeParser extends IntOptionHandler {
+            public SizeParser(CmdLineParser parser, OptionDef option, Setter<? super Integer> setter) {
                 super(parser, option, setter);
             }
 

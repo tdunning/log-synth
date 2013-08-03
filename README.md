@@ -3,8 +3,10 @@ log-synth
 
 The basic idea here is to have a random log generator build fairly realistic log files for analysis. The analyses specified here are fairly typical use cases for trying to figure out where the load on a web-site is coming from.
 
-How to Run It
-============
+The second utility provided here is to generate data based on a specified schema.  Skip down to the section on schema-driven generation.
+
+How to Run the Log Generator
+========================
 
 Install Java 7, maven and get this software using git.
 
@@ -53,11 +55,63 @@ We also need to maintain an average response time per term. The response time fo
 
 Users are assigned to IP addresses using a Pittman-Yor process with a discount of 0.9. This gives long-tailed distribution to the number of users per IP address. This results in 90% of all IP addresses having only a single user.
 
-Generating Other Data
+Schema-driven Data Generation
 =====================
 
-Floating point numbers
-Dates
-Reference keys
-Names
-Addresses
+You can also generate data based on a rough schema.  Schema-driven generation supports the generation of addresses, dates, foreign key references, unique id numbers, random integers, sort of realistic personal names and fanciful street names.
+
+To generate data, follow the compilation directions above, but use this main program instead:
+
+    java -cp target/log-synth-0.1-SNAPSHOT-jar-with-dependencies.jar org.apache.drill.synth.Synth --count 1M --schema schema
+
+The allowable arguments include:
+
+ -count n    Defines how many lines of data to emit.  Default value is 1000.  Suffixes including k, M, and G have customary meanings.
+
+ -schema file Defines where to get the schema definition from.  The schema is in JSON format and consists of a list of field specifications.  Each field specification is a JSON object and is required to have the following values
+
+     class - Defines the distribution that is used to sample values for this field.  Possible values include `address`, `date`, `foreign-key`, `id`, `int`, and `street-name`.  Additional values that may be allowed or required for specific generators are detailed below.
+
+     name - This is the name of the field.  The output will consist of fields ordered as in the schema definition and any header file will contain the names for each field as defined by this value.
+
+ -format CSV | TSV | JSON
+
+The following classes of values are allowed:
+
+address - This distribution generates fairly plausible, if somewhat fanciful street addresses.  There are no additional parameters allowed.
+date - This distribution generates dates which are some time before an epoch date.  Dates shortly before the epoch are more common than those long before.  On average, the dates generated are 100 days before the epoch.  A format field is allowed which takes a format for the data in the style of Java's SimpleDateFormatter.
+
+foreign-key - This distribution generates randomized references to an integer key from another table.  You must specify the size of the table being referenced using the size parameter.  You may optionally specify a skewness factor in the range [0,3].  A value of 0 gives uniform distribution.  A value of 1 gives a classic Zipf distribution.
+id - This distribution returns consecutive integers starting at the value of the start parameter.
+int - This distribution generates random integers that are greater than or equal to the min parameter and less than the max parameter.
+street-name - This distribution generates fanciful three word street names.
+
+The following schema generates a typical fact table from a simulated star schema:
+
+    [
+        {"name":"id", "class":"id"},
+        {"name":"user_id", "class": "foreign-key", "size": 10000},
+        {"name":"item_id", "class": "foreign-key", "size": 2000}
+    ]
+
+Here we have an id and two foreign key references to dimension tables for user information and item information.  This definition assumes that we will generate 10,000 users and 2000 item records.
+
+The users can be generated using this schema.
+
+    [
+        {"name":"id", "class":"id"},
+        {"name":"name", "class":"name", "type":"first_last"},
+        {"name":"address", "class":"address"},
+        {"name":"first_visit", "class":"date", "format":"MM/dd/yyyy"}
+    ]
+
+For each user we generate an id, a name, an address and a date the user first visited the site.
+
+Items are simpler and are generated using this schema
+
+    [
+        {"name":"id", "class":"id"},
+        {"name":"size", "class":"int", "min":10, "max":99}
+    ]
+
+Each item has an id and a size which is just a random integer from 10 to 99.

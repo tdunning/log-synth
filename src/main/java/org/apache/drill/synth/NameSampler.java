@@ -10,7 +10,6 @@ import org.apache.mahout.math.random.Multinomial;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -26,13 +25,12 @@ public class NameSampler extends FieldSampler {
 
     private Type type;
 
-    public NameSampler(Type type) {
+    public NameSampler() {
         try {
             if (first.compareAndSet(null, new Multinomial<String>())) {
                 Preconditions.checkState(last.getAndSet(new Multinomial<String>()) == null);
 
                 Splitter onTab = Splitter.on(CharMatcher.WHITESPACE).omitEmptyStrings().trimResults();
-                this.type = type;
                 for (String resourceName : ImmutableList.of("dist.male.first", "dist.female.first")) {
                     for (String line : Resources.readLines(Resources.getResource(resourceName), Charsets.UTF_8)) {
                         if (!line.startsWith("#")) {
@@ -63,11 +61,15 @@ public class NameSampler extends FieldSampler {
         }
     }
 
-    public static NameSampler create(Map<String, String> args) {
-        Preconditions.checkArgument(args.size() == 1);
-        Preconditions.checkArgument(args.containsKey("type"));
-        return new NameSampler(Type.valueOf(args.get("type").toUpperCase()));
+    public NameSampler(Type type) {
+        init(type);
+
     }
+
+    private void init(Type type) {
+        setTypeRaw(type);
+    }
+
 
     private String initialCap(String s) {
         return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
@@ -89,7 +91,12 @@ public class NameSampler extends FieldSampler {
         return null;
     }
 
-    public void setType(Type type) {
+    public void setTypeRaw(Type type) {
         this.type = type;
+
+    }
+
+    public void setType(String type) {
+        setTypeRaw(Type.valueOf(type.toUpperCase()));
     }
 }
