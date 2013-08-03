@@ -41,6 +41,22 @@ public class LogLine implements Comparable<LogLine> {
         return r.toString();
     }
 
+    public long getCookie() {
+        return cookie;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public InetAddress getIp() {
+        return ip;
+    }
+
+    public List<String> getQuery() {
+        return query;
+    }
+
     public double getT() {
         return t;
     }

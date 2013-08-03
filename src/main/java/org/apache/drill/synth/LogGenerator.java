@@ -3,8 +3,6 @@ package org.apache.drill.synth;
 import com.google.common.collect.Queues;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.AbstractContinousDistribution;
-import org.apache.mahout.math.jet.random.Exponential;
-import org.apache.mahout.math.jet.random.Gamma;
 import org.apache.mahout.math.jet.random.Uniform;
 import org.apache.mahout.math.random.Sampler;
 

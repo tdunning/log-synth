@@ -53,3 +53,11 @@ We also need to maintain an average response time per term. The response time fo
 
 Users are assigned to IP addresses using a Pittman-Yor process with a discount of 0.9. This gives long-tailed distribution to the number of users per IP address. This results in 90% of all IP addresses having only a single user.
 
+Generating Other Data
+=====================
+
+Floating point numbers
+Dates
+Reference keys
+Names
+Addresses

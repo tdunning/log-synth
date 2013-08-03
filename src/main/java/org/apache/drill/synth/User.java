@@ -4,21 +4,14 @@ import com.google.common.collect.Lists;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.AbstractContinousDistribution;
 import org.apache.mahout.math.jet.random.Exponential;
-import org.apache.mahout.math.jet.random.Uniform;
 
 import java.net.InetAddress;
-import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created with IntelliJ IDEA.
- * User: tdunning
- * Date: 2/2/13
- * Time: 6:15 PM
- * To change this template use File | Settings | File Templates.
+ * Samples from a user space.  Each user has a variety of internal characteristics.
  */
 public class User implements Comparable<User> {
     private static AtomicInteger idCounter = new AtomicInteger();
