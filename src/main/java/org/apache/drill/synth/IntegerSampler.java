@@ -10,8 +10,8 @@ import java.util.Random;
  * The only cleverness here is that we allow a variable amount of key skew.
  */
 public class IntegerSampler extends FieldSampler {
-    private int min;
-    private int max;
+    private int min = 0;
+    private int max = 100;
     private Random base;
 
     public IntegerSampler() {

@@ -1,0 +1,4 @@
+[
+   {"name":"id", "class":"id"},
+   {"name":"size", "class":"int", "min":10, "max":99}
+]
