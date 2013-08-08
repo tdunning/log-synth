@@ -1,7 +1,6 @@
 package org.apache.drill.synth;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
@@ -10,7 +9,6 @@ import org.apache.mahout.math.random.Multinomial;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Sample from a space of goofy but somewhat plausible street names.
@@ -41,10 +39,5 @@ public class StreetNameSampler extends FieldSampler {
     @Override
     public String sample() {
         return sampler.get(0).sample() + " " + sampler.get(1).sample() + " " + sampler.get(2).sample();
-    }
-
-    public static StreetNameSampler create(Map<String, String> args) {
-        Preconditions.checkArgument(args.size() == 0);
-        return new StreetNameSampler();
     }
 }

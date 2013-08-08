@@ -85,6 +85,7 @@ The following classes of values are allowed:
 `id` - This distribution returns consecutive integers starting at the value of the start parameter.
 `int` - This distribution generates random integers that are greater than or equal to the min parameter and less than the max parameter.
 `street-name` - This distribution generates fanciful three word street names.
+`string` - This distribution generates a specified distribution of strings.  One parameter called `dist` is required.  This parameter should be a structure with string keys and numerical values.  The probability for each key is proportional to the value.
 
 The following schema generates a typical fact table from a simulated star schema:
 
@@ -101,6 +102,7 @@ The users can be generated using this schema.
     [
         {"name":"id", "class":"id"},
         {"name":"name", "class":"name", "type":"first_last"},
+        {"name":"gender", "class":"string", "dist":{"MALE":0.5, "FEMALE":0.5, "OTHER":0.02}},
         {"name":"address", "class":"address"},
         {"name":"first_visit", "class":"date", "format":"MM/dd/yyyy"}
     ]
