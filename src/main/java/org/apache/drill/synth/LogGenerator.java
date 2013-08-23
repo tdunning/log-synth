@@ -49,7 +49,7 @@ public class LogGenerator implements Sampler<LogLine> {
         return users;
     }
 
-    public LogGenerator(int userCount) {
+    public LogGenerator(double userCount) {
         for (int i = 0; i < userCount; i++) {
             users.add(new User(ipGenerator.sample(), geo.sample(), terms, sessionRateDistribution.nextDouble()));
         }

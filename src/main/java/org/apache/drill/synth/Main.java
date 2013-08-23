@@ -28,7 +28,9 @@ public class Main {
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
-            System.err.println("Usage: -count <number>G|M|K [ -users number ] [-format JSON|LOG|CSV ] log-file user-profiles");
+            System.err.println("Usage: -count <number>G|M|K [ -users number ] [-format JSON|NCSA|LOG|CSV ] log-file user-profiles");
+            System.err.println(e.getMessage());
+            parser.printUsage(System.err);
         }
 
 
@@ -56,17 +58,17 @@ public class Main {
     }
 
     public static enum Format {
-        JSON, LOG, CSV
+        JSON, NCSA, LOG, CSV
     }
 
     private static class Options {
-        @Option(name="users")
-        int users;
+        @Option(name="-users", usage="number of unique users to simulate (default: 1e3)")
+        double users = 1e3;
 
-        @Option(name = "count", handler = SizeParser.class)
-        int count;
+        @Option(name = "-count", usage="number of log records to create (default: 1e6)", handler = SizeParser.class)
+        double count = 1e6;
 
-        @Option(name = "format")
+        @Option(name = "-format", usage="log format to output")
         Format format = Format.LOG;
 
         @Argument()
