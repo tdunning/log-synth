@@ -1,16 +1,22 @@
 package org.apache.drill.synth;
 
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import org.kohsuke.args4j.*;
-import org.kohsuke.args4j.spi.IntOptionHandler;
-import org.kohsuke.args4j.spi.Setter;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+import org.apache.drill.synth.sampler.LogGenerator;
+import org.kohsuke.args4j.Argument;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.OptionDef;
+import org.kohsuke.args4j.spi.IntOptionHandler;
+import org.kohsuke.args4j.spi.Setter;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 
 /**
  * Create a query log with a specified number of log lines and an associated user profile database.

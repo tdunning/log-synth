@@ -1,6 +1,11 @@
 package org.apache.drill.synth;
 
-import com.google.common.base.Joiner;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.drill.synth.sampler.SchemaSampler;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -8,10 +13,7 @@ import org.kohsuke.args4j.OptionDef;
 import org.kohsuke.args4j.spi.IntOptionHandler;
 import org.kohsuke.args4j.spi.Setter;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
+import com.google.common.base.Joiner;
 
 /**
  * Generates plausible database tables in JSON, CSV or TSV format.
