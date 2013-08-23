@@ -41,7 +41,7 @@ public class ForeignKeySampler extends FieldSampler {
     }
 
     private void setup() {
-        base = new Multinomial<>();
+        base = new Multinomial<Integer>();
         for (int i = 0; i < size; i++) {
             base.add(i, Math.pow(i + 1.0, -skew));
         }

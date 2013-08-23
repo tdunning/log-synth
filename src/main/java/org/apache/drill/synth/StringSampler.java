@@ -11,7 +11,7 @@ import java.util.Map;
  * Tip of the hat to http://www.jimwegryn.com/Names/StreetNameGenerator.htm
  */
 public class StringSampler extends FieldSampler {
-    Multinomial<String> distribution = new Multinomial<>();
+    Multinomial<String> distribution = new Multinomial<String>();
 
     public StringSampler() {
     }

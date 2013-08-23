@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class NameSampler extends FieldSampler {
     public enum Type {FIRST, LAST, FIRST_LAST, LAST_FIRST}
 
-    private static AtomicReference<Multinomial<String>> first = new AtomicReference<>(null);
-    private static AtomicReference<Multinomial<String>> last = new AtomicReference<>(null);
+    private static AtomicReference<Multinomial<String>> first = new AtomicReference<Multinomial<String>>(null);
+    private static AtomicReference<Multinomial<String>> last = new AtomicReference<Multinomial<String>>(null);
 
     private Type type;
 
