@@ -1,12 +1,13 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.fieldsampler;
 
-import com.google.common.collect.Lists;
-import org.apache.mahout.common.RandomUtils;
-import org.junit.Test;
+import static junit.framework.Assert.assertEquals;
 
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
+import org.apache.mahout.common.RandomUtils;
+import org.junit.Test;
+
+import com.google.common.collect.Lists;
 
 public class NameSamplerTest {
     @Test

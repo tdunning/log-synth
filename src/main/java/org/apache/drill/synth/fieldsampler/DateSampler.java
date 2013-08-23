@@ -1,11 +1,12 @@
-package org.apache.drill.synth;
-
-import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.Exponential;
+package org.apache.drill.synth.fieldsampler;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.drill.synth.FieldSampler;
+import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.jet.random.Exponential;
 
 /**
  * Sample dates that are all before a fixed epoch.  On average, the generated dates

@@ -41,11 +41,11 @@ public class LogLine implements Comparable<LogLine> {
         return r.toString();
     }
 
-    public long getCookie() {
+    public Long getCookie() {
         return cookie;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -57,7 +57,7 @@ public class LogLine implements Comparable<LogLine> {
         return query;
     }
 
-    public double getT() {
+    public Double getT() {
         return t;
     }
 

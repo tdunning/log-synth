@@ -1,5 +1,6 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.sampler;
 
+import org.apache.drill.synth.WordGenerator;
 import org.apache.mahout.math.random.Sampler;
 
 /**

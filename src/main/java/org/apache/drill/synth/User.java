@@ -1,14 +1,16 @@
 package org.apache.drill.synth;
 
-import com.google.common.collect.Lists;
-import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.AbstractContinousDistribution;
-import org.apache.mahout.math.jet.random.Exponential;
-
 import java.net.InetAddress;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.drill.synth.sampler.TermGenerator;
+import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.jet.random.AbstractContinousDistribution;
+import org.apache.mahout.math.jet.random.Exponential;
+
+import com.google.common.collect.Lists;
 
 /**
  * Samples from a user space.  Each user has a variety of internal characteristics.

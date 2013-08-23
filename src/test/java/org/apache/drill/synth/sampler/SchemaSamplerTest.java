@@ -1,4 +1,17 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.sampler;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.apache.drill.synth.fieldsampler.StringSampler;
+import org.junit.Assert;
+import org.junit.Test;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.HashMultiset;
@@ -6,17 +19,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multiset;
 import com.google.common.io.Resources;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class SchemaSamplerTest {
     @Test

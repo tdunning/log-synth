@@ -1,4 +1,11 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.fieldsampler;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.drill.synth.FieldSampler;
+import org.apache.mahout.math.random.Multinomial;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Charsets;
@@ -6,11 +13,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
-import org.apache.mahout.math.random.Multinomial;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Sample from US names.
@@ -20,8 +22,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class NameSampler extends FieldSampler {
     public enum Type {FIRST, LAST, FIRST_LAST, LAST_FIRST}
 
-    private static AtomicReference<Multinomial<String>> first = new AtomicReference<>(null);
-    private static AtomicReference<Multinomial<String>> last = new AtomicReference<>(null);
+    private static AtomicReference<Multinomial<String>> first = new AtomicReference<Multinomial<String>>(null);
+    private static AtomicReference<Multinomial<String>> last = new AtomicReference<Multinomial<String>>(null);
 
     private Type type;
 

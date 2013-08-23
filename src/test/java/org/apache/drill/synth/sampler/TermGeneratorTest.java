@@ -1,15 +1,21 @@
-package org.apache.drill.synth;
-
-import com.google.common.base.Function;
-import com.google.common.collect.*;
-import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.mahout.math.stats.LogLikelihood;
-import org.junit.Test;
-
-import java.util.List;
+package org.apache.drill.synth.sampler;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.drill.synth.WordGenerator;
+import org.apache.mahout.math.stats.LogLikelihood;
+import org.junit.Test;
+
+import com.google.common.base.Function;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Ordering;
 
 public class TermGeneratorTest {
 

@@ -15,14 +15,15 @@
  * limitations under the License.
  */
 
-package org.apache.drill.synth;
+package org.apache.drill.synth.sampler;
 
-import com.google.common.base.Preconditions;
+import java.util.Random;
+
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.list.DoubleArrayList;
 import org.apache.mahout.math.random.Sampler;
 
-import java.util.Random;
+import com.google.common.base.Preconditions;
 
 /**
  * Generates samples from a generalized Chinese restaurant process (or Pittman-Yor process).

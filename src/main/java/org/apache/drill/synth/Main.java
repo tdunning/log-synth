@@ -1,16 +1,22 @@
 package org.apache.drill.synth;
 
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import org.kohsuke.args4j.*;
-import org.kohsuke.args4j.spi.IntOptionHandler;
-import org.kohsuke.args4j.spi.Setter;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+import org.apache.drill.synth.sampler.LogGenerator;
+import org.kohsuke.args4j.Argument;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.OptionDef;
+import org.kohsuke.args4j.spi.IntOptionHandler;
+import org.kohsuke.args4j.spi.Setter;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 
 /**
  * Create a query log with a specified number of log lines and an associated user profile database.
@@ -28,7 +34,9 @@ public class Main {
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
-            System.err.println("Usage: -count <number>G|M|K [ -users number ] [-format JSON|LOG|CSV ] log-file user-profiles");
+            System.err.println("Usage: -count <number>G|M|K [ -users number ] [-format JSON|NCSA|LOG|CSV ] log-file user-profiles");
+            System.err.println(e.getMessage());
+            parser.printUsage(System.err);
         }
 
 
@@ -56,17 +64,17 @@ public class Main {
     }
 
     public static enum Format {
-        JSON, LOG, CSV
+        JSON, NCSA, LOG, CSV
     }
 
     private static class Options {
-        @Option(name="users")
-        int users;
+        @Option(name="-users", usage="number of unique users to simulate (default: 1e3)")
+        double users = 1e3;
 
-        @Option(name = "count", handler = SizeParser.class)
-        int count;
+        @Option(name = "-count", usage="number of log records to create (default: 1e6)", handler = SizeParser.class)
+        double count = 1e6;
 
-        @Option(name = "format")
+        @Option(name = "-format", usage="log format to output")
         Format format = Format.LOG;
 
         @Argument()

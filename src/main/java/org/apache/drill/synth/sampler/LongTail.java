@@ -1,9 +1,10 @@
-package org.apache.drill.synth;
-
-import com.google.common.collect.Lists;
-import org.apache.mahout.math.random.Sampler;
+package org.apache.drill.synth.sampler;
 
 import java.util.List;
+
+import org.apache.mahout.math.random.Sampler;
+
+import com.google.common.collect.Lists;
 
 /**
  * Samples from a set of things based on a long-tailed distribution.  This converts

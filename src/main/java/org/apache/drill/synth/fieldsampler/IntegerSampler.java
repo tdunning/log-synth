@@ -1,8 +1,9 @@
-package org.apache.drill.synth;
-
-import org.apache.mahout.common.RandomUtils;
+package org.apache.drill.synth.fieldsampler;
 
 import java.util.Random;
+
+import org.apache.drill.synth.FieldSampler;
+import org.apache.mahout.common.RandomUtils;
 
 /**
  * Samples from a "foreign key" which is really just an integer.

@@ -1,9 +1,11 @@
-package org.apache.drill.synth;
-
-import com.google.common.base.Preconditions;
-import org.apache.mahout.math.random.Multinomial;
+package org.apache.drill.synth.fieldsampler;
 
 import java.util.Map;
+
+import org.apache.drill.synth.FieldSampler;
+import org.apache.mahout.math.random.Multinomial;
+
+import com.google.common.base.Preconditions;
 
 /**
  * Sample from a space of goofy but somewhat plausible street names.
@@ -11,7 +13,7 @@ import java.util.Map;
  * Tip of the hat to http://www.jimwegryn.com/Names/StreetNameGenerator.htm
  */
 public class StringSampler extends FieldSampler {
-    Multinomial<String> distribution = new Multinomial<>();
+    Multinomial<String> distribution = new Multinomial<String>();
 
     public StringSampler() {
     }

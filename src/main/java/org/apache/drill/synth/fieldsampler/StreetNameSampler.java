@@ -1,14 +1,16 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.fieldsampler;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.drill.synth.FieldSampler;
+import org.apache.mahout.math.random.Multinomial;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
-import org.apache.mahout.math.random.Multinomial;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Sample from a space of goofy but somewhat plausible street names.

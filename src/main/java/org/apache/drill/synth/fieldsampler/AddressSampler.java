@@ -1,4 +1,6 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.fieldsampler;
+
+import org.apache.drill.synth.FieldSampler;
 
 /**
  * Sample kind of plausible addresses

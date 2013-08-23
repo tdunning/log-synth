@@ -1,7 +1,7 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.fieldsampler;
 
 import org.apache.mahout.math.function.DoubleFunction;
-import org.apache.mahout.math.random.*;
+import org.apache.mahout.math.random.Sampler;
 import org.junit.Test;
 
 public class ForeignKeySamplerTest {

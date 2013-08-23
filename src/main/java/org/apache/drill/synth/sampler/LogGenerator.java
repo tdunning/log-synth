@@ -1,16 +1,20 @@
-package org.apache.drill.synth;
-
-import com.google.common.collect.Queues;
-import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.math.jet.random.AbstractContinousDistribution;
-import org.apache.mahout.math.jet.random.Uniform;
-import org.apache.mahout.math.random.Sampler;
+package org.apache.drill.synth.sampler;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.PriorityQueue;
 import java.util.Random;
+
+import org.apache.drill.synth.LogLine;
+import org.apache.drill.synth.User;
+import org.apache.drill.synth.WordGenerator;
+import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.jet.random.AbstractContinousDistribution;
+import org.apache.mahout.math.jet.random.Uniform;
+import org.apache.mahout.math.random.Sampler;
+
+import com.google.common.collect.Queues;
 
 /**
  * Generates kind of realistic log lines consisting of a user id (a cookie), an IP address and a query.
@@ -49,7 +53,7 @@ public class LogGenerator implements Sampler<LogLine> {
         return users;
     }
 
-    public LogGenerator(int userCount) {
+    public LogGenerator(double userCount) {
         for (int i = 0; i < userCount; i++) {
             users.add(new User(ipGenerator.sample(), geo.sample(), terms, sessionRateDistribution.nextDouble()));
         }

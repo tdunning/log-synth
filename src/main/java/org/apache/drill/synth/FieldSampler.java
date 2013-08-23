@@ -1,8 +1,17 @@
 package org.apache.drill.synth;
 
+import org.apache.drill.synth.fieldsampler.AddressSampler;
+import org.apache.drill.synth.fieldsampler.DateSampler;
+import org.apache.drill.synth.fieldsampler.ForeignKeySampler;
+import org.apache.drill.synth.fieldsampler.IdSampler;
+import org.apache.drill.synth.fieldsampler.IntegerSampler;
+import org.apache.drill.synth.fieldsampler.NameSampler;
+import org.apache.drill.synth.fieldsampler.StreetNameSampler;
+import org.apache.drill.synth.fieldsampler.StringSampler;
+import org.apache.mahout.math.random.Sampler;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.apache.mahout.math.random.Sampler;
 
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="class")
 @JsonSubTypes({

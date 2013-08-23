@@ -1,14 +1,16 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.sampler;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import org.apache.drill.synth.FieldSampler;
+import org.apache.mahout.math.random.Sampler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import org.apache.mahout.math.random.Sampler;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Samples from a specified schema to generate reasonably interesting data.

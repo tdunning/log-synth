@@ -1,8 +1,10 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.fieldsampler;
+
+import org.apache.drill.synth.FieldSampler;
+import org.apache.mahout.math.random.Multinomial;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Preconditions;
-import org.apache.mahout.math.random.Multinomial;
 
 /**
  * Samples from a "foreign key" which is really just an integer.
@@ -41,7 +43,7 @@ public class ForeignKeySampler extends FieldSampler {
     }
 
     private void setup() {
-        base = new Multinomial<>();
+        base = new Multinomial<Integer>();
         for (int i = 0; i < size; i++) {
             base.add(i, Math.pow(i + 1.0, -skew));
         }
