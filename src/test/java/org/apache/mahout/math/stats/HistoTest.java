@@ -95,7 +95,7 @@ public class HistoTest {
         AbstractContinousDistribution mix = new AbstractContinousDistribution() {
             @Override
             public double nextDouble() {
-                return Math.floor(gen.nextDouble() * 10) / 10.0;
+                return Math.rint(gen.nextDouble() * 10) / 10.0;
             }
         };
 
@@ -120,12 +120,16 @@ public class HistoTest {
 //            assertEquals(q, estimate, 0.005);
 
         // all quantiles should round to nearest actual value
-        for (int i = 1; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             double z = i / 10.0;
-            // well, we only test 80% of the possible values
-            for (double q = z - 0.04; q < z + 0.041; q += 0.002) {
+            // we skip over troublesome points that are exactly halfway between
+            for (double q = z + 0.002; q < z + 0.09; q += 0.005) {
+                double cdf = dist.cdf(q);
+                // we also relax the tolerances for repeated values
+                assertEquals(String.format("z=%.1f, q = %.3f, cdf = %.3f", z, q, cdf), z + 0.05, cdf, 0.003);
+
                 double estimate = dist.quantile(q);
-                assertEquals(z, estimate, 0.0005);
+                assertEquals(String.format("z=%.1f, q = %.3f, cdf = %.3f, estimate = %.3f", z, q, cdf, estimate), Math.rint(q * 10) / 10.0, estimate, 0.001);
                 System.out.printf("%s\t%s\t%.3g\t%.3f\t%.6f\n", "mixture", "quantile", q, estimate, estimate - z);
             }
         }

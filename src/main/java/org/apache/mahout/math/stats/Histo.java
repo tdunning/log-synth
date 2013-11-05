@@ -19,11 +19,9 @@ package org.apache.mahout.math.stats;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import org.apache.mahout.common.RandomUtils;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NavigableSet;
-import java.util.SortedSet;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -100,18 +98,24 @@ public class Histo {
         }
     }
 
+    private Random gen = RandomUtils.getRandom();
+
+    // picks uniformly from the groups that have the same mean and minimum size
     private Group smallestGroup(SortedSet<Group> groups, Group base) {
         groups = groups.tailSet(base);
         int minSize = Integer.MAX_VALUE;
         Group closest = null;
+        double n = 1;
         for (Group group : groups) {
             if (group.mean() != base.mean()) {
                 break;
             }
-            if (group.size() < minSize) {
+            // this slightly clever selection method improves accuracy with lots of repeated points
+            if (group.size() < minSize || (group.size() == minSize && gen.nextDouble() < 1 / n)) {
                 minSize = group.size();
                 closest = group;
             }
+            n++;
         }
         return closest;
     }
