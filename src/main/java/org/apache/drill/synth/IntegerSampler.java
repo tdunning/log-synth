@@ -6,8 +6,6 @@ import java.util.Random;
 
 /**
  * Samples from a "foreign key" which is really just an integer.
- *
- * The only cleverness here is that we allow a variable amount of key skew.
  */
 public class IntegerSampler extends FieldSampler {
     private int min = 0;

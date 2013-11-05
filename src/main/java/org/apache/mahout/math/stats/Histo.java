@@ -17,18 +17,21 @@
 
 package org.apache.mahout.math.stats;
 
-import com.google.common.collect.Maps;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.SortedMap;
+import java.util.NavigableSet;
+import java.util.SortedSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Adaptive histogram based on something like streaming k-means.
  */
 public class Histo {
     private double compression = 1000;
-    private SortedMap<Double, Group> summary = Maps.newTreeMap();
+    private NavigableSet<Group> summary = Sets.newTreeSet();
     private int count = 0;
 
     /**
@@ -45,37 +48,39 @@ public class Histo {
 
     /**
      * Adds a sample to a histogram.
-     * @param x  The value to add.
+     *
+     * @param x The value to add.
      */
     public void add(double x) {
-        SortedMap<Double, Group> before = summary.headMap(x);
-        SortedMap<Double, Group> after = summary.tailMap(x);
+        Group base = new Group(x, 0);
+        Group before = summary.floor(base);
+        Group after = summary.ceiling(base);
 
         Group closest;
         double q;
-        if (before.size() == 0) {
-            if (after.size() == 0) {
-                summary.put(x, new Group(x));
+        if (before == null) {
+            if (after == null) {
+                summary.add(new Group(x));
                 count = 1;
                 return;
             } else {
-                closest = after.get(after.firstKey());
+                closest = smallestGroup(summary, after);
                 q = 0;
             }
         } else {
-            if (after.size() == 0) {
-                closest = before.get(before.firstKey());
+            if (after == null) {
+                closest = smallestGroup(summary, before);
                 q = 1;
             } else {
-                double beforeGap = x - before.lastKey();
-                double afterGap = after.firstKey() - x;
+                double beforeGap = x - before.mean();
+                double afterGap = after.mean() - x;
                 if (beforeGap < afterGap) {
-                    closest = before.get(before.lastKey());
+                    closest = smallestGroup(summary, before);
                 } else {
-                    closest = after.get(after.firstKey());
+                    closest = smallestGroup(summary, after);
                 }
                 // this tells us how many buckets are earlier
-                q = (double) before.size() / summary.size();
+                q = (double) summary.headSet(base).size() / summary.size();
                 // and this converts to a true quantile assuming that the buckets have the correct distribution
                 // The tricky bit is that we then use this to enforce the correct distribution
                 q = q * q * (3 - 2 * q);
@@ -85,26 +90,38 @@ public class Histo {
         // helps keep the relative error very small at the cost of increasing the number
         // of centroids by a small integer factor
         if (closest.count > count * 4 * q * (1 - q) / compression) {
-            summary.put(x, new Group(x));
+            summary.add(new Group(x));
             count++;
         } else {
-            summary.remove(closest.centroid);
+            summary.remove(closest);
             closest.add(x);
-            summary.put(closest.centroid, closest);
+            summary.add(closest);
             count++;
         }
+    }
+
+    private Group smallestGroup(SortedSet<Group> groups, Group base) {
+        groups = groups.tailSet(base);
+        int minSize = Integer.MAX_VALUE;
+        Group closest = null;
+        for (Group group : groups) {
+            if (group.mean() != base.mean()) {
+                break;
+            }
+            if (group.size() < minSize) {
+                minSize = group.size();
+                closest = group;
+            }
+        }
+        return closest;
     }
 
     public int size() {
         return count;
     }
 
-    public SortedMap<Double, Group> centroids() {
-        return summary;
-    }
-
     public double cdf(double x) {
-        Collection<Group> values = summary.values();
+        Collection<Group> values = summary;
         if (values.size() == 0) {
             return Double.NaN;
         } else if (values.size() == 1) {
@@ -152,14 +169,73 @@ public class Histo {
         return (x - x0) / (x1 - x0);
     }
 
+    public double quantile(double q) {
+        Collection<Group> values = summary;
+        Preconditions.checkArgument(values.size() > 1);
+
+        Iterator<Group> it = values.iterator();
+        Group a = it.next();
+        Group b = it.next();
+        if (!it.hasNext()) {
+            // both a and b have to have just a single element
+            double diff = (b.mean() - a.mean()) / 2;
+            if (q > 0.75) {
+                return b.mean() + diff * (4 * q - 3);
+            } else {
+                return a.mean() + diff * (4 * q - 1);
+            }
+        } else {
+            q *= count;
+            double right = (b.mean() - a.mean()) / 2;
+            // we have nothing else to go on so make left hanging width same as right to start
+            double left = right;
+
+            if (q <= a.size()) {
+                return a.mean() + left * (2 * q - a.size()) / a.size();
+            } else {
+                double t = a.size();
+                while (it.hasNext()) {
+                    if (t + b.size() / 2 >= q) {
+                        // left of b
+                        return b.mean() - left * 2 * (q - t) / b.size();
+                    } else if (t + b.size() >= q) {
+                        // right of b but left of the left-most thing beyond
+                        return b.mean() + right * 2 * (q - t - b.size() / 2.0) / b.size();
+                    }
+                    t += b.size();
+
+                    a = b;
+                    b = it.next();
+                    left = right;
+                    right = (b.mean() - a.mean()) / 2;
+                }
+                // shouldn't be possible but we have an answer anyway
+                return b.mean() + right;
+            }
+        }
+    }
+
+    public int centroidCount() {
+        return summary.size();
+    }
+
 
     public static class Group implements Comparable<Group> {
+        private static final AtomicInteger uniqueCount = new AtomicInteger(0);
+
         private double centroid;
         private int count;
+        private int id;
 
         public Group(double x) {
             centroid = x;
             count = 1;
+            id = uniqueCount.getAndIncrement();
+        }
+
+        public Group(double x, int id) {
+            this(x);
+            this.id = id;
         }
 
         public void add(double x) {
@@ -185,10 +261,15 @@ public class Histo {
         }
 
         @Override
+        public int hashCode() {
+            return id;
+        }
+
+        @Override
         public int compareTo(Group o) {
             int r = Double.compare(centroid, o.centroid);
             if (r == 0) {
-                r = count - o.count;
+                r = id - o.id;
             }
             return r;
         }
