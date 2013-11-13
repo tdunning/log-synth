@@ -18,10 +18,12 @@
 package org.apache.mahout.math.stats;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 import org.apache.mahout.common.RandomUtils;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -29,8 +31,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class Histo {
     private double compression = 1000;
-    private NavigableSet<Group> summary = Sets.newTreeSet();
+    private GroupTree summary = new GroupTree();
     private int count = 0;
+    private boolean recordAllData = false;
 
     /**
      * A histogram structure that will record a sketch of a distribution.
@@ -50,86 +53,86 @@ public class Histo {
      * @param x The value to add.
      */
     public void add(double x) {
-        Group base = new Group(x, 0);
-        Group before = summary.floor(base);
-        Group after = summary.ceiling(base);
+        // note that because of a zero id, this will be sorted *before* any existing Group with the same mean
+        Group base = createGroup(x, 0);
+        Group start = summary.floor(base);
+        if (start == null) {
+            start = summary.ceiling(base);
+        }
 
-        Group closest;
-        double q;
-        if (before == null) {
-            if (after == null) {
-                summary.add(new Group(x));
-                count = 1;
-                return;
-            } else {
-                closest = smallestGroup(summary, after);
-                q = 0;
-            }
+        if (start == null) {
+            summary.add(createGroup(x));
+            count = 1;
         } else {
-            if (after == null) {
-                closest = smallestGroup(summary, before);
-                q = 1;
-            } else {
-                double beforeGap = x - before.mean();
-                double afterGap = after.mean() - x;
-                if (beforeGap < afterGap) {
-                    closest = smallestGroup(summary, before);
+            Iterable<Group> neighbors = summary.tailSet(start);
+            double minDistance = Double.MAX_VALUE;
+            int lastNeighbor = 0;
+            int i = summary.headCount(start);
+            for (Group neighbor : neighbors) {
+                double z = Math.abs(neighbor.mean() - x);
+                if (z <= minDistance) {
+                    minDistance = z;
+                    lastNeighbor = i;
                 } else {
-                    closest = smallestGroup(summary, after);
+                    break;
                 }
-                // this tells us how many buckets are earlier
-                q = (double) summary.headSet(base).size() / summary.size();
-                // and this converts to a true quantile assuming that the buckets have the correct distribution
-                // The tricky bit is that we then use this to enforce the correct distribution
-                q = q * q * (3 - 2 * q);
+                i++;
             }
-        }
-        // the use of q here makes the threshold for addition small at each end.  This
-        // helps keep the relative error very small at the cost of increasing the number
-        // of centroids by a small integer factor
-        if (closest.count > count * 4 * q * (1 - q) / compression) {
-            summary.add(new Group(x));
+
+            Group closest = null;
+            int sum = summary.headSum(start);
+            i = summary.headCount(start);
+            double n = 1;
+            for (Group neighbor : neighbors) {
+                if (i > lastNeighbor) {
+                    break;
+                }
+                double z = Math.abs(neighbor.mean() - x);
+                double q = (sum + neighbor.count() / 2.0) / count;
+                double k = 4 * count * q * (1 - q) / compression;
+
+                // this slightly clever selection method improves accuracy with lots of repeated points
+                if (z == minDistance && neighbor.count() <= k) {
+                    if (gen.nextDouble() < 1 / n) {
+                        closest = neighbor;
+                    }
+                    n++;
+                }
+                sum += neighbor.count();
+                i++;
+            }
+
+            if (closest == null) {
+                summary.add(createGroup(x));
+            } else {
+                summary.remove(closest);
+                closest.add(x);
+                summary.add(closest);
+            }
             count++;
-        } else {
-            summary.remove(closest);
-            closest.add(x);
-            summary.add(closest);
-            count++;
         }
+    }
+
+    private Group createGroup(double mean, int id) {
+        return new Group(mean, id, recordAllData);
+    }
+
+    private Group createGroup(double mean) {
+        return new Group(mean, recordAllData);
     }
 
     private Random gen = RandomUtils.getRandom();
-
-    // picks uniformly from the groups that have the same mean and minimum size
-    private Group smallestGroup(SortedSet<Group> groups, Group base) {
-        groups = groups.tailSet(base);
-        int minSize = Integer.MAX_VALUE;
-        Group closest = null;
-        double n = 1;
-        for (Group group : groups) {
-            if (group.mean() != base.mean()) {
-                break;
-            }
-            // this slightly clever selection method improves accuracy with lots of repeated points
-            if (group.size() < minSize || (group.size() == minSize && gen.nextDouble() < 1 / n)) {
-                minSize = group.size();
-                closest = group;
-            }
-            n++;
-        }
-        return closest;
-    }
 
     public int size() {
         return count;
     }
 
     public double cdf(double x) {
-        Collection<Group> values = summary;
+        GroupTree values = summary;
         if (values.size() == 0) {
             return Double.NaN;
         } else if (values.size() == 1) {
-            return x < values.iterator().next().mean() ? 0 : 1;
+            return x < values.first().mean() ? 0 : 1;
         } else {
             double r = 0;
 
@@ -147,9 +150,9 @@ public class Histo {
             // scan to next to last element
             while (it.hasNext()) {
                 if (x < a.mean() + right) {
-                    return (r + a.size() * interpolate(x, a.mean() - left, a.mean() + right)) / count;
+                    return (r + a.count() * interpolate(x, a.mean() - left, a.mean() + right)) / count;
                 }
-                r += a.size();
+                r += a.count();
 
                 a = b;
                 b = it.next();
@@ -162,7 +165,7 @@ public class Histo {
             left = right;
             a = b;
             if (x < a.mean() + right) {
-                return (r + a.size() * interpolate(x, a.mean() - left, a.mean() + right)) / count;
+                return (r + a.count() * interpolate(x, a.mean() - left, a.mean() + right)) / count;
             } else {
                 return 1;
             }
@@ -174,7 +177,7 @@ public class Histo {
     }
 
     public double quantile(double q) {
-        Collection<Group> values = summary;
+        GroupTree values = summary;
         Preconditions.checkArgument(values.size() > 1);
 
         Iterator<Group> it = values.iterator();
@@ -194,19 +197,19 @@ public class Histo {
             // we have nothing else to go on so make left hanging width same as right to start
             double left = right;
 
-            if (q <= a.size()) {
-                return a.mean() + left * (2 * q - a.size()) / a.size();
+            if (q <= a.count()) {
+                return a.mean() + left * (2 * q - a.count()) / a.count();
             } else {
-                double t = a.size();
+                double t = a.count();
                 while (it.hasNext()) {
-                    if (t + b.size() / 2 >= q) {
+                    if (t + b.count() / 2 >= q) {
                         // left of b
-                        return b.mean() - left * 2 * (q - t) / b.size();
-                    } else if (t + b.size() >= q) {
+                        return b.mean() - left * 2 * (q - t) / b.count();
+                    } else if (t + b.count() >= q) {
                         // right of b but left of the left-most thing beyond
-                        return b.mean() + right * 2 * (q - t - b.size() / 2.0) / b.size();
+                        return b.mean() + right * 2 * (q - t - b.count() / 2.0) / b.count();
                     }
-                    t += b.size();
+                    t += b.count();
 
                     a = b;
                     b = it.next();
@@ -223,26 +226,62 @@ public class Histo {
         return summary.size();
     }
 
+    public Iterable<? extends Group> centroids() {
+        return summary;
+    }
+
+    public double compression() {
+        return compression;
+    }
+
+    public void recordAllData() {
+        recordAllData = true;
+    }
 
     public static class Group implements Comparable<Group> {
-        private static final AtomicInteger uniqueCount = new AtomicInteger(0);
+        private static final AtomicInteger uniqueCount = new AtomicInteger(1);
 
-        private double centroid;
-        private int count;
+        private double centroid = 0;
+        private int count = 0;
         private int id;
 
+        private List<Double> actualData = null;
+
+        private Group(boolean record) {
+            if (record) {
+                actualData = Lists.newArrayList();
+            }
+        }
+
         public Group(double x) {
-            centroid = x;
-            count = 1;
-            id = uniqueCount.getAndIncrement();
+            this(false);
+            start(x, uniqueCount.getAndIncrement());
         }
 
         public Group(double x, int id) {
-            this(x);
+            this(false);
+            start(x, id);
+        }
+
+        public Group(double x, boolean record) {
+            this(record);
+            start(x, uniqueCount.getAndIncrement());
+        }
+
+        public Group(double x, int id, boolean record) {
+            this(record);
+            start(x, id);
+        }
+
+        private void start(double x, int id) {
             this.id = id;
+            add(x);
         }
 
         public void add(double x) {
+            if (actualData != null) {
+                actualData.add(x);
+            }
             count++;
             double delta = x - centroid;
             centroid += delta / count;
@@ -252,8 +291,12 @@ public class Histo {
             return centroid;
         }
 
-        public int size() {
+        public int count() {
             return count;
+        }
+
+        public int id() {
+            return id;
         }
 
         @Override
@@ -277,5 +320,10 @@ public class Histo {
             }
             return r;
         }
+
+        public Iterable<? extends Double> data() {
+            return actualData;
+        }
     }
+
 }
