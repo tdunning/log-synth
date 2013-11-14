@@ -49,7 +49,6 @@ public class GroupTree implements Iterable<Histo.Group> {
             return;
         } else if (size == 1) {
             int order = group.compareTo(leaf);
-            Preconditions.checkArgument(order != 0, "Cannot insert item already in tree");
             if (order < 0) {
                 left = new GroupTree(group);
                 right = new GroupTree(leaf);

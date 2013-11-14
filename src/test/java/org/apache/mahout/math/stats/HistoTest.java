@@ -164,6 +164,22 @@ public class HistoTest {
         }
     }
 
+    @Test
+    public void testSequentialPoints() {
+        for (int i = 0; i < 5; i++) {
+            runTest(new AbstractContinousDistribution() {
+                double base = 0;
+
+                @Override
+                public double nextDouble() {
+                    base += Math.PI * 1e-5;
+                    return base;
+                }
+            }, 100, new double[]{0.001, 0.01, 0.1, 0.5, 0.9, 0.99, 0.999},
+                    "sequential", true);
+        }
+    }
+
     /**
      * Builds estimates of the CDF of a bunch of data points and checks that the centroids are accurately
      * positioned.  Accuracy is assessed in terms of the estimated CDF which is much more stringent than
@@ -188,6 +204,7 @@ public class HistoTest {
             data.add(x);
             dist.add(x);
         }
+        dist.compress();
         Collections.sort(data);
 
         double[] xValues = qValues.clone();
@@ -210,7 +227,7 @@ public class HistoTest {
         System.out.printf("# %fus per point\n", (System.nanoTime() - t0) * 1e-3 / 100000);
         System.out.printf("# %d centroids\n", dist.centroidCount());
 
-        Assert.assertTrue("Summary is too large", dist.centroidCount() < 9 * sizeGuide);
+        Assert.assertTrue("Summary is too large", dist.centroidCount() < 10 * sizeGuide);
         for (int i = 0; i < xValues.length; i++) {
             double x = xValues[i];
             double q = qValues[i];

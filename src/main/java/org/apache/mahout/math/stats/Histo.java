@@ -21,6 +21,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.apache.mahout.common.RandomUtils;
 
+import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -30,7 +32,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Adaptive histogram based on something like streaming k-means.
  */
 public class Histo {
-    private double compression = 1000;
+    private Random gen = RandomUtils.getRandom();
+
+    private double compression = 100;
     private GroupTree summary = new GroupTree();
     private int count = 0;
     private boolean recordAllData = false;
@@ -53,16 +57,30 @@ public class Histo {
      * @param x The value to add.
      */
     public void add(double x) {
+        add(x, 1);
+    }
+
+    /**
+     * Adds a sample to a histogram.
+     *
+     * @param x The value to add.
+     * @param w The weight of this point.
+     */
+    public void add(double x, int w) {
         // note that because of a zero id, this will be sorted *before* any existing Group with the same mean
         Group base = createGroup(x, 0);
+        add(x, w, base);
+    }
+
+    private void add(double x, int w, Group base) {
         Group start = summary.floor(base);
         if (start == null) {
             start = summary.ceiling(base);
         }
 
         if (start == null) {
-            summary.add(createGroup(x));
-            count = 1;
+            summary.add(Group.createWeighted(x, w, base.data()));
+            count = w;
         } else {
             Iterable<Group> neighbors = summary.tailSet(start);
             double minDistance = Double.MAX_VALUE;
@@ -92,7 +110,7 @@ public class Histo {
                 double k = 4 * count * q * (1 - q) / compression;
 
                 // this slightly clever selection method improves accuracy with lots of repeated points
-                if (z == minDistance && neighbor.count() <= k) {
+                if (z == minDistance && neighbor.count() + w <= k) {
                     if (gen.nextDouble() < 1 / n) {
                         closest = neighbor;
                     }
@@ -103,30 +121,54 @@ public class Histo {
             }
 
             if (closest == null) {
-                summary.add(createGroup(x));
+                summary.add(Group.createWeighted(x, w, base.data()));
             } else {
                 summary.remove(closest);
-                closest.add(x);
+                closest.add(x, w, base.data());
                 summary.add(closest);
             }
-            count++;
+            count += w;
+
+            if (summary.size() > 100 * compression) {
+                // something such as sequential ordering of data points
+                // has caused a pathological expansion of our summary.
+                // To fight this, we simply replay the current centroids
+                // in random order.
+
+                // this causes us to forget the diagnostic recording of data points
+                compress();
+            }
         }
     }
 
-    private Group createGroup(double mean, int id) {
-        return new Group(mean, id, recordAllData);
+    public void compress() {
+        Histo reduced = new Histo(compression);
+        if (recordAllData) {
+            reduced.recordAllData();
+        }
+        List<Group> tmp = Lists.newArrayList(summary);
+        Collections.shuffle(tmp);
+        for (Group group : tmp) {
+            reduced.add(group.mean(), group.count(), group);
+        }
+
+        summary = reduced.summary;
     }
 
-    private Group createGroup(double mean) {
-        return new Group(mean, recordAllData);
-    }
-
-    private Random gen = RandomUtils.getRandom();
-
+    /**
+     * Returns the number of samples represented in this histogram.  If you want to know how many
+     * centroids are being used, try centroids().size().
+     *
+     * @return the number of samples that have been added.
+     */
     public int size() {
         return count;
     }
 
+    /**
+     * @param x the value at which the CDF should be evaluated
+     * @return the approximate fraction of all samples that were less than or equal to x.
+     */
     public double cdf(double x) {
         GroupTree values = summary;
         if (values.size() == 0) {
@@ -172,10 +214,10 @@ public class Histo {
         }
     }
 
-    private double interpolate(double x, double x0, double x1) {
-        return (x - x0) / (x1 - x0);
-    }
-
+    /**
+     * @param q The quantile desired.  Can be in the range [0,1].
+     * @return The minimum value x such that we think that the proportion of samples is <= x is q.
+     */
     public double quantile(double q) {
         GroupTree values = summary;
         Preconditions.checkArgument(values.size() > 1);
@@ -234,9 +276,63 @@ public class Histo {
         return compression;
     }
 
+    /**
+     * Sets up so that all centroids will record all data assigned to them.  For testing only, really.
+     */
     public void recordAllData() {
         recordAllData = true;
     }
+
+    /**
+     * Returns an upper bound on the number bytes that will be required to represent this histogram.
+     */
+    public int byteSize() {
+        return 8 + 4 + summary.size() * 12;
+    }
+
+    /**
+     * Outputs a histogram as bytes using a particularly cheesy encoding.
+     */
+    public void asBytes(ByteBuffer buf) {
+        buf.putDouble(compression());
+        buf.putInt(summary.size());
+        for (Group group : summary) {
+            buf.putDouble(group.mean());
+        }
+
+        for (Group group : summary) {
+            buf.putInt(group.count());
+        }
+    }
+
+    /**
+     * Reads a histogram from a byte buffer
+     *
+     * @return The new histogram structure
+     */
+    public static Histo fromBytes(ByteBuffer buf) {
+        double compression = buf.getDouble();
+        Histo r = new Histo(compression);
+        int n = buf.getInt();
+        double[] means = new double[n];
+        for (int i = 0; i < n; i++) {
+            means[i] = buf.getDouble();
+        }
+        for (int i = 0; i < n; i++) {
+            r.add(means[i], buf.getInt());
+        }
+        return r;
+    }
+
+
+    private Group createGroup(double mean, int id) {
+        return new Group(mean, id, recordAllData);
+    }
+
+    private double interpolate(double x, double x0, double x1) {
+        return (x - x0) / (x1 - x0);
+    }
+
 
     public static class Group implements Comparable<Group> {
         private static final AtomicInteger uniqueCount = new AtomicInteger(1);
@@ -248,6 +344,7 @@ public class Histo {
         private List<Double> actualData = null;
 
         private Group(boolean record) {
+            id = uniqueCount.incrementAndGet();
             if (record) {
                 actualData = Lists.newArrayList();
             }
@@ -263,11 +360,6 @@ public class Histo {
             start(x, id);
         }
 
-        public Group(double x, boolean record) {
-            this(record);
-            start(x, uniqueCount.getAndIncrement());
-        }
-
         public Group(double x, int id, boolean record) {
             this(record);
             start(x, id);
@@ -275,16 +367,15 @@ public class Histo {
 
         private void start(double x, int id) {
             this.id = id;
-            add(x);
+            add(x, 1);
         }
 
-        public void add(double x) {
+        public void add(double x, int w) {
             if (actualData != null) {
                 actualData.add(x);
             }
-            count++;
-            double delta = x - centroid;
-            centroid += delta / count;
+            count += w;
+            centroid += w * (x - centroid) / count;
         }
 
         public double mean() {
@@ -323,6 +414,26 @@ public class Histo {
 
         public Iterable<? extends Double> data() {
             return actualData;
+        }
+
+        public static Group createWeighted(double x, int w, Iterable<? extends Double> data) {
+            Group r = new Group(data != null);
+            r.add(x, w, data);
+            return r;
+        }
+
+        private void add(double x, int w, Iterable<? extends Double> data) {
+            if (actualData != null) {
+                if (data != null) {
+                    for (Double old : data) {
+                        actualData.add(old);
+                    }
+                } else {
+                    actualData.add(x);
+                }
+            }
+            count += w;
+            centroid += w * (x - centroid) / count;
         }
     }
 

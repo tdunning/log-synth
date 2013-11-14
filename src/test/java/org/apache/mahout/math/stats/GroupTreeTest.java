@@ -22,8 +22,8 @@ public class GroupTreeTest {
 
         x.add(new Histo.Group(1));
         Histo.Group group = new Histo.Group(2);
-        group.add(3);
-        group.add(4);
+        group.add(3, 1);
+        group.add(4, 1);
         x.add(group);
 
         assertEquals(2, x.size());
@@ -125,7 +125,7 @@ public class GroupTreeTest {
         }
         Histo.Group g = x.ceiling(new Histo.Group(2, 0));
         x.remove(g);
-        g.add(3);
+        g.add(3, 1);
         x.add(g);
 
         assertEquals(0, x.headCount(new Histo.Group(-1)));
@@ -195,7 +195,7 @@ public class GroupTreeTest {
             Histo.Group g = x.floor(new Histo.Group(v));
             x.remove(g);
             x.checkBalance();
-            g.add(g.mean() + 20);
+            g.add(g.mean() + 20, 1);
             x.add(g);
             x.checkBalance();
         }
