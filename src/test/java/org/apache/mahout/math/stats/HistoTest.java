@@ -31,11 +31,15 @@ import org.junit.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class HistoTest {
 
@@ -147,7 +151,7 @@ public class HistoTest {
         System.out.printf("# %d centroids\n", dist.centroidCount());
 
         // I would be happier with 5x compression, but repeated values make things kind of weird
-        Assert.assertTrue("Summary is too large", dist.centroidCount() < 10 * (double) 1000);
+        assertTrue("Summary is too large", dist.centroidCount() < 10 * (double) 1000);
 
         // all quantiles should round to nearest actual value
         for (int i = 0; i < 10; i++) {
@@ -177,6 +181,81 @@ public class HistoTest {
                 }
             }, 100, new double[]{0.001, 0.01, 0.1, 0.5, 0.9, 0.99, 0.999},
                     "sequential", true);
+        }
+    }
+
+    @Test
+    public void testSerialization() {
+        Random gen = RandomUtils.getRandom();
+        Histo dist = new Histo(100);
+        for (int i = 0; i < 100000; i++) {
+            double x = gen.nextDouble();
+            dist.add(x);
+        }
+        dist.compress();
+
+        ByteBuffer buf = ByteBuffer.allocate(20000);
+        dist.asBytes(buf);
+        assertTrue(buf.position() < 11000);
+        System.out.printf("# big %d bytes\n", buf.position());
+
+        buf.flip();
+        Histo dist2 = Histo.fromBytes(buf);
+        assertEquals(dist.centroidCount(), dist2.centroidCount());
+        assertEquals(dist.compression(), dist2.compression(), 0);
+        assertEquals(dist.size(), dist2.size());
+
+        for (double q = 0; q < 1; q += 0.01) {
+            assertEquals(dist.quantile(q), dist2.quantile(q), 1e-9);
+        }
+
+        Iterator<? extends Histo.Group> ix = dist2.centroids().iterator();
+        for (Histo.Group group : dist.centroids()) {
+            assertTrue(ix.hasNext());
+            assertEquals(group.count(), ix.next().count());
+        }
+        assertFalse(ix.hasNext());
+
+        buf.flip();
+        dist.asSmallBytes(buf);
+        assertTrue(buf.position() < 6000);
+        System.out.printf("# small %d bytes\n", buf.position());
+
+        buf.flip();
+        dist2 = Histo.fromBytes(buf);
+        assertEquals(dist.centroidCount(), dist2.centroidCount());
+        assertEquals(dist.compression(), dist2.compression(), 0);
+        assertEquals(dist.size(), dist2.size());
+
+        for (double q = 0; q < 1; q += 0.01) {
+            assertEquals(dist.quantile(q), dist2.quantile(q), 1e-6);
+        }
+
+        ix = dist2.centroids().iterator();
+        for (Histo.Group group : dist.centroids()) {
+            assertTrue(ix.hasNext());
+            assertEquals(group.count(), ix.next().count());
+        }
+        assertFalse(ix.hasNext());
+    }
+
+    @Test
+    public void testIntEncoding() {
+        Random gen = RandomUtils.getRandom();
+        ByteBuffer buf = ByteBuffer.allocate(10000);
+        List<Integer> ref = Lists.newArrayList();
+        for (int i = 0; i < 3000; i++) {
+            int n = gen.nextInt();
+            n = n >>> (i / 100);
+            ref.add(n);
+            Histo.encode(buf, n);
+        }
+
+        buf.flip();
+
+        for (int i = 0; i < 3000; i++) {
+            int n = Histo.decode(buf);
+            assertEquals(String.format("%d:", i), ref.get(i).intValue(), n);
         }
     }
 
@@ -227,7 +306,7 @@ public class HistoTest {
         System.out.printf("# %fus per point\n", (System.nanoTime() - t0) * 1e-3 / 100000);
         System.out.printf("# %d centroids\n", dist.centroidCount());
 
-        Assert.assertTrue("Summary is too large", dist.centroidCount() < 10 * sizeGuide);
+        assertTrue("Summary is too large", dist.centroidCount() < 10 * sizeGuide);
         for (int i = 0; i < xValues.length; i++) {
             double x = xValues[i];
             double q = qValues[i];

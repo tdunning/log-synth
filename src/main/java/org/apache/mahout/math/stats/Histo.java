@@ -29,7 +29,21 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Adaptive histogram based on something like streaming k-means.
+ * Adaptive histogram based on something like streaming k-means crossed with Q-digest.
+ * <p/>
+ * The special characteristics of this algorithm are:
+ * <p/>
+ * a) smaller summaries than Q-digest
+ * <p/>
+ * b) works on doubles as well as integers.
+ * <p/>
+ * c) provides part per million accuracy for extreme quantiles and typically <1000 ppm accuracy for middle quantiles
+ * <p/>
+ * d) fast
+ * <p/>
+ * e) simple
+ * <p/>
+ * f) test coverage > 90%
  */
 public class Histo {
     private Random gen = RandomUtils.getRandom();
@@ -290,10 +304,14 @@ public class Histo {
         return 8 + 4 + summary.size() * 12;
     }
 
+    public final static int VERBOSE_ENCODING = 1;
+    public final static int SMALL_ENCODING = 2;
+
     /**
      * Outputs a histogram as bytes using a particularly cheesy encoding.
      */
     public void asBytes(ByteBuffer buf) {
+        buf.putInt(VERBOSE_ENCODING);
         buf.putDouble(compression());
         buf.putInt(summary.size());
         for (Group group : summary) {
@@ -305,25 +323,88 @@ public class Histo {
         }
     }
 
+    public void asSmallBytes(ByteBuffer buf) {
+        buf.putInt(SMALL_ENCODING);
+        buf.putDouble(compression());
+        buf.putInt(summary.size());
+        double x = 0;
+        for (Group group : summary) {
+            double delta = group.mean() - x;
+            x = group.mean();
+            buf.putFloat((float) delta);
+        }
+
+        for (Group group : summary) {
+            int n = group.count();
+            encode(buf, n);
+        }
+    }
+
+    public static void encode(ByteBuffer buf, int n) {
+        int k = 0;
+        while (n < 0 || n > 0x7f) {
+            byte b = (byte) (0x80 | (0x7f & n));
+            buf.put(b);
+            n = n >>> 7;
+            k++;
+            Preconditions.checkState(k < 6);
+        }
+        buf.put((byte) n);
+    }
+
+    public static int decode(ByteBuffer buf) {
+        int v = buf.get();
+        int z = 0x7f & v;
+        int shift = 7;
+        while ((v & 0x80) != 0) {
+            Preconditions.checkState(shift <= 28);
+            v = buf.get();
+            z += (v & 0x7f) << shift;
+            shift += 7;
+        }
+        return z;
+    }
+
     /**
      * Reads a histogram from a byte buffer
      *
      * @return The new histogram structure
      */
     public static Histo fromBytes(ByteBuffer buf) {
-        double compression = buf.getDouble();
-        Histo r = new Histo(compression);
-        int n = buf.getInt();
-        double[] means = new double[n];
-        for (int i = 0; i < n; i++) {
-            means[i] = buf.getDouble();
-        }
-        for (int i = 0; i < n; i++) {
-            r.add(means[i], buf.getInt());
-        }
-        return r;
-    }
+        int encoding = buf.getInt();
+        if (encoding == VERBOSE_ENCODING) {
+            double compression = buf.getDouble();
+            Histo r = new Histo(compression);
+            int n = buf.getInt();
+            double[] means = new double[n];
+            for (int i = 0; i < n; i++) {
+                means[i] = buf.getDouble();
+            }
+            for (int i = 0; i < n; i++) {
+                r.add(means[i], buf.getInt());
+            }
+            return r;
+        } else if (encoding == SMALL_ENCODING) {
+            double compression = buf.getDouble();
+            Histo r = new Histo(compression);
+            int n = buf.getInt();
+            double[] means = new double[n];
+            double x = 0;
+            for (int i = 0; i < n; i++) {
+                double delta = buf.getFloat();
+                x += delta;
+                means[i] = x;
+            }
 
+            for (int i = 0; i < n; i++) {
+                int z = decode(buf);
+                r.add(means[i], z);
+            }
+            return r;
+        } else {
+            throw new IllegalStateException("Invalid format for serialized histogram");
+        }
+    }
 
     private Group createGroup(double mean, int id) {
         return new Group(mean, id, recordAllData);
@@ -332,7 +413,6 @@ public class Histo {
     private double interpolate(double x, double x0, double x1) {
         return (x - x0) / (x1 - x0);
     }
-
 
     public static class Group implements Comparable<Group> {
         private static final AtomicInteger uniqueCount = new AtomicInteger(1);
