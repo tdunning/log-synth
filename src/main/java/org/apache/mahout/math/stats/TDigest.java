@@ -163,7 +163,8 @@ public class TDigest {
         }
     }
 
-    public static TDigest merge(double compression, List<TDigest> elements) {
+    public static TDigest merge(double compression, Iterable<TDigest> subData) {
+        List<TDigest> elements = Lists.newArrayList(subData);
         int n = Math.max(1, elements.size() / 4);
         TDigest r = new TDigest(compression);
         if (elements.size() > 0 && elements.get(0).recordAllData) {
@@ -366,6 +367,7 @@ public class TDigest {
         buf.putInt(SMALL_ENCODING);
         buf.putDouble(compression());
         buf.putInt(summary.size());
+
         double x = 0;
         for (Group group : summary) {
             double delta = group.mean() - x;
