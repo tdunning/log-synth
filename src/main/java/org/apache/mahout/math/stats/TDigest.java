@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p/>
  * f) test coverage > 90%
  */
-public class Histo {
+public class TDigest {
     private Random gen = RandomUtils.getRandom();
 
     private double compression = 100;
@@ -61,7 +61,7 @@ public class Histo {
      *                    quantiles.  Conversely, you should expect to track about 5 N centroids for this
      *                    accuracy.
      */
-    public Histo(double compression) {
+    public TDigest(double compression) {
         this.compression = compression;
     }
 
@@ -155,12 +155,40 @@ public class Histo {
         }
     }
 
+    public void add(TDigest other) {
+        List<Group> tmp = Lists.newArrayList(other.summary);
+        Collections.shuffle(tmp);
+        for (Group group : tmp) {
+            add(group.mean(), group.count(), group);
+        }
+    }
+
+    public static TDigest merge(double compression, List<TDigest> elements) {
+        int n = Math.max(1, elements.size() / 4);
+        TDigest r = new TDigest(compression);
+        if (elements.size() > 0 && elements.get(0).recordAllData) {
+            r.recordAllData();
+        }
+        for (int i = 0; i < elements.size(); i += n) {
+            if (n > 1) {
+                r.add(merge(compression, elements.subList(i, Math.min(i + n, elements.size()))));
+            } else {
+                r.add(elements.get(i));
+            }
+        }
+        return r;
+    }
+
     public void compress() {
-        Histo reduced = new Histo(compression);
+        compress(summary);
+    }
+
+    private void compress(GroupTree other) {
+        TDigest reduced = new TDigest(compression);
         if (recordAllData) {
             reduced.recordAllData();
         }
-        List<Group> tmp = Lists.newArrayList(summary);
+        List<Group> tmp = Lists.newArrayList(other);
         Collections.shuffle(tmp);
         for (Group group : tmp) {
             reduced.add(group.mean(), group.count(), group);
@@ -293,8 +321,9 @@ public class Histo {
     /**
      * Sets up so that all centroids will record all data assigned to them.  For testing only, really.
      */
-    public void recordAllData() {
+    public TDigest recordAllData() {
         recordAllData = true;
+        return this;
     }
 
     /**
@@ -302,6 +331,16 @@ public class Histo {
      */
     public int byteSize() {
         return 8 + 4 + summary.size() * 12;
+    }
+
+    /**
+     * Returns an upper bound on the number bytes that will be required to represent this histogram.
+     */
+    public int smallByteSize() {
+        int bound = 8 + 4 + summary.size() * 12;
+        ByteBuffer buf = ByteBuffer.allocate(bound);
+        asSmallBytes(buf);
+        return buf.position();
     }
 
     public final static int VERBOSE_ENCODING = 1;
@@ -370,11 +409,11 @@ public class Histo {
      *
      * @return The new histogram structure
      */
-    public static Histo fromBytes(ByteBuffer buf) {
+    public static TDigest fromBytes(ByteBuffer buf) {
         int encoding = buf.getInt();
         if (encoding == VERBOSE_ENCODING) {
             double compression = buf.getDouble();
-            Histo r = new Histo(compression);
+            TDigest r = new TDigest(compression);
             int n = buf.getInt();
             double[] means = new double[n];
             for (int i = 0; i < n; i++) {
@@ -386,7 +425,7 @@ public class Histo {
             return r;
         } else if (encoding == SMALL_ENCODING) {
             double compression = buf.getDouble();
-            Histo r = new Histo(compression);
+            TDigest r = new TDigest(compression);
             int n = buf.getInt();
             double[] means = new double[n];
             double x = 0;
