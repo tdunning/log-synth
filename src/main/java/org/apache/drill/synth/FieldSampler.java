@@ -13,7 +13,15 @@ import org.apache.mahout.math.random.Sampler;
         @JsonSubTypes.Type(value=IntegerSampler.class, name="int"),
         @JsonSubTypes.Type(value=NameSampler.class, name="name"),
         @JsonSubTypes.Type(value=StreetNameSampler.class, name="street-name"),
-        @JsonSubTypes.Type(value=StringSampler.class, name="string")
+        @JsonSubTypes.Type(value=StringSampler.class, name="string"),
+        @JsonSubTypes.Type(value=CountrySampler.class, name="country"),
+        @JsonSubTypes.Type(value=BrowserSampler.class, name="browser"),
+        @JsonSubTypes.Type(value=StateSampler.class, name="state"),
+        @JsonSubTypes.Type(value=LanguageSampler.class, name="language"),
+        @JsonSubTypes.Type(value=OperatingSystemSampler.class, name="os"),
+        @JsonSubTypes.Type(value=WordSampler.class, name="word"),
+
+        @JsonSubTypes.Type(value=SequenceSampler.class, name="sequence")
 })
 public abstract class FieldSampler implements Sampler<String> {
     private String name;

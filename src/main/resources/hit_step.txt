@@ -1,0 +1,5 @@
+[
+{"name":"product_category", "class":"string", "dist":{"printer":1, "server":1, "laptop":1}},
+{"name":"campaign_list", "class":"sequence", "length":3, "base":{"class":"int", "max":20}},
+{"name":"search_keywords", "class":"sequence", "length":1, "base":{"class":"word"}}
+]

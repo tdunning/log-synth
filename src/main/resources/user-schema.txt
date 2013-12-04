@@ -1,0 +1,11 @@
+[
+    {"name":"user_category", "class":"string", "dist":{
+       "consumer":45, "business":35, "graphic arts":20}
+    },
+    {"name":"state", "class":"state"},
+    {"name":"browser", "class":"browser"},
+    {"name":"country", "class":"country"},
+    {"name":"language", "class":"language"},
+    {"name":"os", "class":"os"},
+    {"name":"user_id", "class":"id"}
+]

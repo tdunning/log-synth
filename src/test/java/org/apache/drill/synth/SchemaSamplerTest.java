@@ -1,11 +1,13 @@
 package org.apache.drill.synth;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multiset;
 import com.google.common.io.Resources;
+import org.apache.mahout.math.stats.OnlineSummarizer;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,9 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class SchemaSamplerTest {
     @Test
@@ -68,17 +68,64 @@ public class SchemaSamplerTest {
         Pattern namePattern = Pattern.compile("[A-Z][a-z]+ [A-Z][a-z]+");
         Pattern addressPattern = Pattern.compile("[0-9]+ [A-Z][a-z]+ [A-Z][a-z]+ [A-Z][a-z]+");
         Pattern datePattern = Pattern.compile("[01][0-9]/[0123][0-9]/20[012][0-9]");
-            for (int i = 0; i < 10000; i++) {
-                List<String> record = s.sample();
-                assertEquals(i, Integer.parseInt(record.get(0)));
-                assertTrue(namePattern.matcher(record.get(1)).matches());
-                assertTrue(addressPattern.matcher(record.get(3)).matches());
-                assertTrue(datePattern.matcher(record.get(4)).matches());
-                gender.add(record.get(1));
+        for (int i = 0; i < 10000; i++) {
+            List<String> record = s.sample();
+            assertEquals(i, Integer.parseInt(record.get(0)));
+            assertTrue(namePattern.matcher(record.get(1)).matches());
+            assertTrue(addressPattern.matcher(record.get(3)).matches());
+            assertTrue(datePattern.matcher(record.get(4)).matches());
+            gender.add(record.get(1));
         }
         check(gender, 0.5 * (1 - 0.02), "MALE");
         check(gender, 0.5 * (1 - 0.02), "FEMALE");
         check(gender, 0.02 * (1 - 0.02), "OTHER");
+    }
+
+    @Test
+    public void testMisc() throws IOException {
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema4.txt"), Charsets.UTF_8).read());
+        Multiset<String> country = HashMultiset.create();
+        Multiset<String> language = HashMultiset.create();
+        Multiset<String> browser = HashMultiset.create();
+        Multiset<String> state = HashMultiset.create();
+        Multiset<String> os = HashMultiset.create();
+        for (int i = 0; i < 10000; i++) {
+            List<String> record = s.sample();
+            country.add(record.get(0));
+            browser.add(record.get(1));
+            language.add(record.get(2));
+            state.add(record.get(3));
+            os.add(record.get(4));
+        }
+
+        assertEquals(2542.0, country.count("us"), 200);
+        assertEquals(3756.0, browser.count("Chrome"), 200);
+        assertEquals(3256.0, language.count("en"), 200);
+        assertEquals(1211.8, state.count("ca"), 100);
+        assertEquals(5876.0, os.count("win7"), 100);
+    }
+
+    @Test
+    public void testSequence() throws IOException {
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema5.txt"), Charsets.UTF_8).read());
+        Splitter onComma = Splitter.on(",").omitEmptyStrings();
+        OnlineSummarizer s0 = new OnlineSummarizer();
+        OnlineSummarizer s1 = new OnlineSummarizer();
+        for (int i = 0; i < 10000; i++) {
+            List<String> x = s.sample();
+            s0.add(Iterables.size(onComma.split(x.get(0))));
+            Iterable<String> numbers = onComma.split(x.get(1));
+            s1.add(Iterables.size(numbers));
+
+            for (String number : numbers) {
+                int z = Integer.parseInt(number);
+                assertTrue(z >= 3 && z < 9);
+            }
+        }
+
+        assertEquals(5, s0.getMean(), 1);
+        assertEquals(10, s1.getMean(), 2);
+
     }
 
     public static class StringSamplerTest {

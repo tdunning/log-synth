@@ -281,7 +281,7 @@ public class TDigestTest {
     public void testScaling() {
         RandomWrapper gen = RandomUtils.getRandom();
 
-        System.out.printf("compression\tq\terror\tsize\n");
+        System.out.printf("pass\tcompression\tq\terror\tsize\n");
         for (int k = 0; k < 40; k++) {
             List<Double> data = Lists.newArrayList();
             for (int i = 0; i < 100000; i++) {
@@ -299,7 +299,7 @@ public class TDigestTest {
                 for (double q : new double[]{0.001, 0.01, 0.1, 0.5}) {
                     double estimate = dist.quantile(q);
                     double actual = data.get((int) (q * data.size()));
-                    System.out.printf("%.0f\t%.3f\t%.9f\t%d\n", compression, q, estimate - actual, dist.byteSize());
+                    System.out.printf("%d\t%.0f\t%.3f\t%.9f\t%d\n", k, compression, q, estimate - actual, dist.byteSize());
                 }
             }
         }

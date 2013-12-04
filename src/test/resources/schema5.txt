@@ -1,0 +1,4 @@
+[
+{"name":"c", "class":"sequence", "base":{"class":"os"}},
+{"name":"d", "class":"sequence", "base":{"class":"int", "min":3, "max":9}, "length":10}
+]

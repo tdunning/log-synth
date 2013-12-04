@@ -44,6 +44,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * e) simple
  * <p/>
  * f) test coverage > 90%
+ * <p/>
+ * g) easy to adapt for use with map-reduce
  */
 public class TDigest {
     private Random gen = RandomUtils.getRandom();

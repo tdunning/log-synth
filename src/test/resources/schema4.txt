@@ -1,0 +1,7 @@
+[
+  {"name":"co", "class":"country"},
+  {"name":"br", "class":"browser"},
+  {"name":"la", "class":"language"},
+  {"name":"st", "class":"state"},
+  {"name":"os", "class":"os"}
+]
