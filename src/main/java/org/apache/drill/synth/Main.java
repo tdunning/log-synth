@@ -29,6 +29,7 @@ public class Main {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
             System.err.println("Usage: -count <number>G|M|K [ -users number ] [-format JSON|LOG|CSV ] log-file user-profiles");
+            System.exit(1);
         }
 
 
@@ -60,13 +61,13 @@ public class Main {
     }
 
     private static class Options {
-        @Option(name="users")
-        int users;
+        @Option(name="-users")
+        int users = 100000;
 
-        @Option(name = "count", handler = SizeParser.class)
-        int count;
+        @Option(name = "-count", handler = SizeParser.class)
+        int count = 1000000;
 
-        @Option(name = "format")
+        @Option(name = "-format")
         Format format = Format.LOG;
 
         @Argument()
