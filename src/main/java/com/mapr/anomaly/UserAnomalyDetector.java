@@ -47,6 +47,7 @@ public class UserAnomalyDetector {
         long lastReport = 0;
 
         scores = new TDigest(1000);
+        System.out.printf("\n\n\tAcquiring initial model training data\n\n");
         while ((System.currentTimeMillis() - t0) / 1e3 < opts.maxRuntime) {
             long now = System.currentTimeMillis();
             if (now - lastReport > 5000) {
@@ -56,9 +57,13 @@ public class UserAnomalyDetector {
                 lastReport = now;
             }
 
+
             if ((now - t0) / 1e3 > opts.warmup && !checkTransactions) {
+                System.out.printf("\n\n\tTraining data acquired ... here is a dump of the event counts and timings\n\n");
                 dumpTable();
 
+                System.out.printf("\n\n\tBeginning to monitor for anomalous events\n\n");
+                System.out.printf("event1 => event2 <is-same-ip-address>\n\n");
                 checkTransactions = true;
             }
 
