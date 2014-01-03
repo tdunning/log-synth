@@ -1,0 +1,5 @@
+#!/bin/sh
+
+java -cp target/log-synth-0.1-SNAPSHOT-jar-with-dependencies.jar \
+           org.apache.drill.synth.Synth $*
+
