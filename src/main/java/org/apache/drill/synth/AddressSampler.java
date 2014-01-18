@@ -1,5 +1,8 @@
 package org.apache.drill.synth;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+
 /**
  * Sample kind of plausible addresses
  */
@@ -14,7 +17,7 @@ public class AddressSampler extends FieldSampler {
     }
 
     @Override
-    public String sample() {
-        return number.sample() + " " + street.sample();
+    public JsonNode sample() {
+        return new TextNode(number.sample().asInt() + " " + street.sample().asText());
     }
 }

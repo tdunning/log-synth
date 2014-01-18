@@ -1,5 +1,6 @@
 package com.mapr;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -80,12 +81,12 @@ public class PurchaseLog {
                 t += dt;
 
                 // hit specific values
-                List<String> step = intermediate.sample();
+                JsonNode step = intermediate.sample();
 
                 // check for purchase
                 double p = 0.01;
-                List<String> campaigns = Lists.newArrayList(onComma.split(step.get(CAMPAIGN)));
-                List<String> keywords = Lists.newArrayList(onComma.split(step.get(SEARCH_TERMS)));
+                List<String> campaigns = Lists.newArrayList(onComma.split(step.get("campaign_list").asText()));
+                List<String> keywords = Lists.newArrayList(onComma.split(step.get("search_keywords").asText()));
                 if ((user.get(COUNTRY).equals("us") && campaigns.contains("5")) ||
                         (user.get(COUNTRY).equals("jp") && campaigns.contains("7")) ||
                         keywords.contains("homer") || keywords.contains("simpson")) {

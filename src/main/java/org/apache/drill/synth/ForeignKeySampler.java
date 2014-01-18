@@ -1,6 +1,8 @@
 package org.apache.drill.synth;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.IntNode;
 import com.google.common.base.Preconditions;
 import org.apache.mahout.math.random.Multinomial;
 
@@ -48,7 +50,7 @@ public class ForeignKeySampler extends FieldSampler {
     }
 
     @Override
-    public String sample() {
-        return base.sample().toString();
+    public JsonNode sample() {
+        return new IntNode(base.sample());
     }
 }

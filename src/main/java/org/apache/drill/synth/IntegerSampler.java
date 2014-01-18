@@ -1,5 +1,7 @@
 package org.apache.drill.synth;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.IntNode;
 import org.apache.mahout.common.RandomUtils;
 
 import java.util.Random;
@@ -10,6 +12,7 @@ import java.util.Random;
 public class IntegerSampler extends FieldSampler {
     private int min = 0;
     private int max = 100;
+    private int power = 0;
     private Random base;
 
     public IntegerSampler() {
@@ -24,9 +27,34 @@ public class IntegerSampler extends FieldSampler {
         this.min = min;
     }
 
+    /**
+     * Sets the amount of skew.  Skew is added by taking the min of several samples.
+     * Setting power = 0 gives uniform distribution, setting it to 5 gives a very
+     * heavily skewed distribution.
+     * <p/>
+     * If you set power to a negative number, the skew is reversed so large values
+     * are preferred.
+     *
+     * @param skew Controls how skewed the distribution is.
+     */
+    public void setSkew(int skew) {
+        this.power = skew;
+    }
+
     @Override
-    public String sample() {
-        return java.lang.Integer.toString(min + base.nextInt(max - min));
+    public JsonNode sample() {
+        int r = power >= 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+        if (power >= 0) {
+            for (int i = 0; i <= power; i++) {
+                r = Math.min(r, min + base.nextInt(max - min));
+            }
+        } else {
+            int n = -power;
+            for (int i = 0; i <= n; i++) {
+                r = Math.max(r, min + base.nextInt(max - min));
+            }
+        }
+        return new IntNode(r);
     }
 
 }

@@ -1,5 +1,7 @@
 package org.apache.drill.synth;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
@@ -71,16 +73,16 @@ public class NameSampler extends FieldSampler {
     }
 
     @Override
-    public String sample() {
+    public JsonNode sample() {
         switch (type) {
             case FIRST:
-                return first.get().sample();
+                return new TextNode(first.get().sample());
             case LAST:
-                return last.get().sample();
+                return new TextNode(last.get().sample());
             case FIRST_LAST:
-                return first.get().sample() + " " + last.get().sample();
+                return new TextNode(first.get().sample() + " " + last.get().sample());
             case LAST_FIRST:
-                return last.get().sample() + ", " + first.get().sample();
+                return new TextNode(last.get().sample() + ", " + first.get().sample());
         }
         // can't happen
         return null;

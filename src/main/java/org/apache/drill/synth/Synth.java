@@ -1,5 +1,6 @@
 package org.apache.drill.synth;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -10,7 +11,6 @@ import org.kohsuke.args4j.spi.Setter;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -28,9 +28,7 @@ public class Synth {
         }
 
         SchemaSampler s = new SchemaSampler(opts.schema);
-        if (opts.format == Format.TSV || opts.format == Format.CSV) {
-            format(opts.format, null, s.getFieldNames());
-        }
+        header(opts.format, s.getFieldNames());
         for (int i = 0; i < opts.count; i++) {
             format(opts.format, s.getFieldNames(), s.sample());
         }
@@ -39,24 +37,38 @@ public class Synth {
     static Joiner withCommas = Joiner.on(",");
     static Joiner withTabs = Joiner.on("\t");
 
-    private static void format(Format format, List<String> names, List<String> fields) {
+    private static void header(Format format, List<String> names) {
         switch (format) {
-            case JSON:
-                String sep = "{";
-                Iterator<String> i = names.iterator();
-                for (String field : fields) {
-                    System.out.printf("%s\"%s\":\"%s\"", sep, i.next(), field);
-                    sep = ",";
-                }
-                System.out.printf("}\n");
-                break;
             case TSV:
-                System.out.printf("%s\n", withTabs.join(fields));
+                System.out.printf("%s\n", withTabs.join(names));
                 break;
             case CSV:
-                System.out.printf("%s\n", withCommas.join(fields));
+                System.out.printf("%s\n", withCommas.join(names));
                 break;
         }
+    }
+
+    private static void format(Format format, List<String> names, JsonNode fields) {
+        switch (format) {
+            case JSON:
+                System.out.printf("%s\n", fields.toString());
+                break;
+            case TSV:
+                printDelimited(names, fields, "\t");
+                break;
+            case CSV:
+                printDelimited(names, fields, ",");
+                break;
+        }
+    }
+
+    private static void printDelimited(List<String> names, JsonNode fields, String separator) {
+        String x = "";
+        for (String name : names) {
+            System.out.printf("%s%s", x, fields.get(name));
+            x = separator;
+        }
+        System.out.printf("\n");
     }
 
     public static enum Format {

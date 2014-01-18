@@ -2,6 +2,7 @@ package org.apache.drill.synth;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.mahout.math.random.Sampler;
 
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="class")
@@ -23,7 +24,7 @@ import org.apache.mahout.math.random.Sampler;
 
         @JsonSubTypes.Type(value=SequenceSampler.class, name="sequence")
 })
-public abstract class FieldSampler implements Sampler<String> {
+public abstract class FieldSampler implements Sampler<JsonNode> {
     private String name;
 
     public String getName() {

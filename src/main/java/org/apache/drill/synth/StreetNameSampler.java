@@ -1,5 +1,7 @@
 package org.apache.drill.synth;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -37,7 +39,7 @@ public class StreetNameSampler extends FieldSampler {
     }
 
     @Override
-    public String sample() {
-        return sampler.get(0).sample() + " " + sampler.get(1).sample() + " " + sampler.get(2).sample();
+    public JsonNode sample() {
+        return new TextNode(sampler.get(0).sample() + " " + sampler.get(1).sample() + " " + sampler.get(2).sample());
     }
 }

@@ -1,5 +1,8 @@
 package org.apache.drill.synth;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+
 /**
  * Sample from English words with somewhat plausible frequency distribution.
  */
@@ -9,7 +12,7 @@ public class WordSampler extends FieldSampler {
     }
 
     @Override
-    public String sample() {
-        return gen.sample();
+    public JsonNode sample() {
+        return new TextNode(gen.sample());
     }
 }

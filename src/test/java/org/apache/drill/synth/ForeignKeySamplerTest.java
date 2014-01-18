@@ -1,5 +1,6 @@
 package org.apache.drill.synth;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.random.*;
 import org.junit.Test;
@@ -21,10 +22,10 @@ public class ForeignKeySamplerTest {
         };
     }
 
-    private void check(int n, DoubleFunction distribution, Sampler<String> s) {
+    private void check(int n, DoubleFunction distribution, Sampler<JsonNode> s) {
         int[] counts = new int[n];
         for (int i = 0; i < 100000; i++) {
-            counts[Integer.parseInt(s.sample())]++;
+            counts[s.sample().asInt()]++;
         }
 
         double sum = 0;

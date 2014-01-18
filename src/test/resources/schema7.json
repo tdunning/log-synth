@@ -1,0 +1,30 @@
+[
+    {
+        "name": "x",
+        "class": "int",
+        "min": 10,
+        "max": 20,
+        "skew": 0
+    },
+    {
+        "name": "y",
+        "class": "int",
+        "min": 10,
+        "max": 20,
+        "skew": 1
+    },
+    {
+        "name": "z",
+        "class": "int",
+        "min": 10,
+        "max": 20,
+        "skew": -1
+    },
+    {
+        "name": "q",
+        "class": "int",
+        "min": 10,
+        "max": 20,
+        "skew": 5
+    }
+]

@@ -1,5 +1,7 @@
 package org.apache.drill.synth;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.Exponential;
 
@@ -24,8 +26,8 @@ public class DateSampler extends FieldSampler {
     }
 
     @Override
-    public String sample() {
+    public JsonNode sample() {
         long t = (long) Math.rint(base.nextDouble());
-        return df.format(new java.util.Date(EPOCH - t));
+        return new TextNode(df.format(new java.util.Date(EPOCH - t)));
     }
 }

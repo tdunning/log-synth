@@ -1,5 +1,8 @@
 package org.apache.drill.synth;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.IntNode;
+
 /**
  * Samples from a "foreign key" which is really just an integer.
  *
@@ -12,8 +15,8 @@ public class IdSampler extends FieldSampler {
     }
 
     @Override
-    public String sample() {
-        return Integer.toString(current++);
+    public JsonNode sample() {
+        return new IntNode(current++);
     }
 
     public void setStart(int start) {

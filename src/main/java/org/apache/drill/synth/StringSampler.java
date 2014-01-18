@@ -1,5 +1,7 @@
 package org.apache.drill.synth;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -55,7 +57,7 @@ public class StringSampler extends FieldSampler {
     }
 
     @Override
-    public String sample() {
-        return distribution.get().sample();
+    public JsonNode sample() {
+        return new TextNode(distribution.get().sample());
     }
 }
