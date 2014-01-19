@@ -1,0 +1,13 @@
+[
+    {
+        "name": "x",
+        "class": "lookup",
+        "resource": "data.json",
+        "skew": 1
+    },
+    {
+        "name": "y",
+        "class": "lookup",
+        "file": "numbers.tsv"
+    }
+]

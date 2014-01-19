@@ -1,0 +1,33 @@
+[
+    {
+        "name": "x",
+        "class": "flatten",
+        "value": {
+            "class": "sequence",
+            "array": [
+                {
+                    "class": "int",
+                    "min": 3,
+                    "max": 4
+                },
+                {
+                    "class": "int",
+                    "min": 6,
+                    "max": 7
+                },
+                {
+                    "class": "int",
+                    "min": 8,
+                    "max": 9
+                }
+            ]
+        }
+    },
+    {
+        "name": "y",
+        "class": "int",
+        "min": 1,
+        "max": 5
+    }
+
+]

@@ -2,14 +2,16 @@ package org.apache.drill.synth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
 import com.google.common.collect.*;
 import com.google.common.io.Resources;
 import org.apache.mahout.math.stats.OnlineSummarizer;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Pattern;
@@ -163,6 +165,39 @@ public class SchemaSamplerTest {
             double kq = 122623.551282 - 27404.139083 * i + 2296.601107 * i * i - 85.510684 * i * i * i + 1.193182 * i * i * i * i;
             // accuracy should get better for smaller numbers
             assertEquals(kq, q.count(i), (25.0 - i) / 15 * 120);
+        }
+    }
+
+    @Test
+    public void testFileSampler() throws IOException {
+        File f = new File("numbers.tsv");
+        f.deleteOnExit();
+
+        BufferedWriter out = Files.newBufferedWriter(f.toPath(), Charsets.UTF_8);
+        out.write("a\tb\n");
+        for (int i = 0; i < 20; i++) {
+            out.write(i + "\t" + (i * i) + "\n");
+        }
+        out.close();
+
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema8.json"), Charsets.UTF_8).read());
+
+        for (int k = 0; k < 1000; k++) {
+            JsonNode r = s.sample();
+            assertEquals(6, r.get("x").get("x").asInt() + r.get("x").get("y").asInt());
+            int i = r.get("y").get("a").asInt();
+            assertEquals(i * i, r.get("y").get("b").asInt());
+        }
+    }
+
+    @Test
+    public void testFlatten() throws IOException {
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema9.json"), Charsets.UTF_8).read());
+
+        for (int k = 0; k < 10; k++) {
+            JsonNode r = s.sample();
+            assertEquals("3,6,8", r.get("x").asText());
+            assertTrue(r.get("y").asInt() >= 1 && r.get("y").asInt() < 5);
         }
     }
 

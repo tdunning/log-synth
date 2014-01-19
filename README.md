@@ -60,6 +60,8 @@ Schema-driven Data Generation
 
 You can also generate data based on a rough schema.  Schema-driven generation supports the generation of addresses, dates, foreign key references, unique id numbers, random integers, sort of realistic personal names and fanciful street names.
 
+In addition to these primitive generators of strings and numbers, nested structures of arrays and objects can also be generated.  In a future release, it is anticipated that the generator will execute arbitrary Javascript in order to allow arbitrary dependencies and transformations of data as it is generated.
+
 To generate data, follow the compilation directions above, but use this main program instead:
 
     java -cp target/log-synth-0.1-SNAPSHOT-jar-with-dependencies.jar org.apache.drill.synth.Synth -count 1M -schema schema
@@ -117,3 +119,18 @@ Items are simpler and are generated using this schema
     ]
 
 Each item has an id and a size which is just a random integer from 10 to 99.
+
+You can use the sequence type to generate variable or fixed-length arrays of values which can themselves be complex.  If you use the JSON output format, this structure will be preserved.  If you want to flatten an array produced by sequence, you can use the flatten sampler.
+
+For example, this produces users with names and variable length query strings
+
+    [
+        {"name":"user_name", "class":"name", "type": "last_first"},
+        {"name":"query", "class":"flatten", "value": {
+            "class": "sequence", "length":4, "base": {
+                "class": "word"
+            }
+        }
+    ]
+
+If you use the TSV format with this schema, the queries will be comma delimited unquoted strings.  If you omit the flatten step, you will get a list of strings surrounded by square brackets and each string will be quoted (i.e. an array in JSON format).
