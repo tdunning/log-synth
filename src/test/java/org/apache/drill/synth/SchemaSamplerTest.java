@@ -102,7 +102,7 @@ public class SchemaSamplerTest {
         assertEquals(3756.0, browser.count("Chrome"), 200);
         assertEquals(3256.0, language.count("en"), 200);
         assertEquals(1211.8, state.count("ca"), 100);
-        assertEquals(5876.0, os.count("win7"), 100);
+        assertEquals(5876.0, os.count("win7"), 120);
     }
 
     @Test
