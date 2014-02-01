@@ -15,6 +15,7 @@ import org.apache.mahout.math.random.Sampler;
         @JsonSubTypes.Type(value=NameSampler.class, name="name"),
         @JsonSubTypes.Type(value=FileSampler.class, name="lookup"),
         @JsonSubTypes.Type(value=FlattenSampler.class, name="flatten"),
+        @JsonSubTypes.Type(value=JoinSampler.class, name="join"),
         @JsonSubTypes.Type(value=StreetNameSampler.class, name="street-name"),
         @JsonSubTypes.Type(value=StringSampler.class, name="string"),
         @JsonSubTypes.Type(value=CountrySampler.class, name="country"),

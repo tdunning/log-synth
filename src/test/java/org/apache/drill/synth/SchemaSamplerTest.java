@@ -32,7 +32,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testInt() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema1.json"), Charsets.UTF_8).read());
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema001.json"), Charsets.UTF_8).read());
         Multiset<String> counts = HashMultiset.create();
         for (int i = 0; i < 10000; i++) {
             counts.add(s.sample().get("size").asText());
@@ -45,7 +45,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testString() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema2.json"), Charsets.UTF_8).read());
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema002.json"), Charsets.UTF_8).read());
         Multiset<String> counts = HashMultiset.create();
         double n = 10000;
         for (int i = 0; i < n; i++) {
@@ -63,7 +63,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testSeveral() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema3.json"), Charsets.UTF_8).read());
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema003.json"), Charsets.UTF_8).read());
         Multiset<String> gender = HashMultiset.create();
         Pattern namePattern = Pattern.compile("[A-Z][a-z]+ [A-Z][a-z]+");
         Pattern addressPattern = Pattern.compile("[0-9]+ [A-Z][a-z]+ [A-Z][a-z]+ [A-Z][a-z]+");
@@ -83,7 +83,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testMisc() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema4.json"), Charsets.UTF_8).read());
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema004.json"), Charsets.UTF_8).read());
         Multiset<String> country = HashMultiset.create();
         Multiset<String> language = HashMultiset.create();
         Multiset<String> browser = HashMultiset.create();
@@ -107,7 +107,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testSequence() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema5.json"), Charsets.UTF_8).read());
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema005.json"), Charsets.UTF_8).read());
         OnlineSummarizer s0 = new OnlineSummarizer();
         OnlineSummarizer s1 = new OnlineSummarizer();
         for (int i = 0; i < 10000; i++) {
@@ -128,7 +128,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testSequenceArray() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema6.json"), Charsets.UTF_8).read());
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema006.json"), Charsets.UTF_8).read());
         for (int i = 0; i < 10; i++) {
             JsonNode x = s.sample();
             Iterator<JsonNode> values = x.get("x").elements();
@@ -143,7 +143,7 @@ public class SchemaSamplerTest {
     @Test
     public void testSkewedInteger() throws IOException {
         // will give fields x, y, z, q with different skewness
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema7.json"), Charsets.UTF_8).read());
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema007.json"), Charsets.UTF_8).read());
 
         SortedMultiset<Integer> x = TreeMultiset.create();
         SortedMultiset<Integer> y = TreeMultiset.create();
@@ -164,7 +164,7 @@ public class SchemaSamplerTest {
             // these magic numbers are a fit to the empirical distribution of q as computed by R
             double kq = 122623.551282 - 27404.139083 * i + 2296.601107 * i * i - 85.510684 * i * i * i + 1.193182 * i * i * i * i;
             // accuracy should get better for smaller numbers
-            assertEquals(kq, q.count(i), (25.0 - i) / 15 * 120);
+            assertEquals(kq, q.count(i), (25.0 - i) / 10 * 120);
         }
     }
 
@@ -180,7 +180,7 @@ public class SchemaSamplerTest {
         }
         out.close();
 
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema8.json"), Charsets.UTF_8).read());
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema008.json"), Charsets.UTF_8).read());
 
         for (int k = 0; k < 1000; k++) {
             JsonNode r = s.sample();
@@ -191,13 +191,29 @@ public class SchemaSamplerTest {
     }
 
     @Test
-    public void testFlatten() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema9.json"), Charsets.UTF_8).read());
+    public void testJoin() throws IOException {
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema009.json"), Charsets.UTF_8).read());
 
         for (int k = 0; k < 10; k++) {
             JsonNode r = s.sample();
             assertEquals("3,6,8", r.get("x").asText());
             assertTrue(r.get("y").asInt() >= 1 && r.get("y").asInt() < 5);
+        }
+    }
+
+    @Test
+    public void testFlatten() throws IOException {
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema010.json"), Charsets.UTF_8).read());
+
+        for (int k = 0; k < 10; k++) {
+            JsonNode r = s.sample();
+            assertEquals(k, r.get("id").asInt());
+            assertTrue(r.get("stuff").isArray());
+            assertEquals(1, r.get("stuff").get(0).asInt());
+            assertEquals(2, r.get("stuff").get(1).asInt());
+            assertEquals(3, r.get("stuff").get(2).asInt());
+            assertEquals(4, r.get("stuff").get(3).asInt());
+            assertEquals(4, r.get("stuff").size());
         }
     }
 

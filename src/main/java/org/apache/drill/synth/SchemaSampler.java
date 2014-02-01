@@ -1,5 +1,6 @@
 package org.apache.drill.synth;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +26,10 @@ public class SchemaSampler implements Sampler<JsonNode> {
 
     public SchemaSampler(String schemaDefinition) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+
         schema = mapper.readValue(schemaDefinition, new TypeReference<List<FieldSampler>>() {
         });
         fields = Lists.transform(schema, new Function<FieldSampler, String>() {
@@ -37,6 +42,9 @@ public class SchemaSampler implements Sampler<JsonNode> {
 
     public SchemaSampler(File input) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         schema = mapper.readValue(input, new TypeReference<List<FieldSampler>>() {
         });
         fields = Lists.transform(schema, new Function<FieldSampler, String>() {

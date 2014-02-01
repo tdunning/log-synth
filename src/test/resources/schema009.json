@@ -1,7 +1,7 @@
 [
     {
         "name": "x",
-        "class": "flatten",
+        "class": "join",
         "value": {
             "class": "sequence",
             "array": [
