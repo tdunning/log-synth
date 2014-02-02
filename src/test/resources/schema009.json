@@ -28,6 +28,20 @@
         "class": "int",
         "min": 1,
         "max": 5
+    },
+    {
+        "name": "z",
+        "class": "join",
+        "value": {
+            "class": "sequence",
+            "length": 5,
+            "base": {
+                "class": "string",
+                "dist": {
+                    "xyz": 1,
+                    "none": 0
+                }
+            }
+        }
     }
-
 ]

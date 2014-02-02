@@ -198,6 +198,7 @@ public class SchemaSamplerTest {
             JsonNode r = s.sample();
             assertEquals("3,6,8", r.get("x").asText());
             assertTrue(r.get("y").asInt() >= 1 && r.get("y").asInt() < 5);
+            assertTrue(r.get("z").asText().matches("(xyz(,xyz)*)?"));
         }
     }
 
