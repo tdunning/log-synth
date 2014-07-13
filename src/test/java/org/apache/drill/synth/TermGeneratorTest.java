@@ -3,6 +3,9 @@ package org.apache.drill.synth;
 import com.google.common.base.Function;
 import com.google.common.collect.*;
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.drill.synth.distributions.LongTail;
+import org.apache.drill.synth.distributions.TermGenerator;
+import org.apache.drill.synth.distributions.WordGenerator;
 import org.apache.mahout.math.stats.LogLikelihood;
 import org.junit.Test;
 

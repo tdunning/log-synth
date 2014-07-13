@@ -1,4 +1,4 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.distributions;
 
 import com.google.common.collect.Lists;
 import org.apache.mahout.math.random.Sampler;

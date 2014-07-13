@@ -1,6 +1,7 @@
 package org.apache.drill.synth;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.drill.synth.samplers.ForeignKeySampler;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.random.*;
 import org.junit.Test;

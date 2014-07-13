@@ -1,4 +1,4 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.samplers;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.apache.drill.synth.samplers.FieldSampler;
 
 import java.util.List;
 import java.util.Random;

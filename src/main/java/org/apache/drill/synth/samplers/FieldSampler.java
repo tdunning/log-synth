@@ -1,8 +1,9 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.samplers;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.drill.synth.*;
 import org.apache.mahout.math.random.Sampler;
 
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="class")

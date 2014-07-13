@@ -1,6 +1,7 @@
 package org.apache.drill.synth;
 
 import com.google.common.collect.Lists;
+import org.apache.drill.synth.samplers.NameSampler;
 import org.apache.mahout.common.RandomUtils;
 import org.junit.Test;
 

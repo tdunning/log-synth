@@ -1,5 +1,6 @@
 package org.apache.drill.synth;
 
+import org.apache.drill.synth.distributions.WordGenerator;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

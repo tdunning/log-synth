@@ -1,7 +1,9 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import org.apache.drill.synth.distributions.TermGenerator;
+import org.apache.drill.synth.distributions.WordGenerator;
 
 /**
  * Sample from English words with somewhat plausible frequency distribution.

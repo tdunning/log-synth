@@ -1,4 +1,4 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -6,6 +6,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.io.Resources;
+import org.apache.drill.synth.samplers.FieldSampler;
 import org.apache.mahout.math.random.Multinomial;
 
 import java.io.IOException;

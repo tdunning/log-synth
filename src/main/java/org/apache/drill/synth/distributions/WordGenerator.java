@@ -1,4 +1,4 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.distributions;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.drill.synth;
+package org.apache.drill.synth.distributions;
 
 import com.google.common.base.Preconditions;
 import org.apache.mahout.common.RandomUtils;

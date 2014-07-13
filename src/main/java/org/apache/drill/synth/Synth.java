@@ -2,6 +2,7 @@ package org.apache.drill.synth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
+import org.apache.drill.synth.samplers.SchemaSampler;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;

@@ -1,4 +1,4 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.samplers;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,9 +1,10 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.samplers;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import org.apache.drill.synth.samplers.FieldSampler;
 
 /**
  * Glue together elements of a list as strings.  Should normally only be done with a list of strings.

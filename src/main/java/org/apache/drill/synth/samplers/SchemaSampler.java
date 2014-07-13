@@ -1,4 +1,4 @@
-package org.apache.drill.synth;
+package org.apache.drill.synth.samplers;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import org.apache.drill.synth.samplers.FieldSampler;
 import org.apache.mahout.math.random.Sampler;
 
 import java.io.File;
@@ -34,7 +35,7 @@ public class SchemaSampler implements Sampler<JsonNode> {
         });
         fields = Lists.transform(schema, new Function<FieldSampler, String>() {
             @Override
-            public String apply(org.apache.drill.synth.FieldSampler input) {
+            public String apply(FieldSampler input) {
                 return input.getName();
             }
         });
@@ -49,7 +50,7 @@ public class SchemaSampler implements Sampler<JsonNode> {
         });
         fields = Lists.transform(schema, new Function<FieldSampler, String>() {
             @Override
-            public String apply(org.apache.drill.synth.FieldSampler input) {
+            public String apply(FieldSampler input) {
                 return input.getName();
             }
         });

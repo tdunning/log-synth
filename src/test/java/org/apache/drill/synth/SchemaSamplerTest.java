@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
 import com.google.common.collect.*;
 import com.google.common.io.Resources;
+import org.apache.drill.synth.samplers.SchemaSampler;
+import org.apache.drill.synth.samplers.StringSampler;
 import org.apache.mahout.math.stats.OnlineSummarizer;
 import org.junit.Assert;
 import org.junit.Test;

@@ -1,6 +1,7 @@
 package org.apache.drill.synth;
 
 import com.google.common.collect.Lists;
+import org.apache.drill.synth.distributions.TermGenerator;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.AbstractContinousDistribution;
 import org.apache.mahout.math.jet.random.Exponential;
