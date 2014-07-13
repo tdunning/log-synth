@@ -134,3 +134,30 @@ For example, this produces users with names and variable length query strings
     ]
 
 If you use the TSV format with this schema, the queries will be comma delimited unquoted strings.  If you omit the flatten step, you will get a list of strings surrounded by square brackets and each string will be quoted (i.e. an array in JSON format).
+
+You can also generate arbitrarily nested data by using the map sampler.  For example, this schema will produce records with an id and a map named stuff that has two integers ("a" and "b") in it.
+
+    [
+        {
+            "name": "id",
+            "class": "id"
+        },
+        {
+            "name": "stuff",
+            "class": "map",
+            "value": [
+                {
+                    "name": "a",
+                    "class": "int",
+                    "min": 3,
+                    "max": 4
+                },
+                {
+                    "name": "b",
+                    "class": "int",
+                    "min": 4,
+                    "max": 5
+                }
+            ]
+        }
+    ]
