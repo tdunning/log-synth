@@ -130,7 +130,7 @@ For example, this produces users with names and variable length query strings
             "class": "sequence", "length":4, "base": {
                 "class": "word"
             }
-        }
+        }}
     ]
 
 If you use the TSV format with this schema, the queries will be comma delimited unquoted strings.  If you omit the flatten step, you will get a list of strings surrounded by square brackets and each string will be quoted (i.e. an array in JSON format).
