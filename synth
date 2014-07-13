@@ -1,5 +1,5 @@
 #!/bin/sh
 
 java -cp $(dirname $0)/target/log-synth-0.1-SNAPSHOT-jar-with-dependencies.jar \
-           org.apache.drill.synth.Synth $*
+           com.mapr.synth.Synth $*
 

@@ -7,7 +7,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
-import org.apache.drill.synth.samplers.SchemaSampler;
+import com.mapr.synth.samplers.SchemaSampler;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
