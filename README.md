@@ -138,26 +138,12 @@ If you use the TSV format with this schema, the queries will be comma delimited 
 You can also generate arbitrarily nested data by using the map sampler.  For example, this schema will produce records with an id and a map named stuff that has two integers ("a" and "b") in it.
 
     [
+        {"name": "id", "class": "id"},
         {
-            "name": "id",
-            "class": "id"
-        },
-        {
-            "name": "stuff",
-            "class": "map",
+            "name": "stuff", "class": "map",
             "value": [
-                {
-                    "name": "a",
-                    "class": "int",
-                    "min": 3,
-                    "max": 4
-                },
-                {
-                    "name": "b",
-                    "class": "int",
-                    "min": 4,
-                    "max": 5
-                }
+                {"name": "a", "class": "int", "min": 3, "max": 4},
+                {"name": "b", "class": "int", "min": 4, "max": 5}
             ]
         }
     ]
