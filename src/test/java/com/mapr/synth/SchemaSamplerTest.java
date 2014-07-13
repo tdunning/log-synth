@@ -143,6 +143,19 @@ public class SchemaSamplerTest {
     }
 
     @Test
+    public void testMap() throws IOException {
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema011.json"), Charsets.UTF_8).read());
+        for (int i = 0; i < 100; i++) {
+            JsonNode x = s.sample();
+            assertEquals(i, x.get("id").asInt());
+            int v = x.get("stuff").get("a").asInt();
+            assertTrue(v == 3 || v == 4);
+            v = x.get("stuff").get("b").asInt();
+            assertTrue(v == 4 || v == 5);
+        }
+    }
+
+    @Test
     public void testSkewedInteger() throws IOException {
         // will give fields x, y, z, q with different skewness
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema007.json"), Charsets.UTF_8).read());

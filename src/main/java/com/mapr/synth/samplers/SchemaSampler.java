@@ -21,8 +21,12 @@ import java.util.List;
 public class SchemaSampler implements Sampler<JsonNode> {
     private final JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals(false);
 
-    private final List<FieldSampler> schema;
-    private final List<String> fields;
+    private List<FieldSampler> schema;
+    private List<String> fields;
+
+    public SchemaSampler(List<FieldSampler> s) {
+        init(s);
+    }
 
     public SchemaSampler(String schemaDefinition) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -30,14 +34,8 @@ public class SchemaSampler implements Sampler<JsonNode> {
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
-        schema = mapper.readValue(schemaDefinition, new TypeReference<List<FieldSampler>>() {
-        });
-        fields = Lists.transform(schema, new Function<FieldSampler, String>() {
-            @Override
-            public String apply(FieldSampler input) {
-                return input.getName();
-            }
-        });
+        init(mapper.<List<FieldSampler>>readValue(schemaDefinition, new TypeReference<List<FieldSampler>>() {
+        }));
     }
 
     public SchemaSampler(File input) throws IOException {
@@ -45,18 +43,22 @@ public class SchemaSampler implements Sampler<JsonNode> {
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        schema = mapper.readValue(input, new TypeReference<List<FieldSampler>>() {
-        });
+        init(mapper.<List<FieldSampler>>readValue(input, new TypeReference<List<FieldSampler>>() {
+        }));
+    }
+
+    public List<String> getFieldNames() {
+        return fields;
+    }
+
+    private void init(List<FieldSampler> s) {
+        schema = s;
         fields = Lists.transform(schema, new Function<FieldSampler, String>() {
             @Override
             public String apply(FieldSampler input) {
                 return input.getName();
             }
         });
-    }
-
-    public List<String> getFieldNames() {
-        return fields;
     }
 
     @Override
