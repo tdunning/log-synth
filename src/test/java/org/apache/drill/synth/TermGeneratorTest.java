@@ -7,6 +7,8 @@ import org.apache.mahout.math.stats.LogLikelihood;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Random;
+import java.util.SortedSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -75,6 +77,81 @@ public class TermGeneratorTest {
             }
 
             i++;
+        }
+    }
+
+    @Test
+    public void speciesCounts() {
+        final boolean transpose = false;
+
+        // generate an example of species sampled on multiple days
+        LongTail<Integer> terms = new LongTail<Integer>(0.5, 0.3) {
+            int max = 0;
+
+            @Override
+            protected Integer createThing() {
+                return ++max;
+            }
+        };
+
+        // I picked seeds to get a good illustration ... want a reasonable number of species and surprises
+        terms.setSeed(2);
+
+        Random gen = new Random(1);
+        SortedSet<Integer> vocabulary = Sets.newTreeSet();
+        List<Multiset<Integer>> r = Lists.newArrayList();
+
+        for (int i = 0; i < 2000; i++) {
+            double length = Math.rint(gen.nextGaussian() * 10 + 50);
+            Multiset<Integer> counts = HashMultiset.create();
+            for (int j = 0; j < length; j++) {
+                counts.add(terms.sample());
+            }
+            r.add(counts);
+        }
+
+        if (transpose) {
+            for (Multiset<Integer> day : r) {
+                vocabulary.addAll(day.elementSet());
+            }
+
+            System.out.printf("%d\n", vocabulary.size());
+            for (Integer s : vocabulary) {
+                String sep = "";
+                for (Multiset<Integer> day : r) {
+                    System.out.printf("%s%s", sep, day.count(s));
+                    sep = "\t";
+                }
+                System.out.printf("\n");
+            }
+        } else {
+            System.out.printf("%d\n", vocabulary.size());
+            for (Multiset<Integer> day : r) {
+                vocabulary.addAll(day.elementSet());
+                String sep = "";
+                System.out.printf("%s%s", sep, vocabulary.size());
+                sep = "\t";
+                for (Integer s : vocabulary) {
+                    System.out.printf("%s%s", sep, day.count(s));
+                    sep = "\t";
+                }
+                System.out.printf("\n");
+            }
+
+            Multiset<Integer> total = HashMultiset.create();
+            for (Multiset<Integer> day : r) {
+                for (Integer species : day.elementSet()) {
+                    total.add(species, day.count(species));
+                }
+            }
+            String sep = "";
+            System.out.printf("%s%s", sep, total.elementSet().size());
+            sep = "\t";
+            for (Integer s : vocabulary) {
+                System.out.printf("%s%s", sep, total.count(s));
+                sep = "\t";
+            }
+            System.out.printf("\n");
         }
     }
 }

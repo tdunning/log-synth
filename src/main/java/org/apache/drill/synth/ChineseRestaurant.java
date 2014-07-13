@@ -116,4 +116,8 @@ public final class ChineseRestaurant implements Sampler<Integer> {
         weight += (count - weights.get(term));
         weights.set(term, count);
     }
+
+    public void setSeed(long seed) {
+        rand.setSeed(seed);
+    }
 }

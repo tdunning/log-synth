@@ -33,9 +33,16 @@ public abstract class LongTail<T> implements Sampler<T> {
     protected abstract T createThing();
 
     public void setThing(int i, T thing) {
+        // extend thing list to desired length
+        // should almost always extend by exactly 1 object
         while (things.size() <= i) {
+            // insert null place holders
             things.add(null);
         }
         things.set(i, thing);
+    }
+
+    public void setSeed(long seed) {
+        base.setSeed(seed);
     }
 }
