@@ -3,5 +3,7 @@
   {"name":"name", "class":"name", "type":"first_last"},
   {"name":"gender", "class":"string", "dist":{"MALE":0.5, "FEMALE":0.5, "OTHER":0.02}},
   {"name":"address", "class":"address"},
-  {"name":"first_visit", "class":"date", "format":"MM/dd/yyyy"}
+  {"name":"first_visit", "class":"date", "format":"MM/dd/yyyy"},
+  {"name":"second_date", "class":"date", "start":"2014-01-31", "end":"2014-02-07"},
+  {"name":"third_date", "class":"date", "format":"MM/dd/yyyy", "start":"01/31/1995", "end":"02/07/1999"}
 ]

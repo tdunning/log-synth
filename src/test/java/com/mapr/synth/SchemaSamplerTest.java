@@ -69,13 +69,17 @@ public class SchemaSamplerTest {
         Multiset<String> gender = HashMultiset.create();
         Pattern namePattern = Pattern.compile("[A-Z][a-z]+ [A-Z][a-z]+");
         Pattern addressPattern = Pattern.compile("[0-9]+ [A-Z][a-z]+ [A-Z][a-z]+ [A-Z][a-z]+");
-        Pattern datePattern = Pattern.compile("[01][0-9]/[0123][0-9]/20[012][0-9]");
+        Pattern datePattern1 = Pattern.compile("[01][0-9]/[0123][0-9]/20[012][0-9]");
+        Pattern datePattern2 = Pattern.compile("2014-0[12]-[0123][0-9]");
+        Pattern datePattern3 = Pattern.compile("[01][0-9]/[0123][0-9]/199[5-9]");
         for (int i = 0; i < 10000; i++) {
             JsonNode record = s.sample();
             assertEquals(i, record.get("id").asInt());
             assertTrue(namePattern.matcher(record.get("name").asText()).matches());
             assertTrue(addressPattern.matcher(record.get("address").asText()).matches());
-            assertTrue(datePattern.matcher(record.get("first_visit").asText()).matches());
+            assertTrue(datePattern1.matcher(record.get("first_visit").asText()).matches());
+            assertTrue(datePattern2.matcher(record.get("second_date").asText()).matches());
+            assertTrue(datePattern3.matcher(record.get("third_date").asText()).matches());
             gender.add(record.get("gender").asText());
         }
         check(gender, 0.5 * (1 - 0.02), "MALE");
