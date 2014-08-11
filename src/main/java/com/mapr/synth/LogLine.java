@@ -35,7 +35,7 @@ public class LogLine implements Comparable<LogLine> {
         String sep = "[";
         for (String term : query) {
             r.format("%s\"%s\"", sep, term);
-            sep = ", ";
+            sep = ",";
         }
         r.format("]}");
         return r.toString();
