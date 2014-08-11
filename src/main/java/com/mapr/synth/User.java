@@ -81,7 +81,7 @@ public class User implements Comparable<User> {
 
     @Override
     public String toString() {
-        return String.format("{ip:\"%s\", cookie:\"%08x\", geo:\"%s\"}", address, cookie, geoCode);
+        return String.format("{ip:\"%s\", cookie:\"%08x\", geo:\"%s\"}", address.getHostAddress(), cookie, geoCode);
     }
 
     public int compareTo(User o) {

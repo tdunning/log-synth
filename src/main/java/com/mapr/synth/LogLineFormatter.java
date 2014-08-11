@@ -39,13 +39,13 @@ public abstract class LogLineFormatter {
         }
 
         public void write(LogLine sample) throws IOException {
-            getLog().printf("{%.3f, %08x, %s, ", sample.getT(), sample.getCookie(), sample.getIp().getHostAddress());
+            getLog().printf("%.3f,%08x,%s,", sample.getT(), sample.getCookie(), sample.getIp().getHostAddress());
             String sep = "\"";
             for (String term : sample.getQuery()) {
                 getLog().format("%s%s", sep, term);
                 sep = " ";
             }
-            getLog().format("]}\n");
+            getLog().format("\"\n");
         }
     }
 
