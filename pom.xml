@@ -14,6 +14,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>me.lemire.integercompression</groupId>
+            <artifactId>JavaFastPFOR</artifactId>
+            <version>0.0.13</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-math</artifactId>
             <version>0.8</version>
