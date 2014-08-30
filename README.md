@@ -20,7 +20,7 @@ Then do this to build a jar file with all dependencies included
 
 Then use this to write one million log lines into the file "log" and to write the associated user database into the file "users".
 
-    java -cp target/log-synth-0.1-SNAPSHOT-jar-with-dependencies.jar com.mapr.synth.Main 1M log users
+    java -cp target/log-synth-0.1-SNAPSHOT-jar-with-dependencies.jar com.mapr.synth.Main -count 1M log users
 
 This program will produce a line of output on the standard output for each 10,000 lines of log produced.  Each line will contain the number of log lines produced so far and the number of unique users in the user profile database.
 
