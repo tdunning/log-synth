@@ -82,11 +82,17 @@ The allowable arguments include:
 The following classes of values are allowed:
 
 `address` - This distribution generates fairly plausible, if somewhat fanciful street addresses.  There are no additional parameters allowed.
+
 `date` - This distribution generates dates which are some time before an epoch date.  Dates shortly before the epoch are more common than those long before.  On average, the dates generated are 100 days before the epoch.  A format field is allowed which takes a format for the data in the style of Java's SimpleDateFormatter.
+
 `foreign-key` - This distribution generates randomized references to an integer key from another table.  You must specify the size of the table being referenced using the size parameter.  You may optionally specify a skewness factor in the range [0,3].  A value of 0 gives uniform distribution.  A value of 1 gives a classic Zipf distribution.
+
 `id` - This distribution returns consecutive integers starting at the value of the start parameter.
+
 `int` - This distribution generates random integers that are greater than or equal to the min parameter and less than the max parameter.
+
 `street-name` - This distribution generates fanciful three word street names.
+
 `string` - This distribution generates a specified distribution of strings.  One parameter called `dist` is required.  This parameter should be a structure with string keys and numerical values.  The probability for each key is proportional to the value.
 
 The following schema generates a typical fact table from a simulated star schema:
