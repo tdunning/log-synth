@@ -24,14 +24,14 @@ public class Synth {
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
-            System.err.println("Usage: [ -count <number>G|M|K ] -schema schema-file [-format JSON|TSV|CSV ]");
+            System.err.println("Usage: [ -count <number>G|M|K ] -schema schema-file [-quote DOUBLE_QUOTE|BACK_SLASH|OPTIMISTIC] [-format JSON|TSV|CSV ]");
             throw e;
         }
 
         SchemaSampler s = new SchemaSampler(opts.schema);
         header(opts.format, s.getFieldNames());
         for (int i = 0; i < opts.count; i++) {
-            format(opts.format, s.getFieldNames(), s.sample());
+            format(opts.format, opts.quote, s.getFieldNames(), s.sample());
         }
     }
 
@@ -49,24 +49,34 @@ public class Synth {
         }
     }
 
-    private static void format(Format format, List<String> names, JsonNode fields) {
+    private static void format(Format format, Quote quoteConvention, List<String> names, JsonNode fields) {
         switch (format) {
             case JSON:
                 System.out.printf("%s\n", fields.toString());
                 break;
             case TSV:
-                printDelimited(names, fields, "\t");
+                printDelimited(quoteConvention, names, fields, "\t");
                 break;
             case CSV:
-                printDelimited(names, fields, ",");
+                printDelimited(quoteConvention, names, fields, ",");
                 break;
         }
     }
 
-    private static void printDelimited(List<String> names, JsonNode fields, String separator) {
+    private static void printDelimited(Quote quoteConvention, List<String> names, JsonNode fields, String separator) {
         String x = "";
         for (String name : names) {
-            System.out.printf("%s%s", x, fields.get(name));
+            switch (quoteConvention) {
+                case DOUBLE_QUOTE:
+                    System.out.printf("%s%s", x, fields.get(name));
+                    break;
+                case OPTIMISTIC:
+                    System.out.printf("%s%s", x, fields.get(name).asText());
+                    break;
+                case BACK_SLASH:
+                    System.out.printf("%s%s", x, fields.get(name).asText().replaceAll("([,\t\\s\\\\])", "\\\\$1"));
+                    break;
+            }
             x = separator;
         }
         System.out.printf("\n");
@@ -74,6 +84,10 @@ public class Synth {
 
     public static enum Format {
         JSON, TSV, CSV
+    }
+
+    public static enum Quote {
+        DOUBLE_QUOTE, BACK_SLASH, OPTIMISTIC
     }
 
     private static class Options {
@@ -85,6 +99,9 @@ public class Synth {
 
         @Option(name = "-format")
         Format format = Format.CSV;
+
+        @Option(name = "-quote")
+        Quote quote = Quote.DOUBLE_QUOTE;
 
         public static class SizeParser extends IntOptionHandler {
             public SizeParser(CmdLineParser parser, OptionDef option, Setter<? super Integer> setter) {
