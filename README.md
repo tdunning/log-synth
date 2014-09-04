@@ -153,3 +153,18 @@ You can also generate arbitrarily nested data by using the map sampler.  For exa
             ]
         }
     ]
+
+Quoting of Strings
+============
+
+By default all strings in CSV or TSV formats are fully quoted.  This can confuse some software (sadly) so there are additional options to control how quoting is done.  
+
+There are three basic strategies supported:
+
+* *DOUBLE_QUOTE* This is the previous behavior where all strings are safely quoted according to JSON conventions.
+
+* *BACK_SLASH* With this convention, all internal spaces, tabs, back slashes and commas are quoted by preceding them with backslash character. This convention is useful with Hive.
+
+* *OPTIMISTIC* With this convention, no quoting of strings is done.  This should not normally be used since it is very easy to get unparseable data.
+
+The default convention is DOUBLE_QUOTE.
