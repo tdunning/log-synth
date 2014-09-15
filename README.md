@@ -154,6 +154,48 @@ You can also generate arbitrarily nested data by using the map sampler.  For exa
         }
     ]
 
+Here is a list of all of the currently known kinds of samplers that you can use as the class argument in your schema
+
+***address*** - Generates a complete street address
+
+***date*** - Generates dates.  By default, these are formatted like yyyy-MM-dd, but you can specify a different format using the format option.  Dates are selected by default to be before July 1, 2013.  The amount before is selected exponentially with mean of 100 days.  If you specify start or end dates, the dates will be sampled uniformly between your dates. The default start is January 1, 1970.  The default end is July 1, 2013.
+
+***foreign-key*** - Selects values from 0 (inclusive) to size (exclusive).  The default value of size is 1000. Values are normally biased towards smaller values.  You can adjust the bias by setting skew.  Setting skew to 0 makes the selection uniform.  The default skew is 0.5.  This sampler uses space proportional to size so be slightly cautious.  
+
+***id*** - Selects sequential integers.
+
+***int*** - Samples values from min (inclusive) to max (exclusive) with an adjustable skew toward small values.  If you set skew to a negative number, larger values will be preferred.
+
+***event*** - Samples Poisson distributed event times with specified rates.
+
+***name*** - Samples from (slightly) plausible names.
+
+***lookup*** - Samples from lines of a file.
+
+***flatten*** - Turns an object into fields.
+
+***join*** -
+
+***map*** - Samples from complex objects, fields of which are sampled according to a recursive schema you specify.
+ 
+***street-name*** - Samples from (slightly) plausible street names.
+
+***string*** - Samples from one of a set of strings you specify.
+
+***country*** - Samples from ISO country codes.
+
+***browser*** - Samples from browser types with kind of plausible frequency distribution.
+
+***state*** - Samples from any of the 58 USPS state abbreviations.  Yes, 58.
+ 
+***language*** - Samples from ISO language codes according to prevalence on the web.
+
+***os*** - Samples from operating system codes.  My own bias will show here.
+
+***word*** - Samples words at random.  A seed file is given, but if more words are needed than seeded, they will be invented.
+
+***sequence*** - Repeatedly samples from a single distribution and returns an array of the results.
+
 Quoting of Strings
 ============
 
