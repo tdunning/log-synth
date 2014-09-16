@@ -14,8 +14,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
@@ -219,6 +222,52 @@ public class SchemaSamplerTest {
             assertTrue(r.get("y").asInt() >= 1 && r.get("y").asInt() < 5);
             assertTrue(r.get("z").asText().matches("(xyz(,xyz)*)?"));
         }
+    }
+
+    @Test
+    public void testEvents() throws IOException, ParseException {
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema012.json"), Charsets.UTF_8).read());
+        long t = System.currentTimeMillis();
+
+        SimpleDateFormat df0 = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat df2 = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        JsonNode old = s.sample();
+
+        long old1 = df0.parse(old.get("foo1").asText()).getTime();
+        assertTrue(Math.abs(old1 - t) < TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS));
+
+        long old2 = df1.parse(old.get("foo2").asText()).getTime();
+        assertEquals((double) old2, df1.parse("2014-01-01 00:00:00").getTime(), 10.0);
+
+        long old3 = df2.parse(old.get("foo3").asText()).getTime();
+        assertEquals(old3, df1.parse("2014-02-01 00:00:00").getTime(), 10);
+
+        double sum1 = 0;
+        double sum2 = 0;
+        double sum3 = 0;
+
+        final int N = 10000;
+
+        for (int k = 0; k < N; k++) {
+            JsonNode r = s.sample();
+
+            long t1 = df0.parse(r.get("foo1").asText()).getTime();
+            sum1 += t1 - old1;
+            old1 = t1;
+
+            long t2 = df1.parse(r.get("foo2").asText()).getTime();
+            sum2 += t2 - old2;
+            old2 = t2;
+
+            long t3 = df2.parse(r.get("foo3").asText()).getTime();
+            sum3 += t3 - old3;
+            old3 = t3;
+        }
+
+        assertEquals((double) TimeUnit.MILLISECONDS.convert(10, TimeUnit.DAYS), (sum1 / N), 0.03 * (sum1 / N));
+        assertEquals(100, sum2 / N, 3);
+        assertEquals(2000, sum3 / N, 2000 * 0.03);
     }
 
     @Test

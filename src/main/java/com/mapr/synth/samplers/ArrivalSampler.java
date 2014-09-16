@@ -16,9 +16,9 @@ import java.util.regex.Pattern;
 
 /**
  * Samples progressive times that look like event arrival times.
- *
+ * <p/>
  * You can set the
- *
+ * <p/>
  * <il>
  * <li><em>rate</em> - use something like 5/m to indicate 5 events per minute.  The unit is optional, seconds are the default.</li>
  * <li><em>offset</em> - the minimum time between events, default is 0</li>
@@ -28,7 +28,8 @@ import java.util.regex.Pattern;
  */
 public class ArrivalSampler extends FieldSampler {
     private final Random base;
-    private final Pattern ratePattern = Pattern.compile("([0-9.e\\-]+)(/[smhd])?");
+    private final Pattern ratePattern = Pattern.compile("([0-9.e\\-]+)(/[smhdw])?");
+
     private final Map<String, TimeUnit> unitMap = ImmutableMap.of(
             "s", TimeUnit.SECONDS,
             "m", TimeUnit.MINUTES,
@@ -37,7 +38,7 @@ public class ArrivalSampler extends FieldSampler {
 
     private double meanInterval = 1000;  // interval - offset will have this mean
     private double minInterval = 0;      // no interval can be less than this
-    private SimpleDateFormat df;
+    private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
     private double start = System.currentTimeMillis();
 
@@ -52,6 +53,8 @@ public class ArrivalSampler extends FieldSampler {
             TimeUnit sourceUnit = (m.groupCount() > 1) ? unitMap.get(m.group(2).substring(1)) : TimeUnit.SECONDS;
             double count = Double.parseDouble(m.group(1));
             this.meanInterval = TimeUnit.MILLISECONDS.convert(1, sourceUnit) / count;
+        } else {
+            throw new IllegalArgumentException(String.format("Invalid rate argument: %s", rate));
         }
     }
 
