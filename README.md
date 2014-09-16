@@ -158,17 +158,48 @@ Here is a list of all of the currently known kinds of samplers that you can use 
 
 ***address*** - Generates a complete street address
 
+```json
+  {"name":"address", "class":"address"},
+```
+
 ***date*** - Generates dates.  By default, these are formatted like yyyy-MM-dd, but you can specify a different format using the format option.  Dates are selected by default to be before July 1, 2013.  The amount before is selected exponentially with mean of 100 days.  If you specify start or end dates, the dates will be sampled uniformly between your dates. The default start is January 1, 1970.  The default end is July 1, 2013.
+
+```json
+  {"name":"first_visit", "class":"date", "format":"MM/dd/yyyy"},
+  {"name":"second_date", "class":"date", "start":"2014-01-31", "end":"2014-02-07"},
+  {"name":"third_date", "class":"date", "format":"MM/dd/yyyy", "start":"01/31/1995", "end":"02/07/1999"}
+```
 
 ***foreign-key*** - Selects values from 0 (inclusive) to size (exclusive).  The default value of size is 1000. Values are normally biased towards smaller values.  You can adjust the bias by setting skew.  Setting skew to 0 makes the selection uniform.  The default skew is 0.5.  This sampler uses space proportional to size so be slightly cautious.  
 
 ***id*** - Selects sequential integers.
 
+```json
+   {"name":"id", "class":"id"},
+```
+
+
 ***int*** - Samples values from min (inclusive) to max (exclusive) with an adjustable skew toward small values.  If you set skew to a negative number, larger values will be preferred.
+
+```json
+  {"name":"size", "class":"int", "min":10, "max":99}
+  {"name": "z", "class": "int", "min": 10, "max": 20, "skew": -1},
+  {"name":"x", "class":"lookup", "resource":"data.json", "skew":1},
+```
 
 ***event*** - Samples Poisson distributed event times with specified rates.
 
+```json
+  {"name":"foo1", "class":"event", "rate": "0.1/d"},
+  {"name":"foo2", "class":"event", "start": "2014-01-01", "format":"yyyy-MM-dd HH:mm:ss", "rate": "10/s"},
+  {"name":"foo3", "class":"event", "format": "MM/dd/yyyy HH:mm:ss", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
+```
+
 ***name*** - Samples from (slightly) plausible names.
+
+```json
+  {"name":"name", "class":"name", "type":"first_last"},
+```
 
 ***lookup*** - Samples from lines of a file.
 
@@ -177,24 +208,85 @@ Here is a list of all of the currently known kinds of samplers that you can use 
 ***join*** -
 
 ***map*** - Samples from complex objects, fields of which are sampled according to a recursive schema you specify.
+
+```json
+  {
+    "name": "stuff",
+    "class": "map",
+    "value": [
+      {"name": "a", "class": "int", "min": 3, "max": 4},
+      {"name": "b","class": "int","min": 4,"max": 5}
+    ]
+  }
+```
  
 ***street-name*** - Samples from (slightly) plausible street names.
 
 ***string*** - Samples from one of a set of strings you specify.
 
+```json
+   {"name":"foo", "class":"string", "dist":{"YES":0.95, "NO":0.05, "NA":1}}
+```
+
 ***country*** - Samples from ISO country codes.
+
+```json
+  {"name":"co", "class":"country"},
+```
 
 ***browser*** - Samples from browser types with kind of plausible frequency distribution.
 
+```json
+  {"name":"br", "class":"browser"},
+```
+
 ***state*** - Samples from any of the 58 USPS state abbreviations.  Yes, 58.
- 
+
+```json
+  {"name":"st", "class":"state"},
+```
+
 ***language*** - Samples from ISO language codes according to prevalence on the web.
 
+```json
+  {"name":"la", "class":"language"},
+```
+
 ***os*** - Samples from operating system codes.  My own bias will show here.
+
+```json
+  {"name":"os", "class":"os"}
+```
 
 ***word*** - Samples words at random.  A seed file is given, but if more words are needed than seeded, they will be invented.
 
 ***sequence*** - Repeatedly samples from a single distribution and returns an array of the results.
+
+```json
+  {"name":"c", "class":"sequence", "base":{"class":"os"}},
+  {"name":"d", "class":"sequence", "base":{"class":"int", "min":3, "max":9}, "length":10}
+  {
+    "name": "x",
+    "class": "sequence",
+    "array": [
+      {
+        "class": "int",
+        "min": 3,
+        "max": 4
+      },
+      {
+        "class": "int",
+        "min": 6,
+        "max": 7
+      },
+      {
+        "class": "int",
+        "min": 8,
+        "max": 9
+      }
+    ]
+  }
+```
 
 Quoting of Strings
 ============
