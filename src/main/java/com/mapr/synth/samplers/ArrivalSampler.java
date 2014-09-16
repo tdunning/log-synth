@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class ArrivalSampler extends FieldSampler {
     private final Random base;
-    private final Pattern ratePattern = Pattern.compile("([0-9.e\\-]+)(/[smhdw])?");
+    private final Pattern ratePattern = Pattern.compile("([0-9.e\\-]+)(/[smhd])?");
 
     private final Map<String, TimeUnit> unitMap = ImmutableMap.of(
             "s", TimeUnit.SECONDS,
