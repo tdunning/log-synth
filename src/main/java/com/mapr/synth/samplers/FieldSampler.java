@@ -10,6 +10,7 @@ import org.apache.mahout.math.random.Sampler;
 @JsonSubTypes({
         @JsonSubTypes.Type(value=AddressSampler.class, name="address"),
         @JsonSubTypes.Type(value=DateSampler.class, name="date"),
+        @JsonSubTypes.Type(value=ArrivalSampler.class, name="event"),
         @JsonSubTypes.Type(value=ForeignKeySampler.class, name="foreign-key"),
         @JsonSubTypes.Type(value=IdSampler.class, name="id"),
         @JsonSubTypes.Type(value=IntegerSampler.class, name="int"),
