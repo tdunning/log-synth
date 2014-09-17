@@ -88,6 +88,8 @@ See the longer examples below.
 
  `-threads n`  Indicates how many threads to use for generating data.  Requires `-output`.  Note that the schema is
 shared across all of the threads so a schema with an id sampler will still generate all consecutive values in order, but the values will be distributed pretty much randomly across the output files.
+
+Note also that the number of threads that gives best throughput is somewhat surprisingly larger than you might think.  >100 threads can be useful.
  
 ## Samplers Allowed in a Schema
 

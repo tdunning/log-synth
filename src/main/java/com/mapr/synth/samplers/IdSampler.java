@@ -18,7 +18,7 @@ public class IdSampler extends FieldSampler {
 
   @Override
   public JsonNode sample() {
-    return new IntNode(current.incrementAndGet());
+    return new IntNode(current.getAndIncrement());
   }
 
   @SuppressWarnings("UnusedDeclaration")

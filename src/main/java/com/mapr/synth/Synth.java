@@ -20,11 +20,15 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Generates plausible database tables in JSON, CSV or TSV format.
  */
 public class Synth {
+
+    private static final int REPORTING_DELTA = 500;
+
     public static void main(String[] args) throws IOException, CmdLineException, InterruptedException, ExecutionException {
         final Options opts = new Options();
         CmdLineParser parser = new CmdLineParser(opts);
@@ -57,6 +61,8 @@ public class Synth {
 
 
         final SchemaSampler s = new SchemaSampler(opts.schema);
+        final AtomicLong rowCount = new AtomicLong();
+        final double t0 = System.nanoTime()*1e-9;
 
         List<Callable<Integer>> tasks = Lists.newArrayList();
         int limit = (opts.count + opts.threads - 1) / opts.threads;
@@ -66,18 +72,19 @@ public class Synth {
             final int count = Math.min(limit, remaining);
             final int fileNumber = i;
             remaining -= count;
+
             tasks.add(new Callable<Integer>() {
                 int localCount = count;
 
                 @Override
                 public Integer call() throws Exception {
                     if ("-".equals(opts.output)) {
-                        return generateFile(opts, s, System.out, localCount);
+                        return generateFile(opts, s, System.out, localCount, rowCount);
                     } else {
                         Path outputPath = new File(opts.output, String.format("synth-%04d", fileNumber)).toPath();
                         try (PrintStream out = new PrintStream(Files.newOutputStream(outputPath,
                                 StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING))) {
-                            return generateFile(opts, s, out, localCount);
+                            return generateFile(opts, s, out, localCount, rowCount);
                         }
                     }
                 }
@@ -85,6 +92,23 @@ public class Synth {
         }
 
         ExecutorService pool = Executors.newFixedThreadPool(opts.threads);
+        ScheduledExecutorService blinker = Executors.newScheduledThreadPool(1);
+        Runnable blink = new Runnable() {
+            public double oldT;
+            private long oldN;
+
+            @Override
+            public void run() {
+                double t = System.nanoTime() * 1e-9;
+                long n = rowCount.get();
+                System.out.printf("%d\t%.1f\t%d\t%.3f\n", opts.threads, t - t0, n, (n - oldN) / (t - oldT));
+                oldN = n;
+                oldT = t;
+            }
+        };
+        if (!"-".equals(opts.output)) {
+            blinker.scheduleAtFixedRate(blink, 0, 10, TimeUnit.SECONDS);
+        }
         List<Future<Integer>> results = pool.invokeAll(tasks);
 
         int total = 0;
@@ -94,12 +118,17 @@ public class Synth {
         Preconditions.checkState(total == opts.count,
                 String.format("Expected to generate %d lines of output, but actually generated %d", opts.count, total));
         pool.shutdownNow();
+        blinker.shutdownNow();
+        blink.run();
     }
 
-    private static int generateFile(Options opts, SchemaSampler s, PrintStream out, int count) {
+    private static int generateFile(Options opts, SchemaSampler s, PrintStream out, int count, AtomicLong rowCount) {
         header(opts.format, s.getFieldNames(), out);
         for (int i = 0; i < count; i++) {
             format(opts.format, opts.quote, s.getFieldNames(), s.sample(), out);
+            if (i % REPORTING_DELTA == 0) {
+                rowCount.addAndGet(REPORTING_DELTA);
+            }
         }
         return count;
     }
