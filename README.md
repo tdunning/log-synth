@@ -1,40 +1,42 @@
 log-synth
 =========
 
-The basic idea here is to have a random log generator build fairly realistic log files for analysis. The analyses specified here are fairly typical use cases for trying to figure out where the load on a web-site is coming from.
+The basic idea here is to have a random log generator build fairly realistic files for analysis. This system has two kinds of generators.  The first is intended to generate stuff that looks like web logs.
 
-The second utility provided here is to generate data based on a specified schema.  Skip down to the section on schema-driven generation.
+The second utility provided here is to generate data based on a specified schema.  Skip down to the section on schema-driven generation for information on that.
 
 How to Run the Log Generator
 ========================
 
-Install Java 7, maven and get this software using git.
+To install and run the web-log generator,
+
+1. Install Java 7, maven and get this software using git.
 
 On a mac, this can help get the right version of Java
 
     export JAVA_HOME=$(/usr/libexec/java_home)
 
-Then do this to build a jar file with all dependencies included
+2. Then do this to build a jar file with all dependencies included
 
     mvn package
 
-Then use this to write one million log lines into the file "log" and to write the associated user database into the file "users".
+3. Then use this to write one million log lines into the file "log" and to write the associated user database into the file "users".
 
     java -cp target/log-synth-0.1-SNAPSHOT-jar-with-dependencies.jar com.mapr.synth.Main -count 1M log users
 
 This program will produce a line of output on the standard output for each 10,000 lines of log produced.  Each line will contain the number of log lines produced so far and the number of unique users in the user profile database.
 
 
-The Data Source
-==============
+## The Data Source
+
 The data source here is a set of heavily biased random numbers to generate traffic sources, response times and queries. In order to give a realistic long-tail experience the data are generated using special random number generators available in the Mahout library.
 
 There are three basic entities involved in the random process that generates these logs that are IP addresses, users and queries. Users have a basic traffic rate and a variable number of users sit behind each IP address. Queries are composed of words which are generated somewhat differently by each user. The response time for each query is determined based on the terms in the queries with a very few terms causing much longer queries than others. Each log line contains an IP address, a user cookie, a query and a response time.
 
 Logs of various sizes can be generated using the generator tools.
 
-The Queries
-==============
+## The Queries
+
 The general goal of the queries is to find out what and/or who is causing long query times and where lots of traffic is coming from.
 
 The questions we would like to answer include:
@@ -45,8 +47,8 @@ The questions we would like to answer include:
 * What are the most common search terms in the slowest 5% of the queries?
 * What is the daily number of searches, (approximate) number of unique users, (approximate) number of unique IP addresses and distribution of response times (average, min, max, 25, 50 and 75%-iles).
 
-Methods
-========
+## Methods
+
 The general process for generating log lines is to select a user, possibly one we have not seen before. If the user is new, then we need to select an IP address for the user. Otherwise, we remember the IP address for each user.
 
 Queries have an overall frequency distribution that is long-tailed, but each user has a variation on that distribution. In order to model this, we sample each user's queries from a per-user Pittman-Yor process. In order to make users have similar query term distributions, each user's query term distribution is initialized from a Pittman-Yor process that has already been sampled a number of times.
@@ -60,7 +62,7 @@ Schema-driven Data Generation
 
 You can also generate data based on a rough schema.  Schema-driven generation supports the generation of addresses, dates, foreign key references, unique id numbers, random integers, sort of realistic personal names and fanciful street names.
 
-In addition to these primitive generators of strings and numbers, nested structures of arrays and objects can also be generated.  In a future release, it is anticipated that the generator will execute arbitrary Javascript in order to allow arbitrary dependencies and transformations of data as it is generated.
+In addition to these primitive generators of strings and numbers, nested structures of arrays and objects can also be generated. You can also generate files that link together via ID's so that complex star schema structures can be build.  In a future release, it is anticipated that the generator will execute arbitrary Javascript in order to allow arbitrary dependencies and transformations of data as it is generated.
 
 To generate data, follow the compilation directions above, but use this main program instead:
 
@@ -82,11 +84,10 @@ See the longer examples below.
 
 `-format CSV | TSV | JSON` Defines what format the output should use.
 
- `-output output-directory-name`    Designates an output directory. 
+ `-output output-directory-name`    Designates an output directory. Output files will be created in this directory named according to the pattern `synth-<thread>` where `<thread>` part is replaced by the thread number that created the file.
 
  `-threads n`  Indicates how many threads to use for generating data.  Requires `-output`.  Note that the schema is
-shared across all of the threads so an id sampler will still generator all consecutive values in order, but the values 
-will be distributed pretty much randomly across the output files.
+shared across all of the threads so a schema with an id sampler will still generate all consecutive values in order, but the values will be distributed pretty much randomly across the output files.
  
 ## Samplers Allowed in a Schema
 
