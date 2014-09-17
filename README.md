@@ -66,35 +66,163 @@ To generate data, follow the compilation directions above, but use this main pro
 
     java -cp target/log-synth-0.1-SNAPSHOT-jar-with-dependencies.jar com.mapr.synth.Synth -count 1M -schema schema
 
+## Command line arguments
+
 The allowable arguments include:
 
  `-count n`    Defines how many lines of data to emit.  Default value is 1000.  Suffixes including k, M, and G have customary meanings.
 
  `-schema file` Defines where to get the schema definition from.  The schema is in JSON format and consists of a list of field specifications.  Each field specification is a JSON object and is required to have the following values
 
-
  * `class` - Defines the distribution that is used to sample values for this field.  Possible values include `address`, `date`, `foreign-key`, `id`, `int`, and `street-name`.  Additional values that may be allowed or required for specific generators are detailed below.
 
  * `name` - This is the name of the field.  The output will consist of fields ordered as in the schema definition and any header file will contain the names for each field as defined by this value.
 
+See the longer examples below.
+
 `-format CSV | TSV | JSON` Defines what format the output should use.
 
-The following classes of values are allowed:
+ `-output output-directory-name`    Designates an output directory. 
 
-`address` - This distribution generates fairly plausible, if somewhat fanciful street addresses.  There are no additional parameters allowed.
+ `-threads n`  Indicates how many threads to use for generating data.  Requires `-output`.  Note that the schema is
+shared across all of the threads so an id sampler will still generator all consecutive values in order, but the values 
+will be distributed pretty much randomly across the output files.
+ 
+## Samplers Allowed in a Schema
 
-`date` - This distribution generates dates which are some time before an epoch date.  Dates shortly before the epoch are more common than those long before.  On average, the dates generated are 100 days before the epoch.  A format field is allowed which takes a format for the data in the style of Java's SimpleDateFormatter.
+The following classes of values are allowed (in approximately alphabetical order):
 
-`foreign-key` - This distribution generates randomized references to an integer key from another table.  You must specify the size of the table being referenced using the size parameter.  You may optionally specify a skewness factor in the range [0,3].  A value of 0 gives uniform distribution.  A value of 1 gives a classic Zipf distribution.
+**`address`** - This distribution generates fairly plausible, if somewhat fanciful street addresses.  There are no additional parameters allowed.
 
-`id` - This distribution returns consecutive integers starting at the value of the start parameter.
+    {"name":"address", "class":"address"},
 
-`int` - This distribution generates random integers that are greater than or equal to the min parameter and less than the max parameter.
+**`browser`** - Samples from browser types with kind of plausible frequency distribution.
 
-`street-name` - This distribution generates fanciful three word street names.
+    {"name":"br", "class":"browser"},
 
-`string` - This distribution generates a specified distribution of strings.  One parameter called `dist` is required.  This parameter should be a structure with string keys and numerical values.  The probability for each key is proportional to the value.
+**`country`** - Samples from ISO country codes.
 
+    {"name":"co", "class":"country"},
+
+**`date`** - This distribution generates dates which are some time before an epoch date.  Dates shortly before the epoch are more common than those long before.  On average, the dates generated are 100 days before the epoch.  A format field is allowed which takes a format for the data in the style of Java's SimpleDateFormatter.  Note that the order of options is significant in that the format will apply to the start and end options if it comes before them.  By default, these are formatted like yyyy-MM-dd, but you can specify a different format using the format option.  Dates are selected by default to be before July 1, 2013.  The amount before is selected exponentially with mean of 100 days.  If you specify start or end dates, the dates will be sampled uniformly between your dates. The default start is January 1, 1970.  The default end is July 1, 2013.
+
+    {"name":"first_visit", "class":"date", "format":"MM/dd/yyyy"},
+    {"name":"second_date", "class":"date", "start":"2014-01-31", "end":"2014-02-07"},
+    {"name":"third_date", "class":"date", "format":"MM/dd/yyyy", "start":"01/31/1995", "end":"02/07/1999"}
+    
+**`event`** - Samples Poisson distributed event times with specified rates.
+
+    {"name":"foo1", "class":"event", "rate": "0.1/d"},
+    {"name":"foo2", "class":"event", "start": "2014-01-01", "format":"yyyy-MM-dd HH:mm:ss", "rate": "10/s"},
+    {"name":"foo3", "class":"event", "format": "MM/dd/yyyy HH:mm:ss", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
+
+**`flatten`** - Turns an object into fields.
+
+**`foreign-key`** - This distribution generates randomized references to an integer key from another table.  You must specify the size of the table being referenced using the size parameter. The default value of size is 1000.  You may optionally specify a skewness factor in the range [0,3].  A value of 0 gives uniform distribution.  A value of 1 gives a classic Zipf distribution.  The default skew is 0.5.  Values are biased towards smaller values.  This sampler uses space proportional to size so be slightly cautious.
+
+**`id`** - This distribution returns consecutive integers starting at the value of the start parameter.
+
+    {"name":"id", "class":"id"},
+
+**`int`** - Samples values from min (inclusive) to max (exclusive) with an adjustable skew toward small values.  If you set skew to a negative number, larger values will be preferred.
+
+    {"name":"size", "class":"int", "min":10, "max":99}
+    {"name": "z", "class": "int", "min": 10, "max": 20, "skew": -1},
+    {"name":"x", "class":"lookup", "resource":"data.json", "skew":1},
+
+**`join`** - Glues together an array of strings.  You can specify a separator that goes between the joined strings with the `separator` parameter.  The `value` parameter specifies how to generate the arrays of strings.
+
+This snippet will generate silly file names nested three deep:
+
+    {
+      "name": "filename",
+      "class": "join",
+      "separator": "/",
+      "value": {
+        "class":"sequence",
+        "length":3,
+        "array":[
+          {"class":"string", "dist":{"top1":10, "top2":5, "top3":2}},
+          {"class":"string", "dist":{"mid1":10, "mid2":5, "mid3":2}},
+          {"class":"string", "dist":{"alice":10, "bob":5, "charles":2, "dahlia":1, "ephraim":1}}
+        ]
+      }
+    }
+
+**`language`** - Samples from ISO language codes according to prevalence on the web.
+
+    {"name":"la", "class":"language"},
+        
+**`lookup`** - Samples from lines of a file.
+
+**`map`** - Samples from complex objects, fields of which are sampled according to a recursive schema you specify.
+
+    {
+      "name": "stuff",
+      "class": "map",
+      "value": [
+        {"name": "a", "class": "int", "min": 3, "max": 4},
+        {"name": "b","class": "int","min": 4,"max": 5}
+      ]
+    }
+
+**`name`** - Samples from (slightly) plausible names.
+
+    {"name":"name", "class":"name", "type":"first_last"},
+
+**`sequence`** - Repeatedly samples from a single distribution and returns an array of the results.
+
+This example produces variable length results with exponentially distributed lengths.  Some of the results have length 0.
+
+    {"name":"c", "class":"sequence", "base":{"class":"os"}},
+
+This example produces values with lengths that are exponentially distributed with mean length of 10.
+
+    {"name":"d", "class":"sequence", "base":{"class":"int", "min":3, "max":9}, "length":10}
+
+This example produces results that always have three values, each of which has a different distribution.
+
+    {
+      "name": "x",
+      "class": "sequence",
+      "array": [
+        {
+          "class": "int",
+          "min": 3,
+          "max": 4
+        },
+        {
+          "class": "int",
+          "min": 6,
+          "max": 7
+        },
+        {
+          "class": "int",
+          "min": 8,
+          "max": 9
+        }
+      ]
+    }
+
+**`state`** - Samples from any of the 58 USPS state abbreviations.  Yes, there are 58 possible values.
+
+    {"name":"st", "class":"state"},
+
+**`street-name`** - This distribution generates fanciful three word street names.
+
+**`string`** - This distribution generates a specified distribution of strings.  One parameter called `dist` is 
+required.  This parameter should be a structure with string keys and numerical values.  The probability for each 
+key is proportional to the value.
+
+    {"name":"foo", "class":"string", "dist":{"YES":0.95, "NO":0.05, "NA":1}}
+
+**`os`** - Samples from operating system codes.  My own bias will show here.
+
+    {"name":"os", "class":"os"}
+
+**`word`** - Samples words at random.  A seed file is given, but if more words are needed than seeded, they will be invented.
+
+## Longer Examples
 The following schema generates a typical fact table from a simulated star schema:
 
     [
@@ -154,142 +282,8 @@ You can also generate arbitrarily nested data by using the map sampler.  For exa
         }
     ]
 
-Here is a list of all of the currently known kinds of samplers that you can use as the class argument in your schema
 
-***address*** - Generates a complete street address
-
-```json
-  {"name":"address", "class":"address"},
-```
-
-***date*** - Generates dates.  By default, these are formatted like yyyy-MM-dd, but you can specify a different format using the format option.  Dates are selected by default to be before July 1, 2013.  The amount before is selected exponentially with mean of 100 days.  If you specify start or end dates, the dates will be sampled uniformly between your dates. The default start is January 1, 1970.  The default end is July 1, 2013.
-
-```json
-  {"name":"first_visit", "class":"date", "format":"MM/dd/yyyy"},
-  {"name":"second_date", "class":"date", "start":"2014-01-31", "end":"2014-02-07"},
-  {"name":"third_date", "class":"date", "format":"MM/dd/yyyy", "start":"01/31/1995", "end":"02/07/1999"}
-```
-
-***foreign-key*** - Selects values from 0 (inclusive) to size (exclusive).  The default value of size is 1000. Values are normally biased towards smaller values.  You can adjust the bias by setting skew.  Setting skew to 0 makes the selection uniform.  The default skew is 0.5.  This sampler uses space proportional to size so be slightly cautious.  
-
-***id*** - Selects sequential integers.
-
-```json
-   {"name":"id", "class":"id"},
-```
-
-
-***int*** - Samples values from min (inclusive) to max (exclusive) with an adjustable skew toward small values.  If you set skew to a negative number, larger values will be preferred.
-
-```json
-  {"name":"size", "class":"int", "min":10, "max":99}
-  {"name": "z", "class": "int", "min": 10, "max": 20, "skew": -1},
-  {"name":"x", "class":"lookup", "resource":"data.json", "skew":1},
-```
-
-***event*** - Samples Poisson distributed event times with specified rates.
-
-```json
-  {"name":"foo1", "class":"event", "rate": "0.1/d"},
-  {"name":"foo2", "class":"event", "start": "2014-01-01", "format":"yyyy-MM-dd HH:mm:ss", "rate": "10/s"},
-  {"name":"foo3", "class":"event", "format": "MM/dd/yyyy HH:mm:ss", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
-```
-
-***name*** - Samples from (slightly) plausible names.
-
-```json
-  {"name":"name", "class":"name", "type":"first_last"},
-```
-
-***lookup*** - Samples from lines of a file.
-
-***flatten*** - Turns an object into fields.
-
-***join*** -
-
-***map*** - Samples from complex objects, fields of which are sampled according to a recursive schema you specify.
-
-```json
-  {
-    "name": "stuff",
-    "class": "map",
-    "value": [
-      {"name": "a", "class": "int", "min": 3, "max": 4},
-      {"name": "b","class": "int","min": 4,"max": 5}
-    ]
-  }
-```
- 
-***street-name*** - Samples from (slightly) plausible street names.
-
-***string*** - Samples from one of a set of strings you specify.
-
-```json
-   {"name":"foo", "class":"string", "dist":{"YES":0.95, "NO":0.05, "NA":1}}
-```
-
-***country*** - Samples from ISO country codes.
-
-```json
-  {"name":"co", "class":"country"},
-```
-
-***browser*** - Samples from browser types with kind of plausible frequency distribution.
-
-```json
-  {"name":"br", "class":"browser"},
-```
-
-***state*** - Samples from any of the 58 USPS state abbreviations.  Yes, 58.
-
-```json
-  {"name":"st", "class":"state"},
-```
-
-***language*** - Samples from ISO language codes according to prevalence on the web.
-
-```json
-  {"name":"la", "class":"language"},
-```
-
-***os*** - Samples from operating system codes.  My own bias will show here.
-
-```json
-  {"name":"os", "class":"os"}
-```
-
-***word*** - Samples words at random.  A seed file is given, but if more words are needed than seeded, they will be invented.
-
-***sequence*** - Repeatedly samples from a single distribution and returns an array of the results.
-
-```json
-  {"name":"c", "class":"sequence", "base":{"class":"os"}},
-  {"name":"d", "class":"sequence", "base":{"class":"int", "min":3, "max":9}, "length":10}
-  {
-    "name": "x",
-    "class": "sequence",
-    "array": [
-      {
-        "class": "int",
-        "min": 3,
-        "max": 4
-      },
-      {
-        "class": "int",
-        "min": 6,
-        "max": 7
-      },
-      {
-        "class": "int",
-        "min": 8,
-        "max": 9
-      }
-    ]
-  }
-```
-
-Quoting of Strings
-============
+## Quoting of Strings
 
 By default all strings in CSV or TSV formats are fully quoted.  This can confuse some software (sadly) so there are additional options to control how quoting is done.  
 
