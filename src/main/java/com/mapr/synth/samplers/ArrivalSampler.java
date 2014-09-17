@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
  * <li><em>format </em>- the format to use when outputting the times</li>
  * <li><em>start </em>- the time of the first event</li>
  * </il>
+ *
+ * Thread safe
  */
 public class ArrivalSampler extends FieldSampler {
     private final Random base;
@@ -46,6 +48,7 @@ public class ArrivalSampler extends FieldSampler {
         base = RandomUtils.getRandom();
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public void setRate(String rate) {
         Matcher m = ratePattern.matcher(rate);
         if (m.matches()) {
@@ -58,6 +61,7 @@ public class ArrivalSampler extends FieldSampler {
         }
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public void setOffset(double offset) {
         minInterval = offset;
     }
@@ -66,14 +70,17 @@ public class ArrivalSampler extends FieldSampler {
         df = new SimpleDateFormat(format);
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public void setStart(String start) throws ParseException {
         this.start = df.parse(start).getTime();
     }
 
     @Override
     public JsonNode sample() {
+      synchronized (this) {
         TextNode r = new TextNode(df.format(new Date((long) start)));
         start += minInterval - meanInterval * Math.log(1 - base.nextDouble());
         return r;
+      }
     }
 }

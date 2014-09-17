@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 /**
  * Sample kind of plausible addresses
+ *
+ * Thread safe
  */
 public class AddressSampler extends FieldSampler {
 

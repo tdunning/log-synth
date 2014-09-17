@@ -8,6 +8,8 @@ import java.util.List;
 
 /**
  * Create a JSON map with values sampled from specified distributions.
+ *
+ * Thread safe for sampling
  */
 public class MapSampler extends FieldSampler {
     private SchemaSampler base = null;

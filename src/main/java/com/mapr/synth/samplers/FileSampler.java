@@ -19,6 +19,8 @@ import java.util.List;
 
 /**
  * Samples lines from a file
+ *
+ * Thread safe for sampling
  */
 public class FileSampler extends FieldSampler {
     private JsonNode data;
@@ -114,6 +116,8 @@ public class FileSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
+      synchronized (this) {
         return data.get(index.sample().asInt());
+      }
     }
 }

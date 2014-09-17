@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
  * dates will be selected uniformly between start and end.  Start and end can be specified
  * as dates in yyyy-MM-dd default format or whatever format is specified with the format
  * option (note that options are parsed in order).
+ *
+ * Thread safe
  */
 public class DateSampler extends FieldSampler {
     private static final long EPOCH = new GregorianCalendar(2013, 7, 1).getTimeInMillis();
@@ -37,11 +39,13 @@ public class DateSampler extends FieldSampler {
         df = new SimpleDateFormat(format);
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public void setStart(String start) throws ParseException {
         this.start = df.parse(start).getTime();
         base = new Uniform(0, this.end - this.start, RandomUtils.getRandom());
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public void setEnd(String end) throws ParseException {
         this.end = df.parse(end).getTime();
         base = new Uniform(0, this.end - this.start, RandomUtils.getRandom());
@@ -49,7 +53,9 @@ public class DateSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
+      synchronized (this) {
         long t = (long) Math.rint(base.nextDouble());
         return new TextNode(df.format(new java.util.Date(end - t)));
+      }
     }
 }

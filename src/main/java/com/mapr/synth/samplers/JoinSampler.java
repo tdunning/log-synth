@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 /**
  * Glue together elements of a list as strings.  Should normally only be done with a list of strings.
+ *
+ * Thread safe for sampling
  */
 public class JoinSampler extends FieldSampler {
     private FieldSampler delegate;

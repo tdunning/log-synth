@@ -10,6 +10,8 @@ import org.apache.mahout.math.random.Multinomial;
  * Samples from a "foreign key" which is really just an integer.
  * <p/>
  * The only cleverness here is that we allow a variable amount of key skew.
+ *
+ * Thread safe
  */
 @JsonIgnoreProperties({"base"})
 public class ForeignKeySampler extends FieldSampler {
@@ -18,6 +20,7 @@ public class ForeignKeySampler extends FieldSampler {
 
     private Multinomial<Integer> base;
 
+    @SuppressWarnings("UnusedDeclaration")
     public ForeignKeySampler() {
     }
 
@@ -51,6 +54,8 @@ public class ForeignKeySampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
+      synchronized (this) {
         return new IntNode(base.sample());
+      }
     }
 }

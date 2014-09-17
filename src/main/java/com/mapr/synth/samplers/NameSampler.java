@@ -18,6 +18,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * Sample from US names.
  * <p/>
  * See http://www.census.gov/genealogy/www/data/1990surnames/names_files.html for data.
+ *
+ * Thread safe
  */
 public class NameSampler extends FieldSampler {
     public enum Type {FIRST, LAST, FIRST_LAST, LAST_FIRST}
@@ -74,6 +76,7 @@ public class NameSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
+      synchronized (this) {
         switch (type) {
             case FIRST:
                 return new TextNode(first.get().sample());
@@ -84,7 +87,8 @@ public class NameSampler extends FieldSampler {
             case LAST_FIRST:
                 return new TextNode(last.get().sample() + ", " + first.get().sample());
         }
-        // can't happen
+      }
+      // can't happen
         return null;
     }
 

@@ -17,6 +17,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * Sample from a multinomial of strings.
  *
  * Tip of the hat to http://www.jimwegryn.com/Names/StreetNameGenerator.htm
+ *
+ * Thread safe for sampling
  */
 public class StringSampler extends FieldSampler {
     private AtomicReference<Multinomial<String>> distribution = new AtomicReference<>();
@@ -58,6 +60,8 @@ public class StringSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
+      synchronized (this) {
         return new TextNode(distribution.get().sample());
+      }
     }
 }

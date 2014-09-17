@@ -5,6 +5,8 @@ import org.apache.mahout.math.random.Sampler;
 /**
  * Generate words at random from a specialized vocabulary.  Every term generator's
  * frequency distribution has a common basis, but each will diverge after initialization.
+ *
+ * Thread safe for sampling
  */
 public class TermGenerator implements Sampler<String> {
     // the word generator handles the problem of making up new words
@@ -34,6 +36,8 @@ public class TermGenerator implements Sampler<String> {
     }
 
     public String sample() {
+      synchronized (this) {
         return distribution.sample();
+      }
     }
 }

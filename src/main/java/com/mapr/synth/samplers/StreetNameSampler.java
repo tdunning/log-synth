@@ -16,6 +16,8 @@ import java.util.List;
  * Sample from a space of goofy but somewhat plausible street names.
  *
  * Tip of the hat to http://www.jimwegryn.com/Names/StreetNameGenerator.htm
+ *
+ * Thread safe
  */
 public class StreetNameSampler extends FieldSampler {
     List<Multinomial<String>> sampler = ImmutableList.of(
@@ -40,6 +42,8 @@ public class StreetNameSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
-        return new TextNode(sampler.get(0).sample() + " " + sampler.get(1).sample() + " " + sampler.get(2).sample());
+        synchronized (this) {
+          return new TextNode(sampler.get(0).sample() + " " + sampler.get(1).sample() + " " + sampler.get(2).sample());
+        }
     }
 }

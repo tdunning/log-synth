@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 /**
  * Delegate to another sampler which generates a list of lists.  Flatten that list into a single list.
+ *
+ * Thread safe for sampling
  */
 public class FlattenSampler extends FieldSampler {
     private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals(false);

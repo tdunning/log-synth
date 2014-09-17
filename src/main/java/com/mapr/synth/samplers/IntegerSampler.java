@@ -8,7 +8,10 @@ import java.util.Random;
 
 /**
  * Samples from a "foreign key" which is really just an integer.
+ *
+ * Thread safe
  */
+
 public class IntegerSampler extends FieldSampler {
     private int min = 0;
     private int max = 100;
@@ -43,6 +46,7 @@ public class IntegerSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
+      synchronized (this) {
         int r = power >= 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
         if (power >= 0) {
             for (int i = 0; i <= power; i++) {
@@ -55,6 +59,7 @@ public class IntegerSampler extends FieldSampler {
             }
         }
         return new IntNode(r);
+      }
     }
 
 }
