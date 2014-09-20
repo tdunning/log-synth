@@ -25,7 +25,6 @@ public class FlattenSampler extends FieldSampler {
         JsonNode value = delegate.sample();
         ArrayNode r = nodeFactory.arrayNode();
 
-
         for (JsonNode component : value) {
             if (component.isArray()) {
                 for (JsonNode node : component) {

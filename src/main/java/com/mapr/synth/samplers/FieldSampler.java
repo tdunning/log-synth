@@ -28,7 +28,9 @@ import org.apache.mahout.math.random.Sampler;
         @JsonSubTypes.Type(value=OperatingSystemSampler.class, name="os"),
         @JsonSubTypes.Type(value=WordSampler.class, name="word"),
 
-        @JsonSubTypes.Type(value=SequenceSampler.class, name="sequence")
+        @JsonSubTypes.Type(value=SequenceSampler.class, name="sequence"),
+
+        @JsonSubTypes.Type(value=CommonPointOfCompromise.class, name="common-point-of-compromise")
 })
 public abstract class FieldSampler implements Sampler<JsonNode> {
     private String name;
