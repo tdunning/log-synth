@@ -61,7 +61,7 @@ public final class ChineseRestaurant implements Sampler<Integer> {
     }
 
     @Override
-    public Integer sample() {
+    public synchronized Integer sample() {
         double u = rand.nextDouble() * (alpha + weight);
         for (int j = 0; j < weights.size(); j++) {
             // select existing options with probability (w_j - d) / (alpha + w)

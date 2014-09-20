@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
  * </ul>
  */
 public class CommonPointOfCompromise extends FieldSampler {
-    Random gen = RandomUtils.getRandom();
+    Random gen = new Random();
 
     // how many average transactions per day?
     Gamma transactionsPerDay = new Gamma(2, 1, gen);
@@ -76,7 +76,7 @@ public class CommonPointOfCompromise extends FieldSampler {
     }
 
     @Override
-    public synchronized JsonNode sample() {
+    public JsonNode sample() {
         ArrayNode r = nodeFactory.arrayNode();
 
         double t = start;
