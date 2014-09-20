@@ -58,12 +58,13 @@ public class Synth {
         }
 
         File outputDir = new File(opts.output);
-        if (!"-".equals(opts.output) && !outputDir.exists()) {
-            Preconditions.checkState(outputDir.mkdirs(), String.format("Couldn't create output directory %s", opts.output));
+        if (!"-".equals(opts.output)) {
+            if (!outputDir.exists()) {
+                Preconditions.checkState(outputDir.mkdirs(), String.format("Couldn't create output directory %s", opts.output));
+            }
+            Preconditions.checkArgument(outputDir.exists() && outputDir.isDirectory(),
+                    String.format("Couldn't create directory %s", opts.output));
         }
-        Preconditions.checkArgument(outputDir.exists() && outputDir.isDirectory(),
-                String.format("Couldn't create directory %s", opts.output));
-
 
         final SchemaSampler sampler = new SchemaSampler(opts.schema);
         final AtomicLong rowCount = new AtomicLong();

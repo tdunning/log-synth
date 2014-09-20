@@ -29,9 +29,9 @@ public class CommonPointOfCompromiseTest {
         int[] fraudByDay = new int[100];
         for (int i = 0; i < 10000; i++) {
             JsonNode sample = s.sample();
-            if (i < 10) {
-                System.out.printf("%s\n", sample);
-            }
+//            if (i < 10) {
+//                System.out.printf("%s\n", sample);
+//            }
             for (JsonNode record : sample.get("history")) {
                 int day = (int) ((record.get("timestamp").asLong() * 1000 - start) / TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS));
                 if (day >= 100) {
@@ -46,6 +46,7 @@ public class CommonPointOfCompromiseTest {
                 transactionsByDay[day]++;
             }
         }
+        System.out.printf("day\tcompromises\tfrauds\ttransactions\n");
 
         for (int i = 0; i < compromiseByDay.length; i++) {
             System.out.printf("%d\t%d\t%d\t%d\n", i, compromiseByDay[i], fraudByDay[i], transactionsByDay[i]);
