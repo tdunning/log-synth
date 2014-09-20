@@ -1,0 +1,11 @@
+[
+    {
+        "name": "id",
+        "class": "id"
+    },
+    {
+        "name": "history",
+        "class": "common-point-of-compromise",
+        "seed": 12
+    }
+]
