@@ -225,6 +225,25 @@ key is proportional to the value.
 
 **`word`** - Samples words at random.  A seed file is given, but if more words are needed than seeded, they will be invented.
 
+** common-point-of-compromise ** - Produces a user history that emulates a common point of compromise fraud scenario.  Contact tdunning@maprtech.com for more info.
+
+    [
+        {
+            "name": "id",
+            "class": "id"
+        },
+        {
+            "name": "history",
+            "class": "common-point-of-compromise",
+            "seed": 12,
+            "exploitStart": "2014-01-20 00:00:00",
+            "exploitEnd": "2014-02-20 00:00:00",
+            "end": "2014-03-31 00:00:00",
+            "compromisedFraudRate": 0.02,
+            "uncompromisedFraudRate": 0.001
+        }
+    ]
+
 ## Longer Examples
 The following schema generates a typical fact table from a simulated star schema:
 

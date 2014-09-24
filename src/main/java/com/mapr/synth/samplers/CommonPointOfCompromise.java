@@ -3,7 +3,6 @@ package com.mapr.synth.samplers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.*;
 import com.mapr.synth.distributions.ChineseRestaurant;
-import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.Exponential;
 import org.apache.mahout.math.jet.random.Gamma;
 
@@ -52,12 +51,14 @@ public class CommonPointOfCompromise extends FieldSampler {
 
 
     private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals(false);
-    private final long end;
-    private final long start;
-    private final long compromiseStart;
-    private final long compromiseEnd;
-    private final long exploitStart;
-    private final long exploitEnd;
+    private long end;
+    private long start;
+    private long compromiseStart;
+    private long compromiseEnd;
+    private long exploitStart;
+    private long exploitEnd;
+    private double compromisedFraudRate;
+    private double uncompromisedFraudRate;
 
     public CommonPointOfCompromise() throws ParseException {
         start = df.parse("2014-01-01 00:00:00").getTime();
@@ -68,11 +69,54 @@ public class CommonPointOfCompromise extends FieldSampler {
 
         exploitStart = df.parse("2014-01-20 00:00:00").getTime();
         exploitEnd = df.parse("2014-01-31 00:00:00").getTime();
+
+        compromisedFraudRate = 0.3;
+        uncompromisedFraudRate = 0.001;
     }
 
     public void setSeed(long seed) {
         gen.setSeed(seed);
         merchant.setSeed(seed);
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setEnd(String end) throws ParseException {
+        this.end = df.parse(end).getTime();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setStart(String start) throws ParseException {
+        this.start = df.parse(start).getTime();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setCompromiseStart(String start) throws ParseException {
+        this.compromiseStart = df.parse(start).getTime();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setCompromiseEnd(String end) throws ParseException {
+        this.compromiseEnd = df.parse(end).getTime();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setExploitStart(String exploitStart) throws ParseException {
+        this.exploitStart = df.parse(exploitStart).getTime();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setExploitEnd(String exploitEnd) throws ParseException {
+        this.exploitEnd = df.parse(exploitEnd).getTime();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setCompromisedFraudRate(double compromisedFraudRate) {
+        this.compromisedFraudRate = compromisedFraudRate;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setUncompromisedFraudRate(double uncompromisedFraudRate) {
+        this.uncompromisedFraudRate = uncompromisedFraudRate;
     }
 
     @Override
@@ -107,9 +151,9 @@ public class CommonPointOfCompromise extends FieldSampler {
 
             double pFraud;
             if (t >= exploitStart && compromised) {
-                pFraud = 0.3;
+                pFraud = compromisedFraudRate;
             } else {
-                pFraud = 0.001;
+                pFraud = uncompromisedFraudRate;
             }
 
             transaction.set("fraud", new IntNode((gen.nextDouble() < pFraud) ? 1 : 0));
