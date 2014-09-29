@@ -169,7 +169,8 @@ This snippet will generate silly file names nested three deep:
       ]
     }
 
-**`name`** - Samples from (slightly) plausible names.
+**`name`** - Samples from (slightly) plausible names.  The allowable types are
+`first`, `last`, `first_last` and `last_first`.  The default type is `first_last`.
 
     {"name":"name", "class":"name", "type":"first_last"},
 

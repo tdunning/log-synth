@@ -27,7 +27,7 @@ public class NameSampler extends FieldSampler {
     private static AtomicReference<Multinomial<String>> first = new AtomicReference<>(null);
     private static AtomicReference<Multinomial<String>> last = new AtomicReference<>(null);
 
-    private Type type;
+    private Type type = Type.FIRST_LAST;
 
     public NameSampler() {
         try {
