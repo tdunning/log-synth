@@ -24,6 +24,7 @@ public class VinSamplerTest {
             assertEquals(r.get("v1").asText(), r.get("v2").get("VIN").asText());
             prefixCounts.add(r.get("v1").asText().substring(0, 2));
             otherCounts.add(r.get("v3").asText().substring(0, 2));
+            System.out.printf("%s\n", r);
         }
         assertEquals("[1F, 2F, 3F]", prefixCounts.elementSet().toString());
         assertEquals("[2F, 3F]", otherCounts.elementSet().toString());

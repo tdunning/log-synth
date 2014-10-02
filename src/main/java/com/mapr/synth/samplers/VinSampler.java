@@ -58,7 +58,14 @@ public class VinSampler extends FieldSampler {
 
     private static List<String> fordPlantCodes = Lists.newArrayList("5", "V", "G", "M", "F");
 
+    private static Map<String, String> bmwModels;
+    private static List<String> bmwModelCodes;
+
+    private static Map<String, String> bmwPlants;
+    private static List<String> bmwPlantCodes;
+
     private static Map<String, Integer> letterCode;
+    private static List<String> letters;
 
     private static List<Integer> checkWeights = Lists.newArrayList(8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2);
 
@@ -83,30 +90,70 @@ public class VinSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
+        ObjectNode r = new ObjectNode(nodeFactory);
+
         String manufacturer = randomCode(legalCodes);
         String restraint = randomCode(restraintCodes);
-        String model = randomCode(fordModelCodes);
-        String engine = randomCode(fordEngineCodes);
-        String check = "0";
+
         int year = randomCode(legalYears);
         String yearCode = computeYearCode(year);
-        String plant = randomCode(fordPlantCodes);
         int sequence = sequenceCounter.incrementAndGet();
 
-        String rawVin = pad(manufacturer, 3, "AAAAAAAAAAAAAAAAAA") + restraint + pad(model, 3, "0000000000000000") + engine + check + yearCode + plant + String.format("%06d", sequence);
+        String front;
+        String plant;
+
+        String make = makes.get(manufacturer);
+
+        switch (make) {
+            case "Ford": {
+                String model = randomCode(fordModelCodes);
+                String engine = randomCode(fordEngineCodes);
+                plant = randomCode(fordPlantCodes);
+                front = pad(manufacturer, 3, "AAAAAAAAAAAAAAAAAA") + restraint + pad(model, 3, "0000000000000000") + engine;
+                if (verbose) {
+                    r.set("model", new TextNode(fordModels.get(model)));
+                    r.set("engine", new TextNode(fordEngines.get(engine)));
+                }
+                break;
+            }
+            case "BMW":
+            case "BMW M": {
+                String model = randomCode(bmwModelCodes);
+                plant = randomCode(bmwPlantCodes);
+                front = pad(manufacturer, 3, "AAAAAAAAAAAAAAAAAA") + restraint + model;
+                if (verbose) {
+                    r.set("model", new TextNode(bmwModels.get(model)));
+                }
+                break;
+            }
+            default: {
+                String model = gibberish(4);
+                plant = gibberish(1);
+                front = pad(manufacturer, 3, "AAAAAAAAAAAAAAAAAA") + restraint + model;
+                break;
+            }
+        }
+        String check = "0";
+
+        String rawVin = front + check + yearCode + plant + String.format("%06d", sequence);
         String vin = addCheckDigit(rawVin);
 
-        ObjectNode r = new ObjectNode(nodeFactory);
         if (verbose) {
             r.set("VIN", new TextNode(vin));
             r.set("manufacturer", new TextNode(makes.get(manufacturer)));
-            r.set("model", new TextNode(fordModels.get(model)));
-            r.set("engine", new TextNode(fordEngines.get(engine)));
             r.set("year", new IntNode(year));
         } else {
             return new TextNode(vin);
         }
         return r;
+    }
+
+    private String gibberish(int length) {
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            buf.append(randomCode(letters));
+        }
+        return buf.toString();
     }
 
     private String computeYearCode(int year) {
@@ -273,7 +320,7 @@ public class VinSampler extends FieldSampler {
     }
 
     private static void fill() {
-        letterCode = Maps.newHashMap();
+        letterCode = Maps.newLinkedHashMap();
         letterCode.put("A", 1);
         letterCode.put("B", 2);
         letterCode.put("C", 3);
@@ -311,8 +358,13 @@ public class VinSampler extends FieldSampler {
         letterCode.put("7", 7);
         letterCode.put("8", 8);
         letterCode.put("9", 9);
+        letters = Lists.newArrayList(letterCode.keySet());
 
         try {
+            bmwModels = mapResource("bmw-models.tsv");
+            bmwModelCodes = Lists.newArrayList(bmwModels.keySet());
+            bmwPlants = mapResource("bmw-plants.tsv");
+            bmwPlantCodes = Lists.newArrayList(bmwPlants.keySet());
             fordModels = mapResource("ford-models.tsv");
             fordEngines = mapResource("ford-engines.tsv");
             fordEngineCodes = Lists.newArrayList(fordEngines.keySet());
