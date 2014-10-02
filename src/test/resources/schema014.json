@@ -35,6 +35,13 @@
         "make": "bmw",
         "years": "2007-2011",
         "verbose": "true"
+    },
+    {
+        "name": "v5",
+        "class": "vin",
+        "seed":12,
+        "years": "2007-2011",
+        "verbose": "true"
     }
 
 ]

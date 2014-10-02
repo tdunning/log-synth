@@ -258,7 +258,7 @@ With `verbose` set to true, the output of the sampler looks like this
 	    "year":2007
     }
 
-Note that there can be implausible combinations of engine, year and model.  Also, the sampler currently only has information about Ford models.  This means that you can easily get a BMW with a Ford Fiesta engine.
+Note that there can be implausible combinations of engine, year and model such as a 2007 DeLorean.  Also, the sampler currently only has information about Ford and BMW models.  For other makes, the model engine and plant information is just gibberish.
 
     {
         "VIN":"WBACW75L67G000008",

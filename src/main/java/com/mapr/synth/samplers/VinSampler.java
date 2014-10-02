@@ -123,6 +123,7 @@ public class VinSampler extends FieldSampler {
                 front = pad(manufacturer, 3, "AAAAAAAAAAAAAAAAAA") + restraint + model;
                 if (verbose) {
                     r.set("model", new TextNode(bmwModels.get(model)));
+                    r.set("plant", new TextNode(bmwPlants.get(plant)));
                 }
                 break;
             }
