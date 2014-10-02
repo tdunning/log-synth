@@ -27,6 +27,14 @@
         "countries": "ca, mx",
         "make": "ford",
         "years": "2007-2011"
+    },
+    {
+        "name": "v4",
+        "class": "vin",
+        "seed":12,
+        "make": "bmw",
+        "years": "2007-2011",
+        "verbose": "true"
     }
 
 ]

@@ -223,6 +223,62 @@ key is proportional to the value.
 **`os`** - Samples from operating system codes.  My own bias will show here.
 
     {"name":"os", "class":"os"}
+    
+**`vin`** - Samples from sort of realistic VIN numbers.
+
+Here is are three different ways to use the VIN sampler.  The first one `v1`, uses a seed to force the generated sequence to be identical every time. 
+
+    {
+        "name": "v1",
+        "class": "vin",
+        "seed": 12,
+        "country": "north_america",
+        "make": "ford",
+        "years": "2007-2011"
+    }
+
+The second example uses the verbose setting to generate a JSON structure instead of just a single value containing a VIN.  This structure includes additional clear text information about where the vehicle was supposedly made, what kind of engine and so on.         
+
+    {
+        "name": "v2",
+        "class": "vin",
+        "country": "north_america",
+        "make": "ford",
+        "years": "2007-2011",
+        "verbose": "true"
+    }
+
+With `verbose` set to true, the output of the sampler looks like this
+
+    {
+        "VIN":"3FAFW33407M000098",
+	    "manufacturer":"Ford",
+	    "model":"Ford F-Series, F-350, Crew Cab, 4WD, Dual Rear Wheels",
+	    "engine":"V6,Essex,3.8 L,EFI,Gasoline,190hp",
+	    "year":2007
+    }
+
+Note that there can be implausible combinations of engine, year and model.  Also, the sampler currently only has information about Ford models.  This means that you can easily get a BMW with a Ford Fiesta engine.
+
+    {
+        "VIN":"WBACW75L67G000008",
+        "manufacturer":"BMW",
+        "model":"Ford F-Series, F-750, Crew Cab, Straight Frame",
+        "engine":"V6,Duratec 25,2.5 L,DOHC,Gasoline,170hp",
+        "year":2007
+    }
+    
+The third example shows how the country and year fields can have more complex constraints.
+         
+    {
+        "name": "v3",
+        "class": "vin",
+        "countries": "ca, mx",
+        "make": "ford",
+        "years": "2002,2007-2011"
+    }
+    
+    
 
 **`word`** - Samples words at random.  A seed file is given, but if more words are needed than seeded, they will be invented.
 

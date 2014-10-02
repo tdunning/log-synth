@@ -11,7 +11,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.*;
 import com.google.common.io.LineProcessor;
 import com.google.common.io.Resources;
-import org.apache.mahout.common.RandomUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -38,6 +37,11 @@ public class VinSampler extends FieldSampler {
     private static Splitter onComma = Splitter.on(",").trimResults().omitEmptyStrings();
     private static Pattern rangePattern = Pattern.compile("([12][09]\\d\\d)(-[12][09]\\d\\d)");
 
+    @Override
+    public String getName() {
+        return super.getName();
+    }
+
     private static Map<String, String> makes;
 
     private static SetMultimap<String, String> byCountry = HashMultimap.create();
@@ -63,7 +67,7 @@ public class VinSampler extends FieldSampler {
     }
 
 
-    private Random rand = RandomUtils.getRandom();
+    private Random rand = new Random();
     private List<String> legalCodes;
     private List<Integer> legalYears;
 
@@ -143,6 +147,9 @@ public class VinSampler extends FieldSampler {
             s.addAll(byCountry.get(country));
         }
         legalCodes.retainAll(s);
+        if (legalCodes.size() == 0) {
+            throw new IllegalArgumentException("No VIN's match all constraints");
+        }
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -163,6 +170,10 @@ public class VinSampler extends FieldSampler {
             s.addAll(byMake.get(country));
         }
         legalCodes.retainAll(s);
+        if (legalCodes.size() == 0) {
+            throw new IllegalArgumentException("No VIN's match all constraints");
+        }
+
     }
 
     @SuppressWarnings("UnusedDeclaration")
