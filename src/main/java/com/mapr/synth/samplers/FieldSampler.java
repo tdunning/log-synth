@@ -27,6 +27,7 @@ import org.apache.mahout.math.random.Sampler;
         @JsonSubTypes.Type(value=LanguageSampler.class, name="language"),
         @JsonSubTypes.Type(value=OperatingSystemSampler.class, name="os"),
         @JsonSubTypes.Type(value=WordSampler.class, name="word"),
+        @JsonSubTypes.Type(value=VinSampler.class, name="vin"),
 
         @JsonSubTypes.Type(value=SequenceSampler.class, name="sequence"),
 

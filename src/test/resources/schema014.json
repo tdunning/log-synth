@@ -1,0 +1,32 @@
+[
+    {
+        "name": "id",
+        "class": "id"
+    },
+    {
+        "name": "v1",
+        "class": "vin",
+        "seed": 12,
+        "country": "north_america",
+        "make": "ford",
+        "years": "2007-2011"
+    },
+    {
+        "name": "v2",
+        "class": "vin",
+        "seed": 12,
+        "country": "north_america",
+        "make": "ford",
+        "years": "2007-2011",
+        "verbose": "true"
+    },
+    {
+        "name": "v3",
+        "class": "vin",
+        "seed": 12,
+        "countries": "ca, mx",
+        "make": "ford",
+        "years": "2007-2011"
+    }
+
+]

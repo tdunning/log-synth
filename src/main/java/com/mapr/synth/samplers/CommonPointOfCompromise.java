@@ -115,6 +115,11 @@ public class CommonPointOfCompromise extends FieldSampler {
     }
 
     @SuppressWarnings("UnusedDeclaration")
+    public void setCompromisedFraudRate(FieldSampler distribution) {
+        this.compromisedFraudRate = distribution.sample().get("compromisedFraudRate").asDouble();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
     public void setUncompromisedFraudRate(double uncompromisedFraudRate) {
         this.uncompromisedFraudRate = uncompromisedFraudRate;
     }

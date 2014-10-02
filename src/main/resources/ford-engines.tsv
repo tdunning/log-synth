@@ -1,0 +1,37 @@
+P	I4,Zetec,2.0 L,SPIEFI,Gasoline,110hp
+3	I4,Zetec,2.0 L,DOHC,Gasoline,130hp
+W	I4,Lima,2.3 L,OHC Turbo,Gasoline,145hp
+T	I4,Lima,2.3 L,OHC Turbo IC,Gasoline,175hp
+N	I4,Duratec 20E,2.0 L,DOHC PZEV,Gasoline,130hp
+N	I4,Duratec 20,2.0 L,DOHC 16V,Gasoline,136hp
+Z	I4,Duratec 23,2.3 L,DOHC 16V,Gasoline,151hp
+J	I4,Duratec Ti-VCT,1.6 L,DOHC 16V,Gasoline,119hp
+8	I4,BP-ZE,1.8 L,DOHC 16V,Gasoline,127hp
+U	V6,Vulcan,3.0 L,EFI,Gasoline,152hp
+2	V6,Vulcan,3.0 L,EFIFFV,Gasoline/E85,145-152hp
+2	V6,Vulcan,3.0 L,EFIFFV,Gasoline/M85,145-155hp
+L	V6,Duratec 25,2.5 L,DOHC,Gasoline,170hp
+G	V6,Duratec 25,2.5 L,DOHC SVT,Gasoline,200hp
+S	V6,Duratec 30,3.0 L,DOHC,Gasoline,200hp
+4	V6,Essex,3.8 L,EFI,Gasoline,190hp
+6	V6,Essex,3.9 L,EFI,Gasoline,195hp
+2	V6,Essex,4.2 L,EFI,Gasoline/E85,hp
+N	V6,Cologne,4.0 L,SOHC,Gasoline,210hp
+Y	V6,SHO V6,3.0 L,EFI DOHC,Gasoline,220hp
+P	V6,SHO V6,3.2 L,EFI DOHC,Gasoline,220hp
+E	V8,Windsor,5.0 L,EFI H.O.,Gasoline,205 - 215hp
+D	V8,Windsor,5.0 L,EFI Cobra,Gasoline,235hp
+E	V8,Windsor,5.0 L,EFI Cobra,Gasoline,240hp
+C	V8,Windsor,5.8 L,EFI Cobra R,Gasoline,300hp
+N	V8,SHO V8,3.4 L,EFI DOHC,Gasoline,235hp
+A	V8,AJ-V8,3.9 L,DOHC,Gasoline,280hp
+W	V8,Modular 4.6,4.6 L,SOHC,Gasoline,220 - 235hp
+9	V8,Modular 4.6,4.6 L,SOHC,CNG,220hp
+X	V8,Modular 4.6,4.6 L,SOHC 2V,Gasoline,260hp
+H	V8,Modular 4.6,4.6 L,SOHC 3V,Gasoline,300hp
+V	V8,Modular 4.6,4.6 L,DOHC 4V,Gasoline,302 - 320hp
+R	V8,Modular 4.6,4.6 L,DOHC Ram Air,Gasoline,305hp
+Y	V8,Modular 4.6,4.6 L,DOHC SC,Gasoline,390hp
+H	V8,Modular 5.4,5.4 L,EFI 4V,Gasoline,385hp
+S	V8,Modular 5.4,5.4 L,DOHC 4VSC,Gasoline,500hp
+S	V8,Modular 5.4,5.4 L,DOHC 4VSC,Gasoline,550hp
