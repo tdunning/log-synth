@@ -265,7 +265,7 @@ The `verbose` flag can be set to true.  If `verbose` is not set, or is explicitl
 current state will be returned.  If `verbose` is set to true, then the current value and the latest step will both be
 returned in a structure.  
 
-When setting the scale of the steps to a random variable is usually done by setting the `precision` parameter to be
+Setting the scale of the steps to a random variable is usually done by setting the `precision` parameter to be
 sampled from a gamma distribution since the gamma is the conjugate distribution to the normal.  The `gamma` sampler
 can be adjusted using `alpha` (shape), `beta` (scale), `rate` (rate or 1/beta) or `dof` and `scale` parameters.  
 When used to set the step size distribution for a `random-walk` sampler, it is common to use the `dof` and `scale` 
