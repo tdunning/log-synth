@@ -260,14 +260,6 @@ With `verbose` set to true, the output of the sampler looks like this
 
 Note that there can be implausible combinations of engine, year and model such as a 2007 DeLorean.  Also, the sampler currently only has information about Ford and BMW models.  For other makes, the model engine and plant information is just gibberish.
 
-    {
-        "VIN":"WBACW75L67G000008",
-        "manufacturer":"BMW",
-        "model":"Ford F-Series, F-750, Crew Cab, Straight Frame",
-        "engine":"V6,Duratec 25,2.5 L,DOHC,Gasoline,170hp",
-        "year":2007
-    }
-    
 The third example shows how the country and year fields can have more complex constraints.
          
     {
@@ -277,7 +269,8 @@ The third example shows how the country and year fields can have more complex co
         "make": "ford",
         "years": "2002,2007-2011"
     }
-    
+
+Currently all sampling for constructing a VIN is done by uniformly sampling all of the possible options.  This could easily be changed if desired.
     
 
 **`word`** - Samples words at random.  A seed file is given, but if more words are needed than seeded, they will be invented.
