@@ -1,0 +1,48 @@
+[
+    {
+        "name": "id",
+        "class": "id"
+    },
+    {
+        "name": "g1",
+        "class": "gamma",
+        "alpha": 0.2,
+        "beta": 0.2
+    },
+    {
+        "name": "g2",
+        "class": "gamma",
+        "seed": 13,
+        "dof": 2
+    },
+    {
+        "name": "v1",
+        "class": "random-walk",
+        "seed": 12,
+        "verbose": "true"
+    },
+    {
+        "name": "v1-bare",
+        "class": "random-walk",
+        "seed": 12
+    },
+    {
+        "name": "v2",
+        "class": "random-walk",
+        "seed": 12,
+        "s": 2,
+        "verbose": "true"
+    },
+    {
+        "name": "v3",
+        "class": "random-walk",
+        "seed": 12,
+        "verbose": "true",
+        "precision": {
+            "class": "gamma",
+            "seed": 13,
+            "dof": 2
+        }
+    }
+
+]

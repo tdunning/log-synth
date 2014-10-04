@@ -1,0 +1,129 @@
+package com.mapr.synth.samplers;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.DoubleNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.util.concurrent.AtomicDouble;
+
+import java.io.IOException;
+import java.util.Random;
+
+/**
+ * Does a random walk where the next step is distributed according to a Normal distribution, but where
+ * the standard deviation of the step distribution may not be fixed.
+ */
+public class RandomWalkSampler extends FieldSampler {
+    private static final JsonNode ONE = new DoubleNode(1);
+    private static final int SEED_NOT_SET = new Random(1).nextInt();
+
+    private int seed = SEED_NOT_SET;
+
+    FieldSampler sd = new FieldSampler() {
+        @Override
+        public JsonNode sample() {
+            return ONE;
+        }
+    };
+
+    private Random rand = new Random();
+    private boolean verbose = false;
+
+    private AtomicDouble state = new AtomicDouble();
+
+    @Override
+    public JsonNode sample() {
+        double step = rand.nextGaussian() * sd.sample().asDouble();
+        double newState = state.addAndGet(step);
+
+        if (verbose) {
+            ObjectNode r = new ObjectNode(JsonNodeFactory.withExactBigDecimals(false));
+            r.set("value", new DoubleNode(newState));
+            r.set("step", new DoubleNode(step));
+            return r;
+        } else {
+            return new DoubleNode(newState);
+        }
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setSeed(int seed) {
+        if (seed == SEED_NOT_SET) {
+            seed++;
+        }
+        this.seed = seed;
+        init();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setS(JsonNode value) throws IOException {
+        if (value.isObject()) {
+            sd = FieldSampler.newSampler(value.toString());
+        } else {
+            this.sd = constant(value.asDouble());
+        }
+        init();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setPrecision(final JsonNode value) throws IOException {
+        if (value.isObject()) {
+            sd = new FieldSampler() {
+                FieldSampler base = FieldSampler.newSampler(value.toString());
+
+                @Override
+                public JsonNode sample() {
+                    return new DoubleNode(Math.sqrt(1 / base.sample().asDouble()));
+                }
+            };
+        } else {
+            this.sd = constant(Math.sqrt(1 / value.asDouble()));
+        }
+        init();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setVariance(final JsonNode value) throws IOException {
+        if (value.isObject()) {
+            sd = new FieldSampler() {
+                FieldSampler base = FieldSampler.newSampler(value.toString());
+
+                @Override
+                public JsonNode sample() {
+                    return new DoubleNode(Math.sqrt(base.sample().asDouble()));
+                }
+            };
+        } else {
+            this.sd = constant(Math.sqrt(value.asDouble()));
+        }
+        init();
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setSD(FieldSampler sd) {
+        this.sd = sd;
+        init();
+    }
+
+    private void init() {
+        if (seed != SEED_NOT_SET) {
+            rand = new Random(seed);
+        }
+    }
+
+    private FieldSampler constant(final double v) {
+        return new FieldSampler() {
+            private DoubleNode sd = new DoubleNode(v);
+
+            @Override
+            public JsonNode sample() {
+                return sd;
+            }
+        };
+    }
+}

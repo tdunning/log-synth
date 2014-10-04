@@ -2,9 +2,14 @@ package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.mapr.synth.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mapr.synth.OperatingSystemSampler;
 import org.apache.mahout.math.random.Sampler;
+
+import java.io.IOException;
 
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="class")
 @JsonSubTypes({
@@ -28,6 +33,8 @@ import org.apache.mahout.math.random.Sampler;
         @JsonSubTypes.Type(value=OperatingSystemSampler.class, name="os"),
         @JsonSubTypes.Type(value=WordSampler.class, name="word"),
         @JsonSubTypes.Type(value=VinSampler.class, name="vin"),
+        @JsonSubTypes.Type(value=GammaSampler.class, name="gamma"),
+        @JsonSubTypes.Type(value=RandomWalkSampler.class, name="random-walk"),
 
         @JsonSubTypes.Type(value=SequenceSampler.class, name="sequence"),
 
@@ -35,6 +42,16 @@ import org.apache.mahout.math.random.Sampler;
 })
 public abstract class FieldSampler implements Sampler<JsonNode> {
     private String name;
+
+    public static FieldSampler newSampler(String def) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+
+        return mapper.readValue(def, new TypeReference<FieldSampler>() {
+        });
+    }
 
     public String getName() {
         return name;

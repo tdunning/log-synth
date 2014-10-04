@@ -224,6 +224,63 @@ key is proportional to the value.
 
     {"name":"os", "class":"os"}
     
+**`random-walk`** and **`gamma`** - Allows sampling from a random walk.
+
+The `random-walk` sample samples steps from a normal distribution and accumulates those steps into a current position.  
+The returned value is the sum of those steps.  
+
+The defaults for the `random-walk` sampler are sensible so that this
+
+    {
+        "name": "v1",
+        "class": "random-walk",
+    }
+    
+samples steps from a unit normal distribution.  The scale of the steps can be changed by setting the `s` (standard deviation),
+`variance` (squared standard deviation) or `precision` (inverse of variance) parameters.  Here is an example of setting the 
+scale of the step distribution:
+
+    {
+        "name": "v2",
+        "class": "random-walk",
+        "s": 2,
+    },
+    
+If you are setting the scale to
+a constant, the `s` parameter would normally be used.  You can also set these parameters to have values that are themselves
+random variables that are sampled each step.  For example, this sets the precision to be sampled from a gamma distribution.
+The result of this second-order sampling will be a t-distribution with `dof` = 2.  Using very small values of `dof` gives
+a very heavy-tailed distribution that occasionally takes enormous steps.
+
+    {
+        "name": "v3",
+        "class": "random-walk",
+        "precision": {
+            "class": "gamma",
+            "dof": 2
+        }
+    }
+
+The `verbose` flag can be set to true.  If `verbose` is not set, or is explicitly set to false, then the value of the
+current state will be returned.  If `verbose` is set to true, then the current value and the latest step will both be
+returned in a structure.  
+
+When setting the scale of the steps to a random variable is usually done by setting the `precision` parameter to be
+sampled from a gamma distribution since the gamma is the conjugate distribution to the normal.  The `gamma` sampler
+can be adjusted using `alpha` (shape), `beta` (scale), `rate` (rate or 1/beta) or `dof` and `scale` parameters.  
+When used to set the step size distribution for a `random-walk` sampler, it is common to use the `dof` and `scale` 
+parameters.  
+
+    {
+        "name": "g1",
+        "class": "gamma",
+        "alpha": 0.2,
+        "beta": 0.2
+    }
+
+When setting `dof` and `scale`, these are translated as `alpha` = `dof` / 2, `beta` = `scale` * `dof` / 2.
+
+    
 **`vin`** - Samples from sort of realistic VIN numbers.
 
 Here is are three different ways to use the VIN sampler.  The first one `v1`, uses a seed to force the generated sequence to be identical every time. 
@@ -275,7 +332,7 @@ Currently all sampling for constructing a VIN is done by uniformly sampling all 
 
 **`word`** - Samples words at random.  A seed file is given, but if more words are needed than seeded, they will be invented.
 
-** common-point-of-compromise ** - Produces a user history that emulates a common point of compromise fraud scenario.  Contact tdunning@maprtech.com for more info.
+**`common-point-of-compromise`** - Produces a user history that emulates a common point of compromise fraud scenario.  Contact tdunning@maprtech.com for more info.
 
     [
         {
