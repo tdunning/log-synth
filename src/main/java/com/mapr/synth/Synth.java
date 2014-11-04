@@ -95,7 +95,7 @@ public class Synth {
             public void run() {
                 double t = System.nanoTime() * 1e-9;
                 long n = rowCount.get();
-                System.out.printf("%s\t%d\t%.1f\t%d\t%.1f\t%.3f\n", finalRun.get() ? "F" : "R", opts.threads, t - t0, n, n / (t - t0), (n - oldN) / (t - oldT));
+                System.err.printf("%s\t%d\t%.1f\t%d\t%.1f\t%.3f\n", finalRun.get() ? "F" : "R", opts.threads, t - t0, n, n / (t - t0), (n - oldN) / (t - oldT));
                 for (ReportingWorker task : tasks) {
                     ReportingWorker.ThreadReport r = task.report();
                     sideLog.printf("\t%d\t%.2f\t%.2f\t%.2f\t%.1f\t%.1f\n", r.fileNumber, r.threadTime, r.userTime, r.wallTime, r.rows / r.threadTime, r.rows / r.wallTime);
