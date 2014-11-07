@@ -220,6 +220,8 @@ key is proportional to the value.
 
     {"name":"foo", "class":"string", "dist":{"YES":0.95, "NO":0.05, "NA":1}}
 
+**`uuid`** - Generates random UUIDs.
+
 **`os`** - Samples from operating system codes.  My own bias will show here.
 
     {"name":"os", "class":"os"}
