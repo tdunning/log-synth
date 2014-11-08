@@ -1,0 +1,11 @@
+[
+    {
+        "name": "id",
+        "class": "id"
+    },
+    {
+        "name": "z",
+        "class": "zip",
+        "seed": 123
+    }
+]
