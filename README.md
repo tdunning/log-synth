@@ -350,6 +350,22 @@ Currently all sampling for constructing a VIN is done by uniformly sampling all 
             "uncompromisedFraudRate": 0.001
         }
     ]
+    
+**`zip`** - Samples from a table of US Zip Codes.  This gives you latitude, longitude and other common parameters for zip codes.  This can be used to generate random ish locations for various purposes that have nothing to do with the postal system.
+
+All parameters for this sampler are optional.
+
+    [
+        {
+            "name": "z",
+            "class": "zip",
+            "seed": 12,
+            "latitudeFuzz": 1,
+            "longitudeFuzz": 1,
+            "onlyContinental": "true"
+        }
+    ]
+
 
 ## Longer Examples
 The following schema generates a typical fact table from a simulated star schema:

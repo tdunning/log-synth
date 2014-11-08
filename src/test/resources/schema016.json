@@ -7,5 +7,19 @@
         "name": "z",
         "class": "zip",
         "seed": 123
+    },
+    {
+        "name": "zContinental",
+        "class": "zip",
+        "seed": 123,
+        "onlyContinental": "true"
+    },
+    {
+        "name": "zFuzzy",
+        "class": "zip",
+        "seed": 123,
+        "latitudeFuzz": 10,
+        "longitudeFuzz": 10,
+        "onlyContinental": "true"
     }
 ]

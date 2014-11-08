@@ -23,19 +23,47 @@ public class ZipSamplerTest {
 
         double latitude = 0;
         double longitude = 0;
+        double latitudeFuzzy = 0;
+        double longitudeFuzzy = 0;
+        boolean allInside1 = true;
+        boolean allInside2 = true;
         for (int i = 0; i < N; i++) {
             v = s.sample();
             double x = v.get("z").get("longitude").asDouble();
-            longitude += x;
-
             double y = v.get("z").get("latitude").asDouble();
+
+            longitude += x;
             latitude += y;
+            allInside1 &= isContinental(x, y);
+
+            x = v.get("zContinental").get("longitude").asDouble();
+            y = v.get("zContinental").get("latitude").asDouble();
+            allInside2 &= isContinental(x, y);
+
+            x = v.get("zFuzzy").get("longitude").asDouble();
+            y = v.get("zFuzzy").get("latitude").asDouble();
+            longitudeFuzzy += x;
+            latitudeFuzzy += y;
         }
+
+        assertFalse("Expected non-continental samples", allInside1);
+        assertTrue("Should not have had non-continental samples", allInside2);
+
         longitude = longitude / N;
         latitude = latitude / N;
+
+        longitudeFuzzy = longitudeFuzzy / N;
+        latitudeFuzzy = latitudeFuzzy / N;
 
         // these expected values are the true means of all zip code locations
         assertEquals(-90.88465, longitude , 2);
         assertEquals(38.47346, latitude, 2);
+
+        assertEquals(-90.88465, longitudeFuzzy , 5);
+        assertEquals(38.47346, latitudeFuzzy, 5);
+    }
+
+    private boolean isContinental(double x, double y) {
+        return y >= 22 && y <= 50 && x >= -130 && x <= -65;
     }
 }
