@@ -28,7 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Generates plausible database tables in JSON, CSV or TSV format.
+ * Generates plausible database tables in JSON, CSV or TSV format according to the data design
+ * specified in a schema file.
  */
 public class Synth {
 

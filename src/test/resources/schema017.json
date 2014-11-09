@@ -1,0 +1,15 @@
+[
+    {
+        "name": "id",
+        "class": "id"
+    },
+    {
+        "name": "u1",
+        "class": "uuid",
+        "seed": 123
+    },
+    {
+        "name": "u2",
+        "class": "uuid"
+    }
+]
