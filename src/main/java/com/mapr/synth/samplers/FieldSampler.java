@@ -31,6 +31,7 @@ import java.io.IOException;
         @JsonSubTypes.Type(value=StateSampler.class, name="state"),
         @JsonSubTypes.Type(value=LanguageSampler.class, name="language"),
         @JsonSubTypes.Type(value=OperatingSystemSampler.class, name="os"),
+        @JsonSubTypes.Type(value=UUIDSampler.class, name="uuid"),
         @JsonSubTypes.Type(value=WordSampler.class, name="word"),
         @JsonSubTypes.Type(value=VinSampler.class, name="vin"),
         @JsonSubTypes.Type(value=ZipSampler.class, name="zip"),
