@@ -2,6 +2,8 @@ package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import com.google.common.io.Resources;
 import org.junit.Test;
 
@@ -20,6 +22,8 @@ public class ZipSamplerTest {
         JsonNode v = s.sample();
         // regression test given that we specify the seed
         assertEquals("65529", v.get("z").get("zip").asText());
+
+        Multiset<String> laCounts = HashMultiset.create();
 
         double latitude = 0;
         double longitude = 0;
@@ -44,6 +48,9 @@ public class ZipSamplerTest {
             y = v.get("zFuzzy").get("latitude").asDouble();
             longitudeFuzzy += x;
             latitudeFuzzy += y;
+
+            laCounts.add(v.get("zLosAngeles").get("zip").asText());
+            assertTrue("Unexpected zip code in LA", v.get("zLosAngeles").get("zip").asText().matches("(9[0123]...)|(89...)"));
         }
 
         assertFalse("Expected non-continental samples", allInside1);
@@ -61,6 +68,8 @@ public class ZipSamplerTest {
 
         assertEquals(-90.88465, longitudeFuzzy , 5);
         assertEquals(38.47346, latitudeFuzzy, 5);
+
+        assertEquals(1365, laCounts.elementSet().size(), 50);
     }
 
     private boolean isContinental(double x, double y) {

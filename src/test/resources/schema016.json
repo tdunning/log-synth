@@ -21,5 +21,11 @@
         "latitudeFuzz": 10,
         "longitudeFuzz": 10,
         "onlyContinental": "true"
+    },
+    {
+        "name": "zLosAngeles",
+        "class": "zip",
+        "near": "33.97,-118.24",
+        "milesFrom": 200
     }
 ]
