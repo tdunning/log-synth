@@ -368,6 +368,28 @@ All parameters for this sampler are optional.
         }
     ]
 
+Zip samplers can also limit the points returned by using a latitude/longitude bounding box or by specifying a single point and a distance radius (in miles).
+
+This gives all zips with centers within 200 miles of a point in Los Angeles
+
+    {
+        "name": "zLosAngeles",
+        "class": "zip",
+        "near": "33.97,-118.24",
+        "milesFrom": 200
+    }
+
+Note that having a small radius here will make the sampler very slow because it will have to reject many samples.  A radius of 200 miles makes the sampler about 10 times slower.
+
+Likewise, this gives zips that have latitude from 20 to 30 degrees
+
+    {
+        "name": "zLosAngeles",
+        "class": "zip",
+        "latitude": "20,30"
+    }
+
+
 
 ## Longer Examples
 The following schema generates a typical fact table from a simulated star schema:
