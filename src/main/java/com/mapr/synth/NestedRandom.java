@@ -1,7 +1,8 @@
 package com.mapr.synth;
 
 import com.google.common.base.Charsets;
-import org.apache.mahout.math.MurmurHash;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 
 import java.util.Iterator;
 import java.util.Random;
@@ -21,7 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class NestedRandom implements Iterable<NestedRandom> {
     private NestedRandom parent;
-    private final byte[] content;
+    private final String content;
+    private int seed;
 
     /**
      * Returns a NestedRandom with a default seed.
@@ -89,35 +91,30 @@ public class NestedRandom implements Iterable<NestedRandom> {
 
     private NestedRandom(NestedRandom parent, int value) {
         this.parent = parent;
-        content = new byte[4];
-
-        int i = 0;
-        content[i++] = (byte) (value & 0xff);
-        value = value >> 8;
-        content[i++] = (byte) (value & 0xff);
-        value = value >> 8;
-        content[i++] = (byte) (value & 0xff);
-        value = value >> 8;
-        content[i] = (byte) (value & 0xff);
+        content = null;
+        seed = value;
     }
 
     private NestedRandom(NestedRandom parent, String component) {
         this.parent = parent;
-        content = component.getBytes(Charsets.UTF_8);
+        content = component;
+    }
+
+    private void hash(Hasher hasher) {
+        if (content != null) {
+            hasher.putString(content, Charsets.UTF_8);
+        } else {
+            hasher.putInt(seed);
+        }
+        if (parent != null) {
+            parent.hash(hasher);
+        }
     }
 
     private long hash(long seed) {
-        // first we hash in our content
-        int seed1 = MurmurHash.hash(content, (int) seed);
-        int seed2 = MurmurHash.hash(content, (int) (seed >> 32));
-
-        seed = seed1 + (((long) seed2) << 32);
-        if (parent != null) {
-            // then our parent's content
-            seed = parent.hash(seed);
-        }
-
-        // result is the seed
-        return seed;
+        Hasher h = Hashing.murmur3_128().newHasher();
+        h.putLong(seed);
+        hash(h);
+        return h.hash().asLong();
     }
 }
