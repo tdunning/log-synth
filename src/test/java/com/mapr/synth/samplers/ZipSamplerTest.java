@@ -66,7 +66,7 @@ public class ZipSamplerTest {
         assertEquals(-90.88465, longitude , 2);
         assertEquals(38.47346, latitude, 2);
 
-        assertEquals(-90.88465, longitudeFuzzy , 5);
+        assertEquals(-90.88465, longitudeFuzzy , 7);
         assertEquals(38.47346, latitudeFuzzy, 5);
 
         assertEquals(1365, laCounts.elementSet().size(), 50);

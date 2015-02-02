@@ -67,6 +67,9 @@ public class Synth {
                     String.format("Couldn't create directory %s", opts.output));
         }
 
+        if (opts.schema == null) {
+            throw new IllegalArgumentException("Must specify schema file using [-schema filename] option");
+        }
         final SchemaSampler sampler = new SchemaSampler(opts.schema);
         final AtomicLong rowCount = new AtomicLong();
 
