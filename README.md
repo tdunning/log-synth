@@ -465,3 +465,20 @@ There are three basic strategies supported:
 * *OPTIMISTIC* With this convention, no quoting of strings is done.  This should not normally be used since it is very easy to get unparseable data.
 
 The default convention is DOUBLE_QUOTE.
+
+Template based Data Generation
+=====================
+
+This approach uses Freemarker templating engine to render custom templates. The data variables in the template are fed from a specified schema.
+
+## Command-line options:
+
+`-format TEMPLATE` to have the output format coming from the template
+
+`-template file` link to a Freemarker template
+
+`-schema file` to specify the schema (see above)
+
+## Template notation
+
+To print the value of a variable in the template, use ${name.asText()} placeholder.

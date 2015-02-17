@@ -24,6 +24,10 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.mapr.synth.samplers.SchemaSampler;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -31,10 +35,7 @@ import org.kohsuke.args4j.OptionDef;
 import org.kohsuke.args4j.spi.IntOptionHandler;
 import org.kohsuke.args4j.spi.Setter;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.nio.file.Files;
@@ -64,13 +65,17 @@ public class Synth {
                     "[ -count <number>G|M|K ] " +
                     "-schema schema-file " +
                     "[-quote DOUBLE_QUOTE|BACK_SLASH|OPTIMISTIC] " +
-                    "[-format JSON|TSV|CSV ] " +
+                    "[-format JSON|TSV|CSV|TEMPLATE ] " +
                     "[-threads n] " +
                     "[-output output-directory-name] ");
             throw e;
         }
+
         Preconditions.checkArgument(opts.threads > 0 && opts.threads <= 2000,
                 "Must have at least one thread and no more than 2000");
+
+        Preconditions.checkArgument(opts.format == Format.TEMPLATE && opts.template != null,
+                "Please specify a template file");
 
         if (opts.threads > 1) {
             Preconditions.checkArgument(!"-".equals(opts.output),
@@ -226,9 +231,30 @@ public class Synth {
         }
 
         public static int generateFile(Options opts, SchemaSampler s, PrintStream out, int count) {
-            for (int i = 0; i < count; i++) {
-                format(opts.format, opts.quote, s.getFieldNames(), s.sample(), out);
+            if (opts.format == Format.TEMPLATE) {
+                Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+                cfg.setDefaultEncoding("UTF-8");
+                cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+
+                Template template = null;
+                try {
+                    cfg.setDirectoryForTemplateLoading(opts.template.getParentFile());
+                    template = cfg.getTemplate(opts.template.getName());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                PrintWriter writer = new PrintWriter(out);
+                for (int i = 0; i < count; i++) {
+                    formatTemplate(opts.format, opts.quote, s.getFieldNames(), s.sample(), template, writer);
+                }
+
+            } else {
+                for (int i = 0; i < count; i++) {
+                    format(opts.format, opts.quote, s.getFieldNames(), s.sample(), out);
+                }
             }
+
             return count;
         }
 
@@ -270,10 +296,18 @@ public class Synth {
         }
     }
 
-
     static Joiner withCommas = Joiner.on(",");
     static Joiner withTabs = Joiner.on("\t");
 
+    private static void formatTemplate(Format format, Quote quoteConvention, List<String> names, JsonNode fields, Template temp, PrintWriter writer) {
+        try {
+            temp.process(fields, writer);
+        } catch (TemplateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private static void format(Format format, Quote quoteConvention, List<String> names, JsonNode fields, PrintStream out) {
         switch (format) {
@@ -309,7 +343,7 @@ public class Synth {
     }
 
     public static enum Format {
-        JSON, TSV, CSV
+        JSON, TSV, CSV, TEMPLATE
     }
 
     public static enum Quote {
@@ -326,8 +360,11 @@ public class Synth {
         @Option(name = "-count", handler = SizeParser.class)
         int count = 1000;
 
-        @Option(name = "-schema")
+        @Option(name = "-schema", required = false)
         File schema;
+
+        @Option(name = "-template", required = false)
+        File template;
 
         @Option(name = "-format")
         Format format = Format.CSV;
