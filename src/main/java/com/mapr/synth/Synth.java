@@ -97,6 +97,20 @@ public class Synth {
         final SchemaSampler sampler = new SchemaSampler(opts.schema);
         final AtomicLong rowCount = new AtomicLong();
 
+        Template template = null;
+        if (opts.format == Format.TEMPLATE) {
+            final Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+            cfg.setDefaultEncoding("UTF-8");
+            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+            cfg.setDirectoryForTemplateLoading(opts.template.getAbsoluteFile().getParentFile());
+
+            try {
+                template = cfg.getTemplate(opts.template.getName());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         final List<ReportingWorker> tasks = Lists.newArrayList();
         int limit = (opts.count + opts.threads - 1) / opts.threads;
         int remaining = opts.count;
@@ -105,7 +119,7 @@ public class Synth {
             final int count = Math.min(limit, remaining);
             remaining -= count;
 
-            tasks.add(new ReportingWorker(opts, sampler, rowCount, count, i));
+            tasks.add(new ReportingWorker(opts, sampler, template, rowCount, count, i));
         }
 
         final double t0 = System.nanoTime() * 1e-9;
@@ -165,8 +179,9 @@ public class Synth {
         final AtomicLong lastWall;
         final AtomicLong lastThreadTime;
         final AtomicLong lastRowCount;
+        final Template template;
 
-        ReportingWorker(final Options opts, final SchemaSampler sampler, final AtomicLong rowCount, final int count, final int fileNumber) {
+        ReportingWorker(final Options opts, final SchemaSampler sampler, final Template template, final AtomicLong rowCount, final int count, final int fileNumber) {
             mx = ManagementFactory.getThreadMXBean();
             try {
                 if (mx.isThreadCpuTimeSupported())
@@ -183,6 +198,7 @@ public class Synth {
             this.rowCount = rowCount;
             this.count = count;
             this.fileNumber = fileNumber;
+            this.template = template;
             localCount = this.count;
             lastWall = new AtomicLong(System.nanoTime());
             wallTime = new AtomicLong(lastWall.get());
@@ -196,7 +212,7 @@ public class Synth {
         @Override
         public Integer call() throws Exception {
             if ("-".equals(opts.output)) {
-                return generateFile(opts, sampler, System.out, localCount);
+                return generateFile(opts, sampler, template, System.out, localCount);
             } else {
                 Path outputPath = new File(opts.output, String.format("synth-%04d", fileNumber)).toPath();
 
@@ -208,7 +224,7 @@ public class Synth {
                     while (rows < localCount) {
                         int k = Math.min(localCount - rows, REPORTING_DELTA);
                         rows += k;
-                        rowCount.addAndGet(generateFile(opts, sampler, out, k));
+                        rowCount.addAndGet(generateFile(opts, sampler, template, out, k));
                         wallTime.set(System.nanoTime());
                         threadTime.set(mx.getCurrentThreadCpuTime());
                         userTime.set(mx.getCurrentThreadUserTime());
@@ -230,25 +246,13 @@ public class Synth {
             }
         }
 
-        public static int generateFile(Options opts, SchemaSampler s, PrintStream out, int count) {
-            if (opts.format == Format.TEMPLATE) {
-                Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
-                cfg.setDefaultEncoding("UTF-8");
-                cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-
-                Template template = null;
-                try {
-                    cfg.setDirectoryForTemplateLoading(opts.template.getParentFile());
-                    template = cfg.getTemplate(opts.template.getName());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+        public static int generateFile(Options opts, SchemaSampler s, Template template, PrintStream out, int count) {
+            if (template != null) {
                 PrintWriter writer = new PrintWriter(out);
+
                 for (int i = 0; i < count; i++) {
                     formatTemplate(opts.format, opts.quote, s.getFieldNames(), s.sample(), template, writer);
                 }
-
             } else {
                 for (int i = 0; i < count; i++) {
                     format(opts.format, opts.quote, s.getFieldNames(), s.sample(), out);
