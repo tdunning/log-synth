@@ -74,7 +74,17 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.1.1</version>
+            <version>2.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>woodstox-core-asl</artifactId>
+            <version>4.1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+            <version>2.4.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -86,6 +96,11 @@
             <artifactId>t-digest</artifactId>
             <version>3.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>stax</groupId>
+            <artifactId>stax-api</artifactId>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
     <build>

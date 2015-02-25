@@ -20,6 +20,7 @@
 package com.mapr.synth;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -31,6 +32,9 @@ import org.kohsuke.args4j.OptionDef;
 import org.kohsuke.args4j.spi.IntOptionHandler;
 import org.kohsuke.args4j.spi.Setter;
 
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -64,7 +68,7 @@ public class Synth {
                     "[ -count <number>G|M|K ] " +
                     "-schema schema-file " +
                     "[-quote DOUBLE_QUOTE|BACK_SLASH|OPTIMISTIC] " +
-                    "[-format JSON|TSV|CSV ] " +
+                    "[-format JSON|TSV|CSV|XML ] " +
                     "[-threads n] " +
                     "[-output output-directory-name] ");
             throw e;
@@ -161,6 +165,9 @@ public class Synth {
         final AtomicLong lastThreadTime;
         final AtomicLong lastRowCount;
 
+        private static XmlMapper xmlMapper;
+        private static XMLStreamWriter sw;
+
         ReportingWorker(final Options opts, final SchemaSampler sampler, final AtomicLong rowCount, final int count, final int fileNumber) {
             mx = ManagementFactory.getThreadMXBean();
             try {
@@ -198,6 +205,17 @@ public class Synth {
                 try (PrintStream out = new PrintStream(Files.newOutputStream(outputPath,
                         StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING))) {
 
+                    if (opts.format == Format.XML) {
+                        XMLOutputFactory f = XMLOutputFactory.newFactory();
+                        sw = f.createXMLStreamWriter(out);
+                        sw.writeStartDocument();
+                        sw.writeCharacters("\n");
+                        sw.writeStartElement("root");
+                        sw.writeCharacters("\n");
+
+                        xmlMapper = new XmlMapper();
+                    }
+
                     header(opts.format, sampler.getFieldNames(), out);
                     int rows = 0;
                     while (rows < localCount) {
@@ -209,12 +227,15 @@ public class Synth {
                         userTime.set(mx.getCurrentThreadUserTime());
                     }
 
+                    if (opts.format == Format.XML) {
+                        sw.close();
+                    }
                     return rows;
                 }
             }
         }
 
-        public static void header(Format format, List<String> names, PrintStream out) {
+        public static void header(Format format, List<String> names, PrintStream out) throws XMLStreamException {
             switch (format) {
                 case TSV:
                     out.printf("%s\n", withTabs.join(names));
@@ -225,11 +246,55 @@ public class Synth {
             }
         }
 
-        public static int generateFile(Options opts, SchemaSampler s, PrintStream out, int count) {
+        public static int generateFile(Options opts, SchemaSampler s, PrintStream out, int count) throws IOException {
             for (int i = 0; i < count; i++) {
                 format(opts.format, opts.quote, s.getFieldNames(), s.sample(), out);
             }
             return count;
+        }
+
+        private static void format(Format format, Quote quoteConvention, List<String> names, JsonNode fields, PrintStream out) throws IOException {
+            switch (format) {
+                case JSON:
+                    out.printf("%s\n", fields.toString());
+                    break;
+                case TSV:
+                    printDelimited(quoteConvention, names, fields, "\t", out);
+                    break;
+                case CSV:
+                    printDelimited(quoteConvention, names, fields, ",", out);
+                    break;
+                case XML:
+                    printXml(fields);
+            }
+        }
+
+        private static void printXml(JsonNode fields) throws IOException {
+            xmlMapper.writeValue(sw, fields);
+            try {
+                sw.writeCharacters("\n");
+            } catch (XMLStreamException e) {
+                throw new IOException(e);
+            }
+        }
+
+        private static void printDelimited(Quote quoteConvention, List<String> names, JsonNode fields, String separator, PrintStream out) {
+            String x = "";
+            for (String name : names) {
+                switch (quoteConvention) {
+                    case DOUBLE_QUOTE:
+                        out.printf("%s%s", x, fields.get(name));
+                        break;
+                    case OPTIMISTIC:
+                        out.printf("%s%s", x, fields.get(name).asText());
+                        break;
+                    case BACK_SLASH:
+                        out.printf("%s%s", x, fields.get(name).asText().replaceAll("([,\t\\s\\\\])", "\\\\$1"));
+                        break;
+                }
+                x = separator;
+            }
+            out.printf("\n");
         }
 
         public ThreadReport report() {
@@ -274,43 +339,10 @@ public class Synth {
     static Joiner withCommas = Joiner.on(",");
     static Joiner withTabs = Joiner.on("\t");
 
-
-    private static void format(Format format, Quote quoteConvention, List<String> names, JsonNode fields, PrintStream out) {
-        switch (format) {
-            case JSON:
-                out.printf("%s\n", fields.toString());
-                break;
-            case TSV:
-                printDelimited(quoteConvention, names, fields, "\t", out);
-                break;
-            case CSV:
-                printDelimited(quoteConvention, names, fields, ",", out);
-                break;
-        }
-    }
-
-    private static void printDelimited(Quote quoteConvention, List<String> names, JsonNode fields, String separator, PrintStream out) {
-        String x = "";
-        for (String name : names) {
-            switch (quoteConvention) {
-                case DOUBLE_QUOTE:
-                    out.printf("%s%s", x, fields.get(name));
-                    break;
-                case OPTIMISTIC:
-                    out.printf("%s%s", x, fields.get(name).asText());
-                    break;
-                case BACK_SLASH:
-                    out.printf("%s%s", x, fields.get(name).asText().replaceAll("([,\t\\s\\\\])", "\\\\$1"));
-                    break;
-            }
-            x = separator;
-        }
-        out.printf("\n");
-    }
-
     public static enum Format {
-        JSON, TSV, CSV
+        JSON, TSV, CSV, XML
     }
+
 
     public static enum Quote {
         DOUBLE_QUOTE, BACK_SLASH, OPTIMISTIC
