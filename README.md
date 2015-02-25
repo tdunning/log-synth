@@ -82,7 +82,7 @@ The allowable arguments include:
 
 See the longer examples below.
 
-`-format CSV | TSV | JSON` Defines what format the output should use.
+`-format CSV | TSV | JSON | XML` Defines what format the output should use.  Note that XML format assumes that the root element is called "root" and each record element should be callled "OBJECT_NODE".  There is no way that is what people really want.  Send email with what is really needed.
 
  `-output output-directory-name`    Designates an output directory. Output files will be created in this directory named according to the pattern `synth-<thread>` where `<thread>` part is replaced by the thread number that created the file.
 
