@@ -20,6 +20,7 @@
 package com.mapr.synth;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -214,6 +215,7 @@ public class Synth {
                         sw.writeCharacters("\n");
 
                         xmlMapper = new XmlMapper();
+                        xmlMapper.enable(SerializationFeature.INDENT_OUTPUT);
                     }
 
                     header(opts.format, sampler.getFieldNames(), out);
