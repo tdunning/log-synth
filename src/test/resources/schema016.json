@@ -9,6 +9,12 @@
         "seed": 123
     },
     {
+        "name": "zLimited",
+        "class": "zip",
+        "fields": "zip, state; latitude longitude",
+        "seed": 123
+    },
+    {
         "name": "zContinental",
         "class": "zip",
         "seed": 123,

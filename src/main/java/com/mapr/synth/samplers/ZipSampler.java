@@ -26,10 +26,12 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Returns data structures containing various aspects of zip codes including location, population and such.
@@ -190,6 +192,18 @@ public class ZipSampler extends FieldSampler {
     public void setKmFrom(double distance) {
         Preconditions.checkArgument(limits instanceof RadialBound);
         ((RadialBound) limits).setRadius(distance * 0.621371);
+    }
+
+    /**
+     * Limits the fields that are returned to only those that are specified.
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public void setFields(String fields) {
+        Set<String> desiredFields = Sets.newHashSet(Splitter.on(Pattern.compile("[\\s,;]+")).split(fields));
+        for (String field : desiredFields) {
+            Preconditions.checkArgument(values.containsKey(field), "Invalid field " + field);
+        }
+        values.keySet().retainAll(desiredFields);
     }
 
     @Override

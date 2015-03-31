@@ -19,14 +19,19 @@
 
 package com.mapr.synth.samplers;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -54,6 +59,14 @@ public class ZipSamplerTest {
             v = s.sample();
             double x = v.get("z").get("longitude").asDouble();
             double y = v.get("z").get("latitude").asDouble();
+
+            Set<String> ss = Sets.newTreeSet();
+            Iterator<String> it = v.get("zLimited").fieldNames();
+            while (it.hasNext()) {
+                String field = it.next();
+                ss.add(field);
+            }
+            assertEquals("[latitude, longitude, state, zip]", ss.toString());
 
             longitude += x;
             latitude += y;
@@ -89,6 +102,22 @@ public class ZipSamplerTest {
         assertEquals(38.47346, latitudeFuzzy, 5);
 
         assertEquals(1365, laCounts.elementSet().size(), 50);
+    }
+
+    @Test
+    public void testBogusFieldLimit() throws IOException {
+        try {
+            new SchemaSampler(Resources.asCharSource(Resources.getResource("schema018.json"), Charsets.UTF_8).read());
+            fail("Should have failed due to invalid fields");
+        } catch (JsonMappingException e) {
+            Preconditions.checkState(e.getCause() instanceof IllegalArgumentException, "Wrong exception");
+        }
+
+    }
+
+    @Test
+    public void testLimitedFields() {
+
     }
 
     private boolean isContinental(double x, double y) {
