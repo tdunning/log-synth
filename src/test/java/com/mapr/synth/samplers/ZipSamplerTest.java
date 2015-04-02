@@ -115,11 +115,6 @@ public class ZipSamplerTest {
 
     }
 
-    @Test
-    public void testLimitedFields() {
-
-    }
-
     private boolean isContinental(double x, double y) {
         return y >= 22 && y <= 50 && x >= -130 && x <= -65;
     }
