@@ -1,0 +1,8 @@
+[
+  {
+    "name": "zBogus",
+    "class": "ssn",
+    "fields": "zip, state; lat longitude",
+    "seed": 123
+  }
+]

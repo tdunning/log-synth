@@ -1,0 +1,19 @@
+[
+  {
+    "name": "id",
+    "class": "id"
+  },
+  {
+    "name": "z",
+    "class": "ssn",
+    "fields": "ssn,state,type",
+    "seed": 123
+  },
+  {
+    "name": "zLimited",
+    "class": "ssn",
+    "fields": "ssn,state,description,type",
+    "types": "normal,extra",
+    "seed": 123
+  }
+]

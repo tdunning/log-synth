@@ -54,6 +54,7 @@ import java.io.IOException;
         @JsonSubTypes.Type(value=WordSampler.class, name="word"),
         @JsonSubTypes.Type(value=VinSampler.class, name="vin"),
         @JsonSubTypes.Type(value=ZipSampler.class, name="zip"),
+        @JsonSubTypes.Type(value=SsnSampler.class, name="ssn"),
         @JsonSubTypes.Type(value=GammaSampler.class, name="gamma"),
         @JsonSubTypes.Type(value=RandomWalkSampler.class, name="random-walk"),
 

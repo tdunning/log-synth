@@ -208,6 +208,34 @@ This example produces results that always have three values, each of which has a
       ]
     }
 
+**`ssn`** - Samples somewhat realistic SSN's
+
+A social security number (SSN) has fields `ssn`, `state`, `description` and `type`.  The `ssn` field is what you might expect.  The
+`state` field is the two letter abbreviation of the state that the SSN was issued in (assuming that the SSN was issued before the 2011 conversion to
+random assignment).  The `description` is the longer form of the `state`.  The `type` field can have the value `normal` or `extra`.  The `extra` type applies to locations
+that don't correspond to the 52 values that most people might expect (50 states + `DC` + `PR`).
+
+You can limit which fields you get back with default fields of `ssn`, `state``description`.  You can also limit the types of values you get back.
+
+For example:
+
+  {
+    "name": "z",
+    "class": "ssn",
+  },
+
+Or
+
+  {
+    "name": "zLimited",
+    "class": "ssn",
+    "fields": "ssn,state,description,type",
+    "types": "normal,extra",
+    "seed": 123
+  }
+
+As is common with many samplers, you can set the seed if you like.
+
 **`state`** - Samples from any of the 58 USPS state abbreviations.  Yes, there are 58 possible values.
 
     {"name":"st", "class":"state"},

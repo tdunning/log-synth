@@ -1,0 +1,65 @@
+# each line has a starting point and ending point (both inclusive) and a state abbreviation
+# there is also a type to indicate the normal states versus special abbreviations like PI
+# for Pacific Islands. The codes for type are "normal", "extra", "unused"
+#start,end,state,type,description
+000,000,--,unused,
+001,003,NH,normal,New Hampshire
+004,007,ME,normal,Maine
+008,009,VT,normal,Vermont
+010,034,MA,normal,Massachusetts
+035,039,RI,normal,Rhode Island
+040,049,CT,normal,Connecticutt
+050,134,NY,normal,New York
+135,158,NJ,normal,New Jersey
+159,211,PA,normal,Pennsylvania
+212,220,MD,normal,Maryland
+221,222,DE,normal,Delaware
+223,231,VA,normal,Virginia
+232,236,WV,normal,West Virginia
+237,246,NC,normal,North Carolina
+247,251,SC,normal,South Carolina
+252,260,GA,normal,Georgia
+261,267,FL,normal,Florida
+268,302,OH,normal,Ohio
+303,317,IN,normal,Indiana
+318,361,IL,normal,Illinois
+362,386,MI,normal,Michigan
+387,399,WI,normal,Wisconsin
+400,407,KY,normal,Kentucky
+408,415,TN,normal,Tennessee
+416,424,AL,normal,Alabama
+425,428,MS,normal,Mississippi
+429,432,AR,normal,Arkansas
+433,439,LA,normal,Louisiana
+440,448,OK,normal,Oklahoma
+449,467,TX,normal,Texas
+468,477,MN,normal,Minnesota
+478,485,IA,normal,Iowa
+486,500,MO,normal,Missouri
+501,502,ND,normal,North Dakota
+503,504,SD,normal,South Dakota
+505,508,NE,normal,Nebraska
+509,515,KS,normal,Kansas
+516,517,MT,normal,Montana
+518,519,ID,normal,Idaho
+520,520,WY,normal,Wyoming
+521,524,CO,normal,Colorado
+525,525,NM,normal,New Mexico
+526,527,AZ,normal,Arizona
+528,529,UT,normal,Utah
+530,530,NV,normal,Nevada
+531,539,WA,normal,Washington
+540,544,OR,normal,Oregon
+545,573,CA,normal,California
+574,574,AK,normal,Alaska
+575,576,HI,normal,Hawaii
+577,579,DC,normal,District of Columbia
+580,580,VI,extra,Virgin Islands
+581,584,PR,normal,Puerto Rico
+585,585,NM,normal,New Mexico
+586,586,PI,extra,Pacific Islands: Guam/American Samoa/Philippines
+587,588,MS,normal,Mississippi
+589,595,FL,normal,Florida
+596,599,PR,normal,Puerto Rico
+600,601,AZ,normal,Arizona
+602,626,CA,normal,California
