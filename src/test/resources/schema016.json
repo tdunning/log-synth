@@ -33,5 +33,10 @@
         "class": "zip",
         "near": "33.97,-118.24",
         "milesFrom": 200
+    },
+    {
+        "name": "zFlat",
+        "class": "zip",
+        "verbose": false
     }
 ]

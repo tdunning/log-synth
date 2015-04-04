@@ -49,6 +49,7 @@ public class SsnSampler extends FieldSampler {
     private Set<String> keepTypes = Sets.newHashSet("normal");
     private Set<String> keepFields = Sets.newHashSet("ssn", "state");
     private List<String> names;
+    private boolean verbose = true;
 
     public SsnSampler() {
         Splitter onComma = Splitter.on(",").trimResults();
@@ -102,31 +103,38 @@ public class SsnSampler extends FieldSampler {
         }
     }
 
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
+    }
+
     @Override
     public JsonNode sample() {
-        boolean keep = false;
-        ObjectNode r = null;
-        while (!keep) {
+        while (true) {
             int i = rand.nextInt(codes.size());
             List<String> fields = values.get(codes.get(i));
 
-            keep = keepTypes.contains(fields.get(names.indexOf("type")));
-            if (keep) {
-                r = new ObjectNode(nodeFactory);
-                Iterator<String> nx = names.iterator();
-                for (String field : fields) {
-                    Preconditions.checkState(nx.hasNext());
-                    String fieldName = nx.next();
-                    if (keepFields.contains(fieldName)) {
-                        r.set(fieldName, new TextNode(field));
+            if (keepTypes.contains(fields.get(names.indexOf("type")))) {
+                if (verbose) {
+                    ObjectNode rx = new ObjectNode(nodeFactory);
+                    Iterator<String> nx = names.iterator();
+                    for (String field : fields) {
+                        Preconditions.checkState(nx.hasNext());
+                        String fieldName = nx.next();
+                        if (keepFields.contains(fieldName)) {
+                            rx.set(fieldName, new TextNode(field));
+                        }
                     }
-                }
-                Preconditions.checkState(!nx.hasNext());
-                if (keepFields.contains("ssn")) {
-                    r.set("ssn", new TextNode(String.format("%s-%02d-%04d", codes.get(i), rand.nextInt(99) + 1, rand.nextInt(9999) + 1)));
+                    Preconditions.checkState(!nx.hasNext());
+                    if (keepFields.contains("ssn")) {
+                        rx.set("ssn", new TextNode(String.format("%s-%02d-%04d", codes.get(i), rand.nextInt(99) + 1, rand.nextInt(9999) + 1)));
+                    }
+                    return rx;
+                } else {
+                    return new TextNode(String.format("%s-%02d-%04d", codes.get(i), rand.nextInt(99) + 1, rand.nextInt(9999) + 1));
                 }
             }
         }
-        return r;
     }
 }

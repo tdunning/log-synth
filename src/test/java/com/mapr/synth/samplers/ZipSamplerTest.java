@@ -83,6 +83,8 @@ public class ZipSamplerTest {
 
             laCounts.add(v.get("zLosAngeles").get("zip").asText());
             assertTrue("Unexpected zip code in LA", v.get("zLosAngeles").get("zip").asText().matches("(9[0123]...)|(89...)"));
+
+            assertTrue(v.get("zFlat").asText().matches("\\d\\d\\d\\d\\d"));
         }
 
         assertFalse("Expected non-continental samples", allInside1);

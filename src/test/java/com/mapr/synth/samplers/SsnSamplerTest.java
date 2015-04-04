@@ -29,9 +29,9 @@ import com.google.common.io.Resources;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class SsnSamplerTest {
@@ -50,7 +50,7 @@ public class SsnSamplerTest {
         Multiset<String> state1 = HashMultiset.create();
         Multiset<String> state2 = HashMultiset.create();
 
-        Pattern p = Pattern.compile("\\d\\d\\d-\\d\\d-\\d\\d\\d\\d");
+        String legalSsn = "\\d\\d\\d-\\d\\d-\\d\\d\\d\\d";
 
         for (int i = 0; i < N; i++) {
             v = s.sample();
@@ -60,7 +60,8 @@ public class SsnSamplerTest {
             state1.add(v.get("z").get("state").asText());
             state2.add(v.get("zLimited").get("state").asText());
 
-            Preconditions.checkState(p.matcher(v.get("z").get("ssn").asText()).matches(), "Bad format for SSN: %s", v.get("z").get("ssn"));
+            assertTrue(String.format("Bad format for SSN: %s", v.get("z").get("ssn")), v.get("z").get("ssn").asText().matches(legalSsn));
+            assertTrue(v.get("zFlat").asText().matches(legalSsn));
         }
 
         assertEquals(1, type1.elementSet().size());

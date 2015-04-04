@@ -46,6 +46,7 @@ public class ZipSampler extends FieldSampler {
     private double longitudeFuzz = 0;
 
     private LocationBound limits = null;
+    private boolean verbose = true;
 
     public ZipSampler() {
         try {
@@ -200,20 +201,23 @@ public class ZipSampler extends FieldSampler {
     @SuppressWarnings("UnusedDeclaration")
     public void setFields(String fields) {
         Set<String> desiredFields = Sets.newHashSet(Splitter.on(Pattern.compile("[\\s,;]+")).split(fields));
+        desiredFields.add("zip");
         for (String field : desiredFields) {
             Preconditions.checkArgument(values.containsKey(field), "Invalid field " + field);
         }
         values.keySet().retainAll(desiredFields);
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
+    }
+
     @Override
     public JsonNode sample() {
-        boolean keep = false;
-        ObjectNode r = null;
-        while (!keep) {
+        while (true) {
             int i = rand.nextInt(zipCount);
-            keep = true;
-            r = new ObjectNode(nodeFactory);
+            ObjectNode r = new ObjectNode(nodeFactory);
             for (String key : values.keySet()) {
                 r.set(key, new TextNode(values.get(key).get(i)));
             }
@@ -223,11 +227,14 @@ public class ZipSampler extends FieldSampler {
                 r.set("latitude", new TextNode(String.format("%.4f", r.get("latitude").asDouble() + rand.nextDouble() * latitudeFuzz)));
             }
 
-            if (limits != null) {
-                keep = limits.accept(r);
+            if (limits == null || limits.accept(r)) {
+                if (verbose) {
+                    return r;
+                } else {
+                    return r.get("zip");
+                }
             }
         }
-        return r;
     }
 
     private abstract class LocationBound {
