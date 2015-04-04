@@ -221,7 +221,7 @@ For example:
 
   {
     "name": "z",
-    "class": "ssn",
+    "class": "ssn"
   },
 
 Or
@@ -235,6 +235,15 @@ Or
   }
 
 As is common with many samplers, you can set the seed if you like.
+
+If you only want a string with the SSN in it, you can set the `verbose` flag to false:
+
+  {
+    "name": "z",
+    "class": "ssn",
+    "verbose": false
+  },
+
 
 **`state`** - Samples from any of the 58 USPS state abbreviations.  Yes, there are 58 possible values.
 
@@ -417,6 +426,15 @@ Likewise, this gives zips that have latitude from 20 to 30 degrees
         "latitude": "20,30"
     }
 
+If you only want the zip code as a string without all the supporting information, set the `verbose` flag to false. For example:
+
+    {
+        "name": "zLosAngeles",
+        "class": "zip",
+        "near": "33.97,-118.24",
+        "milesFrom": 200,
+        "verbose": false
+    }
 
 
 ## Longer Examples
