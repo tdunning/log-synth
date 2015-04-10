@@ -1,0 +1,10 @@
+[
+    {
+        "name": "lat",
+        "class": "zip",
+        "seed": 12,
+        "onlyContinental": "true",
+        "verbose": "true",
+        "fields": "latitude"
+    }
+]

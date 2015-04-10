@@ -40,6 +40,7 @@ public class ZipSampler extends FieldSampler {
     private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals(false);
 
     private Map<String, List<String>> values = Maps.newHashMap();
+    private Set<String> retainedFields = null;
     private Random rand = new Random();
     private int zipCount;
     private double latitudeFuzz = 0;
@@ -201,11 +202,10 @@ public class ZipSampler extends FieldSampler {
     @SuppressWarnings("UnusedDeclaration")
     public void setFields(String fields) {
         Set<String> desiredFields = Sets.newHashSet(Splitter.on(Pattern.compile("[\\s,;]+")).split(fields));
-        desiredFields.add("zip");
         for (String field : desiredFields) {
             Preconditions.checkArgument(values.containsKey(field), "Invalid field " + field);
         }
-        values.keySet().retainAll(desiredFields);
+        retainedFields = desiredFields;
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -229,6 +229,13 @@ public class ZipSampler extends FieldSampler {
 
             if (limits == null || limits.accept(r)) {
                 if (verbose) {
+                    if (retainedFields != null) {
+                        for (String key : values.keySet()) {
+                            if (!retainedFields.contains(key)) {
+                                r.remove(key);
+                            }
+                        }
+                    }
                     return r;
                 } else {
                     return r.get("zip");

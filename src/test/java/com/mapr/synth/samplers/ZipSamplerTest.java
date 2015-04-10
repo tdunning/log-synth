@@ -97,13 +97,20 @@ public class ZipSamplerTest {
         latitudeFuzzy = latitudeFuzzy / N;
 
         // these expected values are the true means of all zip code locations
-        assertEquals(-90.88465, longitude , 2);
+        assertEquals(-90.88465, longitude, 2);
         assertEquals(38.47346, latitude, 2);
 
-        assertEquals(-90.88465, longitudeFuzzy , 7);
+        assertEquals(-90.88465, longitudeFuzzy, 7);
         assertEquals(38.47346, latitudeFuzzy, 5);
 
         assertEquals(1365, laCounts.elementSet().size(), 50);
+    }
+
+    @Test
+    public void testNPE() throws IOException {
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema021.json"), Charsets.UTF_8).read());
+        JsonNode r = s.sample();
+        assertEquals(34.44, r.get("lat").get("latitude").asDouble(), 0.001);
     }
 
     @Test
