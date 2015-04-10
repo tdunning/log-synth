@@ -24,35 +24,70 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.Iterator;
 
 /**
- * Delegate to another sampler which generates a list of lists.  Flatten that list into a single list.
+ * Delegate to another sampler which generates an object.  The fields of this object inserted into the
+ * parent of this sampler.  This is handy when working with samplers that return complex types such as
+ * VIN an ZIP.  If you want, for instance, the zip-code, latitude and longitude as three variables in a
+ * record, you can do this:
  *
+ * <per>
+ *     {"class":"flatten", "type":"flatten", "prefix":"", "value": {
+ *         "class":"zip", "fields":["zip", "latitude", "longitude"]
+ *     }}
+ * </per>
+ *
+ * By default, the promoted values have names prefixed by the name of the flattener. You can set this
+ * prefix to any value you like including the empty string.
+ * <p/>
  * Thread safe for sampling
  */
 public class FlattenSampler extends FieldSampler {
     private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals(false);
     private FieldSampler delegate;
+    private String prefix;
 
     @JsonCreator
-    public FlattenSampler(@JsonProperty("value") FieldSampler delegate) {
+    public FlattenSampler(@JsonProperty("name") String name, @JsonProperty("value") FieldSampler delegate) {
         this.delegate = delegate;
+        prefix = name + "-";
+        setName(name);
+        setFlattener(true);
+    }
+
+    @SuppressWarnings("unused")
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 
     @Override
     public JsonNode sample() {
         JsonNode value = delegate.sample();
-        ArrayNode r = nodeFactory.arrayNode();
 
-        for (JsonNode component : value) {
-            if (component.isArray()) {
-                for (JsonNode node : component) {
-                    r.add(node);
-                }
-            } else {
-                throw new IllegalArgumentException(String.format("Cannot flatten type %s", component.getClass()));
+        if (value.isObject()) {
+            ObjectNode r = new ObjectNode(nodeFactory);
+            for (Iterator<String> it = value.fieldNames(); it.hasNext(); ) {
+                String key = it.next();
+                JsonNode v = value.get(key);
+                r.set(prefix + key, v);
             }
+            return r;
+        } else {
+            ArrayNode r = nodeFactory.arrayNode();
+
+            for (JsonNode component : value) {
+                if (component.isArray()) {
+                    for (JsonNode node : component) {
+                        r.add(node);
+                    }
+                } else {
+                    throw new IllegalArgumentException(String.format("Cannot flatten type %s", component.getClass()));
+                }
+            }
+            return r;
         }
-        return r;
     }
 }

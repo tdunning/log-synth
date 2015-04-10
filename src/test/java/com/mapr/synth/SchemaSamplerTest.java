@@ -289,22 +289,6 @@ public class SchemaSamplerTest {
         assertEquals(2000, sum3 / N, 2000 * 0.03);
     }
 
-    @Test
-    public void testFlatten() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema010.json"), Charsets.UTF_8).read());
-
-        for (int k = 0; k < 10; k++) {
-            JsonNode r = s.sample();
-            assertEquals(k, r.get("id").asInt());
-            assertTrue(r.get("stuff").isArray());
-            assertEquals(1, r.get("stuff").get(0).asInt());
-            assertEquals(2, r.get("stuff").get(1).asInt());
-            assertEquals(3, r.get("stuff").get(2).asInt());
-            assertEquals(4, r.get("stuff").get(3).asInt());
-            assertEquals(4, r.get("stuff").size());
-        }
-    }
-
     public static class StringSamplerTest {
         @Test
         public void testEmptyDist() {

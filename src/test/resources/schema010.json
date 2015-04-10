@@ -5,7 +5,7 @@
     },
     {
         "name": "stuff",
-        "class": "flatten",
+        "class": "array-flatten",
         "value": {
             "class": "sequence",
             "array": [

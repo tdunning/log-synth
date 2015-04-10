@@ -41,6 +41,7 @@ import java.io.IOException;
         @JsonSubTypes.Type(value=NameSampler.class, name="name"),
         @JsonSubTypes.Type(value=FileSampler.class, name="lookup"),
         @JsonSubTypes.Type(value=FlattenSampler.class, name="flatten"),
+        @JsonSubTypes.Type(value=ArrayFlattener .class, name="array-flatten"),
         @JsonSubTypes.Type(value=JoinSampler.class, name="join"),
         @JsonSubTypes.Type(value=MapSampler.class, name="map"),
         @JsonSubTypes.Type(value=StreetNameSampler.class, name="street-name"),
@@ -64,6 +65,7 @@ import java.io.IOException;
 })
 public abstract class FieldSampler implements Sampler<JsonNode> {
     private String name;
+    private boolean flattener = false;
 
     public static FieldSampler newSampler(String def) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -81,5 +83,13 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setFlattener(boolean flattener) {
+        this.flattener = flattener;
+    }
+
+    public boolean isFlat() {
+        return flattener;
     }
 }

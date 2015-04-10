@@ -85,7 +85,15 @@ public class SchemaSampler implements Sampler<JsonNode> {
         ObjectNode r = nodeFactory.objectNode();
         Iterator<String> fx = fields.iterator();
         for (FieldSampler s : schema) {
-            r.set(fx.next(), s.sample());
+            if (s.isFlat()) {
+                JsonNode v = s.sample();
+                for (Iterator<String> it = v.fieldNames(); it.hasNext(); ) {
+                    String key = it.next();
+                    r.set(key, v.get(key));
+                }
+            } else {
+                r.set(fx.next(), s.sample());
+            }
         }
         return r;
     }

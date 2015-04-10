@@ -1,0 +1,16 @@
+[
+    {
+        "name": "q",
+        "class": "flatten",
+        "value": {
+            "class": "zip"
+        }
+    },
+    {
+        "name": "r",
+        "class": "flatten",
+        "value": {
+            "class": "zip"
+        }
+    }
+]
