@@ -58,6 +58,15 @@ public class FlattenSamplerTest {
     }
 
     @Test
+    public void testSequenceFlattening() throws IOException {
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema022.json"), Charsets.UTF_8).read());
+        JsonNode v = s.sample();
+        JsonNode x = v.get("s").get("zip");
+        assertTrue(x.isTextual());
+        assertTrue(x.asText().matches("[0-9]+"));
+    }
+
+    @Test
     public void testEmptyPrefix() throws IOException {
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema023.json"), Charsets.UTF_8).read());
         JsonNode v = s.sample();

@@ -66,8 +66,8 @@ public class SequenceSampler extends FieldSampler {
                 r.add(base.sample());
             }
         } else {
-            for (FieldSampler fieldSampler : array) {
-                r.add(fieldSampler.sample());
+            for (FieldSampler sampler : array) {
+                r.add(sampler.sample());
             }
         }
         return r;

@@ -48,7 +48,7 @@ import java.util.Iterator;
 public class FlattenSampler extends FieldSampler {
     private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals(false);
     private FieldSampler delegate;
-    private String prefix;
+    private String prefix = "";
 
     @JsonCreator
     public FlattenSampler(@JsonProperty("name") String name, @JsonProperty("value") FieldSampler delegate) {
@@ -76,18 +76,7 @@ public class FlattenSampler extends FieldSampler {
             }
             return r;
         } else {
-            ArrayNode r = nodeFactory.arrayNode();
-
-            for (JsonNode component : value) {
-                if (component.isArray()) {
-                    for (JsonNode node : component) {
-                        r.add(node);
-                    }
-                } else {
-                    throw new IllegalArgumentException(String.format("Cannot flatten type %s", component.getClass()));
-                }
-            }
-            return r;
+            return value;
         }
     }
 }

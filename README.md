@@ -98,6 +98,8 @@ The following classes of values are allowed (in approximately alphabetical order
 **`address`** - This distribution generates fairly plausible, if somewhat fanciful street addresses.  There are no additional parameters allowed.
 
     {"name":"address", "class":"address"},
+    
+**`array-flattener`** - This sampler converts a nested list of lists into a flat list.  This can be useful if used in conjunction with the `sequence` sampler (see the example for `sequence`).
 
 **`browser`** - Samples from browser types with kind of plausible frequency distribution.
 
@@ -120,6 +122,38 @@ The following classes of values are allowed (in approximately alphabetical order
     {"name":"foo3", "class":"event", "format": "MM/dd/yyyy HH:mm:ss", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
 
 **`flatten`** - Turns an object into fields.
+
+Some samplers such as `zip` or `vin` return complex objects with many fields.  If you want to output each of these fields
+as a separate field in CSV format, you could post process a JSON output file or you can use the `flatten` sampler
+to promote these fields to the level above. As an example, the snippet below results in samples with fields like `zipType`,
+`zip`, `latitude`, `longitude` and others.
+
+    {
+        "class": "flatten",
+        "value": { "class": "zip" },
+        "prefix": ""
+    }
+
+Notice how there is no name here for the `flatten` sampler.  This is because the resulting values are named using the 
+prefix (empty in this example) and the names fo the fields from the sub-sampler (the `zip` sampler in this case).
+
+The prefix used to form the flattened variable names can be specified explicitly, but unless you want it to be empty 
+it is usually simpler to just name the `flatten` sampler.  This gives you a default prefix that is the name of the 
+flattener with a dash appended.  For instance, this snippet
+
+    {
+        "name": "x"
+        "class": "flatten",
+        "value": { "class": "zip", "fields": "latitude, longitude" },
+    },
+    {
+        "name": "y"
+        "class": "flatten",
+        "value": { "class": "zip", "fields": "latitude, longitude" },
+    }
+
+would give samples with fields named `x-latitude`, `x-longitude`, `y-latitude` and `y-longitude` which makes it
+easy to keep track of which fields are associated with each other.
 
 **`foreign-key`** - This distribution generates randomized references to an integer key from another table.  You must specify the size of the table being referenced using the size parameter. The default value of size is 1000.  You may optionally specify a skewness factor in the range [0,3].  A value of 0 gives uniform distribution.  A value of 1 gives a classic Zipf distribution.  The default skew is 0.5.  Values are biased towards smaller values.  This sampler uses space proportional to size so be slightly cautious.
 
@@ -475,14 +509,14 @@ For example, this produces users with names and variable length query strings
 
     [
         {"name":"user_name", "class":"name", "type": "last_first"},
-        {"name":"query", "class":"flatten", "value": {
+        {"name":"query", "class":"array-flatten", "value": {
             "class": "sequence", "length":4, "base": {
                 "class": "word"
             }
         }}
     ]
 
-If you use the TSV format with this schema, the queries will be comma delimited unquoted strings.  If you omit the flatten step, you will get a list of strings surrounded by square brackets and each string will be quoted (i.e. an array in JSON format).
+If you use the TSV format with this schema, the queries will be comma delimited unquoted strings.  If you omit the `array-flatten` step, you will get a list of strings surrounded by square brackets and each string will be quoted (i.e. an array in JSON format).
 
 You can also generate arbitrarily nested data by using the map sampler.  For example, this schema will produce records with an id and a map named stuff that has two integers ("a" and "b") in it.
 
