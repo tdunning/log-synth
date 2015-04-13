@@ -12,20 +12,5 @@
         "value": {
             "class": "zip"
         }
-    },
-    // this is a silly thing to do because map is kind of the inverse of flatten
-    // it does demonstrate that flatten works inside of other things
-    {
-        "name": "s",
-        "class": "map",
-        "value": [
-            {
-                "class": "flatten",
-                "prefix":"",
-                "value": {
-                    "class": "zip"
-                }
-            }
-        ]
     }
 ]

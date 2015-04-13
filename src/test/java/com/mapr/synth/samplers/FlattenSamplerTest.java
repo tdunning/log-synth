@@ -59,7 +59,7 @@ public class FlattenSamplerTest {
 
     @Test
     public void testSequenceFlattening() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema022.json"), Charsets.UTF_8).read());
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema025.json"), Charsets.UTF_8).read());
         JsonNode v = s.sample();
         JsonNode x = v.get("s").get("zip");
         assertTrue(x.isTextual());
