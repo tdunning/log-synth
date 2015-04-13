@@ -68,6 +68,7 @@ public class Synth {
             System.err.println("Usage: " +
                     "[ -count <number>G|M|K ] " +
                     "-schema schema-file " +
+                    "[-transform schema-file] " +
                     "[-quote DOUBLE_QUOTE|BACK_SLASH|OPTIMISTIC] " +
                     "[-format JSON|TSV|CSV|XML ] " +
                     "[-threads n] " +
@@ -97,6 +98,7 @@ public class Synth {
         final SchemaSampler sampler = new SchemaSampler(opts.schema);
         final AtomicLong rowCount = new AtomicLong();
 
+
         final List<ReportingWorker> tasks = Lists.newArrayList();
         int limit = (opts.count + opts.threads - 1) / opts.threads;
         int remaining = opts.count;
@@ -117,7 +119,6 @@ public class Synth {
         Runnable blink = new Runnable() {
             public double oldT;
             private long oldN;
-
 
             @Override
             public void run() {
@@ -168,6 +169,7 @@ public class Synth {
 
         private static XmlMapper xmlMapper;
         private static XMLStreamWriter sw;
+        private final Transformer transform;
 
         ReportingWorker(final Options opts, final SchemaSampler sampler, final AtomicLong rowCount, final int count, final int fileNumber) {
             mx = ManagementFactory.getThreadMXBean();
@@ -194,6 +196,8 @@ public class Synth {
             lastUserTime = new AtomicLong(mx.getCurrentThreadUserTime());
             userTime = new AtomicLong(lastThreadTime.get());
             lastRowCount = new AtomicLong(0);
+
+            transform = Transformer.create(opts.transform);
         }
 
         @Override
@@ -248,9 +252,9 @@ public class Synth {
             }
         }
 
-        public static int generateFile(Options opts, SchemaSampler s, PrintStream out, int count) throws IOException {
+        public int generateFile(Options opts, SchemaSampler s, PrintStream out, int count) throws IOException {
             for (int i = 0; i < count; i++) {
-                format(opts.format, opts.quote, s.getFieldNames(), s.sample(), out);
+                format(opts.format, opts.quote, s.getFieldNames(), transform.apply(s.sample()), out);
             }
             return count;
         }
@@ -362,6 +366,9 @@ public class Synth {
 
         @Option(name = "-schema")
         File schema;
+
+        @Option(name = "-transform")
+        File transform;
 
         @Option(name = "-format")
         Format format = Format.CSV;
