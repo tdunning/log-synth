@@ -109,11 +109,7 @@ public class Synth {
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             cfg.setDirectoryForTemplateLoading(opts.template.getAbsoluteFile().getParentFile());
 
-            try {
-                template = cfg.getTemplate(opts.template.getName());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            template = cfg.getTemplate(opts.template.getName());
         }
 
         final List<ReportingWorker> tasks = Lists.newArrayList();
