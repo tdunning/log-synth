@@ -79,8 +79,8 @@ public class Synth {
         Preconditions.checkArgument(opts.threads > 0 && opts.threads <= 2000,
                 "Must have at least one thread and no more than 2000");
 
-        Preconditions.checkArgument(opts.format == Format.TEMPLATE && opts.template != null,
-                "Please specify a template file");
+        Preconditions.checkArgument(opts.template != null && opts.template.exists(),
+                "Please specify a valid template file");
 
         if (opts.threads > 1) {
             Preconditions.checkArgument(!"-".equals(opts.output),
@@ -103,7 +103,7 @@ public class Synth {
         final AtomicLong rowCount = new AtomicLong();
 
         Template template = null;
-        if (opts.format == Format.TEMPLATE) {
+        if (opts.template != null) {
             final Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
             cfg.setDefaultEncoding("UTF-8");
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
@@ -401,7 +401,7 @@ public class Synth {
     }
 
     public static enum Format {
-        JSON, TSV, CSV, XML, TEMPLATE
+        JSON, TSV, CSV, XML
     }
 
 
@@ -419,7 +419,7 @@ public class Synth {
         @Option(name = "-count", handler = SizeParser.class)
         int count = 1000;
 
-        @Option(name = "-schema", required = false)
+        @Option(name = "-schema")
         File schema;
 
         @Option(name = "-template", required = false)
