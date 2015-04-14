@@ -549,11 +549,9 @@ The default convention is DOUBLE_QUOTE.
 Template based Data Generation
 =====================
 
-This approach uses Freemarker templating engine to render custom templates. The data variables in the template are fed from a specified schema.
+This approach uses Freemarker template engine to render custom templates. The data variables in the template are fed from a specified schema.
 
 ## Command-line options:
-
-`-format TEMPLATE` to have the output format coming from the template
 
 `-template file` link to a Freemarker template
 
