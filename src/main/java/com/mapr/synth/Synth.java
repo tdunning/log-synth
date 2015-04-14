@@ -70,7 +70,7 @@ public class Synth {
                     "[ -count <number>G|M|K ] " +
                     "-schema schema-file " +
                     "[-quote DOUBLE_QUOTE|BACK_SLASH|OPTIMISTIC] " +
-                    "[-format JSON|TSV|CSV|XML|TEMPLATE ] " +
+                    "[-format JSON|TSV|CSV|XML ] " +
                     "[-threads n] " +
                     "[-output output-directory-name] ");
             throw e;
