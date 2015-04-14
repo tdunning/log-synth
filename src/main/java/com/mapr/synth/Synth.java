@@ -186,7 +186,6 @@ public class Synth {
         final AtomicLong lastRowCount;
         final Template template;
 
-
         private static XmlMapper xmlMapper;
         private static XMLStreamWriter sw;
 
@@ -269,6 +268,7 @@ public class Synth {
                     break;
             }
         }
+
 
         public static int generateFile(Options opts, SchemaSampler s, Template template, PrintStream out, int count) throws IOException {
             if (template != null) {
