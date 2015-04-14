@@ -266,12 +266,12 @@ public class Synth {
         }
 
 
-        public static int generateFile(Options opts, SchemaSampler s, Template template, PrintStream out, int count) throws IOException {
+        public static int generateFile(Options opts, SchemaSampler s, Template template, PrintStream out, int count) throws IOException, TemplateException {
             if (template != null) {
                 PrintWriter writer = new PrintWriter(out);
 
                 for (int i = 0; i < count; i++) {
-                    formatTemplate(opts.format, opts.quote, s.getFieldNames(), s.sample(), template, writer);
+                    template.process(s.sample(), writer);
                 }
             } else {
                 for (int i = 0; i < count; i++) {
@@ -366,16 +366,6 @@ public class Synth {
 
     static Joiner withCommas = Joiner.on(",");
     static Joiner withTabs = Joiner.on("\t");
-
-    private static void formatTemplate(Format format, Quote quoteConvention, List<String> names, JsonNode fields, Template temp, PrintWriter writer) {
-        try {
-            temp.process(fields, writer);
-        } catch (TemplateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private static void format(Format format, Quote quoteConvention, List<String> names, JsonNode fields, PrintStream out) {
         switch (format) {
