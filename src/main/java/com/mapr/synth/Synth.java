@@ -26,6 +26,10 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.mapr.synth.samplers.SchemaSampler;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -33,13 +37,10 @@ import org.kohsuke.args4j.OptionDef;
 import org.kohsuke.args4j.spi.IntOptionHandler;
 import org.kohsuke.args4j.spi.Setter;
 
+import java.io.*;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.nio.file.Files;
@@ -74,8 +75,12 @@ public class Synth {
                     "[-output output-directory-name] ");
             throw e;
         }
+
         Preconditions.checkArgument(opts.threads > 0 && opts.threads <= 2000,
                 "Must have at least one thread and no more than 2000");
+
+        Preconditions.checkArgument(opts.template != null && opts.template.exists(),
+                "Please specify a valid template file");
 
         if (opts.threads > 1) {
             Preconditions.checkArgument(!"-".equals(opts.output),
@@ -97,6 +102,16 @@ public class Synth {
         final SchemaSampler sampler = new SchemaSampler(opts.schema);
         final AtomicLong rowCount = new AtomicLong();
 
+        Template template = null;
+        if (opts.template != null) {
+            final Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
+            cfg.setDefaultEncoding("UTF-8");
+            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+            cfg.setDirectoryForTemplateLoading(opts.template.getAbsoluteFile().getParentFile());
+
+            template = cfg.getTemplate(opts.template.getName());
+        }
+
         final List<ReportingWorker> tasks = Lists.newArrayList();
         int limit = (opts.count + opts.threads - 1) / opts.threads;
         int remaining = opts.count;
@@ -105,7 +120,7 @@ public class Synth {
             final int count = Math.min(limit, remaining);
             remaining -= count;
 
-            tasks.add(new ReportingWorker(opts, sampler, rowCount, count, i));
+            tasks.add(new ReportingWorker(opts, sampler, template, rowCount, count, i));
         }
 
         final double t0 = System.nanoTime() * 1e-9;
@@ -165,11 +180,12 @@ public class Synth {
         final AtomicLong lastWall;
         final AtomicLong lastThreadTime;
         final AtomicLong lastRowCount;
+        final Template template;
 
         private static XmlMapper xmlMapper;
         private static XMLStreamWriter sw;
 
-        ReportingWorker(final Options opts, final SchemaSampler sampler, final AtomicLong rowCount, final int count, final int fileNumber) {
+        ReportingWorker(final Options opts, final SchemaSampler sampler, final Template template, final AtomicLong rowCount, final int count, final int fileNumber) {
             mx = ManagementFactory.getThreadMXBean();
             try {
                 if (mx.isThreadCpuTimeSupported())
@@ -186,6 +202,7 @@ public class Synth {
             this.rowCount = rowCount;
             this.count = count;
             this.fileNumber = fileNumber;
+            this.template = template;
             localCount = this.count;
             lastWall = new AtomicLong(System.nanoTime());
             wallTime = new AtomicLong(lastWall.get());
@@ -199,7 +216,7 @@ public class Synth {
         @Override
         public Integer call() throws Exception {
             if ("-".equals(opts.output)) {
-                return generateFile(opts, sampler, System.out, localCount);
+                return generateFile(opts, sampler, template, System.out, localCount);
             } else {
                 Path outputPath = new File(opts.output, String.format("synth-%04d", fileNumber)).toPath();
 
@@ -223,7 +240,7 @@ public class Synth {
                     while (rows < localCount) {
                         int k = Math.min(localCount - rows, REPORTING_DELTA);
                         rows += k;
-                        rowCount.addAndGet(generateFile(opts, sampler, out, k));
+                        rowCount.addAndGet(generateFile(opts, sampler, template, out, k));
                         wallTime.set(System.nanoTime());
                         threadTime.set(mx.getCurrentThreadCpuTime());
                         userTime.set(mx.getCurrentThreadUserTime());
@@ -248,10 +265,20 @@ public class Synth {
             }
         }
 
-        public static int generateFile(Options opts, SchemaSampler s, PrintStream out, int count) throws IOException {
-            for (int i = 0; i < count; i++) {
-                format(opts.format, opts.quote, s.getFieldNames(), s.sample(), out);
+
+        public static int generateFile(Options opts, SchemaSampler s, Template template, PrintStream out, int count) throws IOException, TemplateException {
+            if (template != null) {
+                PrintWriter writer = new PrintWriter(out);
+
+                for (int i = 0; i < count; i++) {
+                    template.process(s.sample(), writer);
+                }
+            } else {
+                for (int i = 0; i < count; i++) {
+                    format(opts.format, opts.quote, s.getFieldNames(), s.sample(), out);
+                }
             }
+
             return count;
         }
 
@@ -337,9 +364,41 @@ public class Synth {
         }
     }
 
-
     static Joiner withCommas = Joiner.on(",");
     static Joiner withTabs = Joiner.on("\t");
+
+    private static void format(Format format, Quote quoteConvention, List<String> names, JsonNode fields, PrintStream out) {
+        switch (format) {
+            case JSON:
+                out.printf("%s\n", fields.toString());
+                break;
+            case TSV:
+                printDelimited(quoteConvention, names, fields, "\t", out);
+                break;
+            case CSV:
+                printDelimited(quoteConvention, names, fields, ",", out);
+                break;
+        }
+    }
+
+    private static void printDelimited(Quote quoteConvention, List<String> names, JsonNode fields, String separator, PrintStream out) {
+        String x = "";
+        for (String name : names) {
+            switch (quoteConvention) {
+                case DOUBLE_QUOTE:
+                    out.printf("%s%s", x, fields.get(name));
+                    break;
+                case OPTIMISTIC:
+                    out.printf("%s%s", x, fields.get(name).asText());
+                    break;
+                case BACK_SLASH:
+                    out.printf("%s%s", x, fields.get(name).asText().replaceAll("([,\t\\s\\\\])", "\\\\$1"));
+                    break;
+            }
+            x = separator;
+        }
+        out.printf("\n");
+    }
 
     public static enum Format {
         JSON, TSV, CSV, XML
@@ -360,8 +419,11 @@ public class Synth {
         @Option(name = "-count", handler = SizeParser.class)
         int count = 1000;
 
-        @Option(name = "-schema")
+        @Option(name = "-schema", required = true)
         File schema;
+
+        @Option(name = "-template")
+        File template;
 
         @Option(name = "-format")
         Format format = Format.CSV;
