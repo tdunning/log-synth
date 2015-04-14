@@ -419,10 +419,10 @@ public class Synth {
         @Option(name = "-count", handler = SizeParser.class)
         int count = 1000;
 
-        @Option(name = "-schema")
+        @Option(name = "-schema", required = true)
         File schema;
 
-        @Option(name = "-template", required = false)
+        @Option(name = "-template")
         File template;
 
         @Option(name = "-format")
