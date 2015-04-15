@@ -560,3 +560,68 @@ This approach uses Freemarker template engine to render custom templates. The da
 ## Template notation
 
 To print the value of a variable in the template, use ${name.asText()} placeholder.
+
+To generate a sample vCard simply create a file template.txt:
+```
+BEGIN:VCARD
+VERSION:3.0
+N:${last_name.asText()};${first_name.asText()};;${title.asText()}
+ORG:Sample Org
+TITLE:${title.asText()}
+PHOTO;VALUE=URL;TYPE=GIF:http://thumbs.example.com/${filename.asText()}/${first_name.asText()?lower_case  }.gif
+TEL;TYPE=HOME,VOICE:${phone_number.asText()}
+ADR;TYPE=WORK:;;${address.asText()?split(" ")?join(";")}
+EMAIL;TYPE=PREF,INTERNET:${first_name.asText()[0]?lower_case}${last_name.asText()?lower_case}@example.com
+REV:${first_visit.asText()}
+END:VCARD
+```
+Then a schema file, let’s call it schema.txt:
+```xml
+[
+    {"name":"title", "class":"string", "dist":{"Mr":0.5, "Mrs.":0.14, "Miss":0.36}},
+    {"name":"first_name", "class":"name", "type":"first"},
+    {"name":"last_name", "class":"name", "type":"last"},
+
+  {"name": "filename", "class": "join", "separator": "/", "value": {
+          "class":"sequence",
+          "length":2,
+          "array":[
+              {"class":"string", "dist":{"small":10, "medium":5, "large":2}},
+              {"class":"string", "dist":{"high":10, "low":5, "mobile":15}}
+          ]
+      }
+  },
+
+  {"name": "phone_number", "class": "join", "separator": "-", "value": {
+          "class":"sequence",
+          "length":3,
+          "array":[
+              { "class": "int", "min": 100, "max": 999},
+              { "class": "int", "min": 100, "max": 999},
+              { "class": "int", "min": 100, "max": 999}
+          ]
+      }
+  },
+
+    {"name":"address", "class":"address"},
+    {"name":"first_visit", "class":"date", "format":"yyyy-MM-dd HH:mm:ssZ"}
+]
+```
+To invoke the log-synth, just do:
+
+./target/log-synth -count 5000 -schema schema.txt -template template.txt -format TEMPLATE -output output/
+
+The output documents will end up in the output/ folder as expected and they will look like:
+```
+BEGIN:VCARD
+VERSION:3.0
+N:Kittle;Gwendolyn;;Mr
+ORG:Sample Org
+TITLE:Mr
+PHOTO;VALUE=URL;TYPE=GIF:http://thumbs.example.com/small/mobile/gwendolyn.gif
+TEL;TYPE=HOME,VOICE:774-383-580
+ADR;TYPE=WORK:;;18033;Quaking;Brook;Avenue
+EMAIL;TYPE=PREF,INTERNET:gkittle@example.com
+REV:2013-07-14 01:37:08+0100
+END:VCARDBEGIN:VCARD
+```
