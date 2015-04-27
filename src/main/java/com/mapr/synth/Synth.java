@@ -79,7 +79,7 @@ public class Synth {
         Preconditions.checkArgument(opts.threads > 0 && opts.threads <= 2000,
                 "Must have at least one thread and no more than 2000");
 
-        Preconditions.checkArgument(opts.template != null && opts.template.exists(),
+        Preconditions.checkArgument(opts.template == null || opts.template.exists(),
                 "Please specify a valid template file");
 
         if (opts.threads > 1) {
