@@ -55,6 +55,8 @@ Queries have an overall frequency distribution that is long-tailed, but each use
 
 We also need to maintain an average response time per term. The response time for each query is exponentially distributed with a mean equal to the sum of the average response times for the terms. Response times for words are sampled either from an exponential distribution, from a log-gamma distribution or from a gamma distribution with a moderately low shape parameter so that we can have interestingly long tails for response time.
 
+<James: currently the response time is not returned>
+
 Users are assigned to IP addresses using a Pittman-Yor process with a discount of 0.9. This gives long-tailed distribution to the number of users per IP address. This results in 90% of all IP addresses having only a single user.
 
 Schema-driven Data Generation
