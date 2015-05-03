@@ -19,9 +19,16 @@
 
 package com.mapr.synth;
 
+import com.google.common.collect.ImmutableSet;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -30,10 +37,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class LogLine implements Comparable<LogLine> {
     private static AtomicInteger counter = new AtomicInteger();
 
+    // these add up to enough to cause 0.3% of the queries to be 5x slower
+    private static final Set<String> slowWords = ImmutableSet.of("company", "office", "boss", "law",
+            "chocolate", "drinking", "table", "english");
+    private final Random rand = new Random();
+
     private InetAddress ip;
     private long cookie;
     private List<String> query;
     private double t;
+    private final double responseTime;
     private int id = counter.addAndGet(1);
 
     public LogLine(double t, InetAddress ip, long cookie, List<String> query) {
@@ -41,13 +54,25 @@ public class LogLine implements Comparable<LogLine> {
         this.cookie = cookie;
         this.ip = ip;
         this.query = query;
+        this.responseTime = sampleResponseTime(query);
+    }
+
+    private double sampleResponseTime(List<String> query) {
+        double mean = 0;
+        for (String s : query) {
+            if (slowWords.contains(s)) {
+                mean = Math.max(mean, 50e-3 + rand.nextGaussian() * 10e-3);
+            } else {
+                mean = Math.max(mean, 10e-3 + rand.nextGaussian() * 2e-3);
+            }
+        }
+        return Math.exp(Math.log(mean) + rand.nextGaussian() / 3);
     }
 
     public LogLine(double t, User user) {
         this(t, user.getAddress(), user.getCookie(), user.getQuery());
     }
 
-    @Override
     public String toString() {
         Formatter r = new Formatter();
         r.format("{t: %.3f, cookie:\"%08x\", ip:\"%s\", query:", t, cookie, ip.getHostAddress());
@@ -87,5 +112,9 @@ public class LogLine implements Comparable<LogLine> {
         } else {
             return this.id - o.id;
         }
+    }
+
+    public double getResponseTime() {
+        return responseTime;
     }
 }

@@ -24,14 +24,14 @@ On a mac, this can help get the right version of Java
 
     java -cp target/log-synth-0.1-SNAPSHOT-jar-with-dependencies.jar com.mapr.synth.Main -count 1M log users
 
-This program will produce a line of output on the standard output for each 10,000 lines of log produced.  Each line will contain the number of log lines produced so far and the number of unique users in the user profile database.
+This program will produce a line of output on the standard output for each 50,000 lines of log produced.  Each line will contain the number of log lines produced so far and the amount of time taken for the last tranche.  The first tranche includes the time required to generate the user database and thus is much slower.
 
 
 ## The Data Source
 
 The data source here is a set of heavily biased random numbers to generate traffic sources, response times and queries. In order to give a realistic long-tail experience the data are generated using special random number generators available in the Mahout library.
 
-There are three basic entities involved in the random process that generates these logs that are IP addresses, users and queries. Users have a basic traffic rate and a variable number of users sit behind each IP address. Queries are composed of words which are generated somewhat differently by each user. The response time for each query is determined based on the terms in the queries with a very few terms causing much longer queries than others. Each log line contains an IP address, a user cookie, a query and a response time.
+There are three basic entities involved in the random process that generates these logs that are IP addresses, users and queries. Users have a basic traffic rate and a variable number of users sit behind each IP address. Queries are composed of words which are generated somewhat differently by each user. The response time for each query is determined based on the terms in the queries with a very few terms causing much longer queries than others. Each log line contains an IP address, a user cookie, a query and a response time.  Response time is only printed if requested.
 
 Logs of various sizes can be generated using the generator tools.
 
@@ -51,9 +51,15 @@ The questions we would like to answer include:
 
 The general process for generating log lines is to select a user, possibly one we have not seen before. If the user is new, then we need to select an IP address for the user. Otherwise, we remember the IP address for each user.
 
-Queries have an overall frequency distribution that is long-tailed, but each user has a variation on that distribution. In order to model this, we sample each user's queries from a per-user Pittman-Yor process. In order to make users have similar query term distributions, each user's query term distribution is initialized from a Pittman-Yor process that has already been sampled a number of times.
+Query words have an overall frequency distribution that is long-tailed. The program currently uses the same query distribution for every user, but 
+it is possible for each user has a variation on that distribution. In order to model this, we sample each user's queries from a per-user Pittman-Yor process. 
+In order to make users have similar query term distributions, each user's query term distribution is initialized from a Pittman-Yor process that has already 
+been sampled a number of times. Having a separate query distribution for each user costs a considerable amount of time and memory and thus is not implemented
+in the current code. It can be enabled by modifying the user construction loop in the constructor for LogGenerator.
 
-We also need to maintain an average response time per term. The response time for each query is exponentially distributed with a mean equal to the sum of the average response times for the terms. Response times for words are sampled either from an exponential distribution, from a log-gamma distribution or from a gamma distribution with a moderately low shape parameter so that we can have interestingly long tails for response time.
+We also need to maintain an average response time per term. The response time for each query is log-normal distributed 
+with a mean equal to the max of the average response times for the terms. Response times for words are sampled 
+from a normal distribution with mean of 10ms for fast words and 50ms for slow words.
 
 Users are assigned to IP addresses using a Pittman-Yor process with a discount of 0.9. This gives long-tailed distribution to the number of users per IP address. This results in 90% of all IP addresses having only a single user.
 

@@ -28,19 +28,21 @@ import java.io.Writer;
  * Log lines can be formated in different ways
  */
 public abstract class LogLineFormatter {
+    private final boolean withResponseTimes;
     private PrintWriter log;
 
-    public LogLineFormatter(Writer log) {
+    public LogLineFormatter(Writer log, boolean withResponseTimes) {
         this.log = new PrintWriter(log);
+        this.withResponseTimes = withResponseTimes;
     }
 
-    public static LogLineFormatter create(BufferedWriter log, Main.Format format) {
+    public static LogLineFormatter create(BufferedWriter log, Main.Format format, boolean withResponseTimes) {
         switch (format) {
             case JSON:
-                return new JsonFormatter(log);
+                return new JsonFormatter(log, withResponseTimes);
             case LOG:
             case CSV:
-                return new CsvFormatter(log);
+                return new CsvFormatter(log, withResponseTimes);
         }
         // can't happen
         return null;
@@ -53,8 +55,8 @@ public abstract class LogLineFormatter {
     }
 
     private static class CsvFormatter extends LogLineFormatter {
-        public CsvFormatter(BufferedWriter log) {
-            super(log);
+        public CsvFormatter(BufferedWriter log, boolean withResponseTimes) {
+            super(log, withResponseTimes);
         }
 
         public void write(LogLine sample) throws IOException {
@@ -64,13 +66,17 @@ public abstract class LogLineFormatter {
                 getLog().format("%s%s", sep, term);
                 sep = " ";
             }
-            getLog().format("\"\n");
+            getLog().format("\"");
+            if (super.withResponseTimes) {
+                getLog().printf(",%.1f", sample.getResponseTime() * 1000);
+            }
+            getLog().format("\n");
         }
     }
 
     private static class JsonFormatter extends LogLineFormatter {
-        public JsonFormatter(BufferedWriter log) {
-            super(log);
+        public JsonFormatter(BufferedWriter log, boolean withResponseTimes) {
+            super(log, withResponseTimes);
         }
 
         public void write(LogLine sample) throws IOException {
@@ -79,6 +85,10 @@ public abstract class LogLineFormatter {
             for (String term : sample.getQuery()) {
                 getLog().format("%s\"%s\"", sep, term);
                 sep = ", ";
+            }
+            getLog().format("]");
+            if (super.withResponseTimes) {
+                getLog().printf(", responseTime: %.1f", sample.getResponseTime() * 1000);
             }
             getLog().format("]}\n");
         }

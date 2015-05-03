@@ -47,14 +47,14 @@ public class Main {
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
-            System.err.println("Usage: -count <number>G|M|K [ -users number ] [-format JSON|LOG|CSV ] log-file user-profiles");
+            System.err.println("Usage: -count <number>G|M|K [ -users number ] [-format JSON|LOG|CSV ] [-with-response-time] log-file user-profiles");
             System.exit(1);
         }
 
 
         LogGenerator lg = new LogGenerator(opts.users);
         BufferedWriter log = Files.newWriter(new File(opts.files.get(0)), Charsets.UTF_8);
-        LogLineFormatter out = LogLineFormatter.create(log, opts.format);
+        LogLineFormatter out = LogLineFormatter.create(log, opts.format, opts.withResponseTimes);
         long t0 = System.nanoTime();
         for (int i = 0; i < opts.count; i++) {
             if (i % 50000 == 0) {
@@ -88,6 +88,9 @@ public class Main {
 
         @Option(name = "-format")
         Format format = Format.LOG;
+
+        @Option(name = "-with-response-times")
+        boolean withResponseTimes = false;
 
         @Argument()
         List<String> files;
