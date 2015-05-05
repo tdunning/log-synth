@@ -80,7 +80,7 @@ public abstract class LogLineFormatter {
         }
 
         public void write(LogLine sample) throws IOException {
-            getLog().printf("{t: %.3f, cookie:\"%08x\", ip:\"%s\", query:", sample.getT(), sample.getCookie(), sample.getIp().getHostAddress());
+            getLog().printf("{\"t\": %.3f, \"cookie\":\"%08x\", \"ip\":\"%s\", \"query\":", sample.getT(), sample.getCookie(), sample.getIp().getHostAddress());
             String sep = "[";
             for (String term : sample.getQuery()) {
                 getLog().format("%s\"%s\"", sep, term);
@@ -88,7 +88,7 @@ public abstract class LogLineFormatter {
             }
             getLog().format("]");
             if (super.withResponseTimes) {
-                getLog().printf(", responseTime: %.1f", sample.getResponseTime() * 1000);
+                getLog().printf(", \"responseTime\": %.1f", sample.getResponseTime() * 1000);
             }
             getLog().format("]}\n");
         }
