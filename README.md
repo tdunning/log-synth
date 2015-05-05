@@ -61,6 +61,8 @@ We also need to maintain an average response time per term. The response time fo
 with a mean equal to the max of the average response times for the terms. Response times for words are sampled 
 from a normal distribution with mean of 10ms for fast words and 50ms for slow words.
 
+<James: currently the response time is not returned>
+
 Users are assigned to IP addresses using a Pittman-Yor process with a discount of 0.9. This gives long-tailed distribution to the number of users per IP address. This results in 90% of all IP addresses having only a single user.
 
 Schema-driven Data Generation
