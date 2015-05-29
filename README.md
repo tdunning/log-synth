@@ -250,6 +250,27 @@ This example produces results that always have three values, each of which has a
       ]
     }
 
+Normally a `sequence` produces arrays of result whose length is randomly chosen from an exponential distribution.  
+If you set the `lengthDistribution` parameter instead of the `length` parameter, then you can control how the length is 
+chosen. Somewhat confusingly, if you set `lengthDistribution` to a constant you get lists with the same length every 
+time.  Here are some examples:
+
+    {
+      // generates lists with exactly 5 samples each
+      "name": "fixed-length",
+      "class":"sequence",
+      "lengthDistribution":5
+      "base": ...
+    }
+
+    {
+      // generates lists with 5-10 samples in each
+      "name": "fixed-length",
+      "class":"sequence",
+      "lengthDistribution":{"class":"integer", "min":5, "max":10},
+      "base": ...
+    }
+
 **`ssn`** - Samples somewhat realistic SSN's
 
 A social security number (SSN) has fields `ssn`, `state`, `description` and `type`.  The `ssn` field is what you might expect.  The
