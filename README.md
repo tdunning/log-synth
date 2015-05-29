@@ -361,6 +361,17 @@ parameters.
 
 When setting `dof` and `scale`, these are translated as `alpha` = `dof` / 2, `beta` = `scale` * `dof` / 2.
 
+If desired, the mean step size can also be set either to a constant or a distribution.  This helps model walks that
+have a consistent drift.  As an example, we could model the sampling times for a data acquisition that makes a
+measurement every 100 microseconds with 2 microseconds of jitter this way:
+
+    {
+        "name": "t",
+        "class": "random-walk",
+        "mean":100,
+        "sd":5
+    }
+
     
 **`vin`** - Samples from sort of realistic VIN numbers.
 

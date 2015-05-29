@@ -34,14 +34,21 @@ import java.util.Random;
  */
 public class RandomWalkSampler extends FieldSampler {
     private static final JsonNode ONE = new DoubleNode(1);
+    private static final JsonNode ZERO = new DoubleNode(0);
     private static final int SEED_NOT_SET = new Random(1).nextInt();
 
     private int seed = SEED_NOT_SET;
 
-    FieldSampler sd = new FieldSampler() {
+    private FieldSampler sd = new FieldSampler() {
         @Override
         public JsonNode sample() {
             return ONE;
+        }
+    };
+    private FieldSampler mean = new FieldSampler() {
+        @Override
+        public JsonNode sample() {
+            return ZERO;
         }
     };
 
@@ -52,7 +59,7 @@ public class RandomWalkSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
-        double step = rand.nextGaussian() * sd.sample().asDouble();
+        double step = rand.nextGaussian() * sd.sample().asDouble() + mean.sample().asDouble();
         double newState = state.addAndGet(step);
 
         if (verbose) {
@@ -124,8 +131,27 @@ public class RandomWalkSampler extends FieldSampler {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    public void setSD(FieldSampler sd) {
-        this.sd = sd;
+    public void setSD(final JsonNode value) throws IOException {
+        if (value.isObject()) {
+            sd = new FieldSampler() {
+                FieldSampler base = FieldSampler.newSampler(value.toString());
+
+                @Override
+                public JsonNode sample() {
+                    return new DoubleNode(base.sample().asDouble());
+                }
+            };
+        } else {
+            sd = constant(value.asDouble());
+        }        init();
+    }
+
+    public void setMean(final JsonNode value) throws IOException {
+        if (value.isObject()) {
+            mean = FieldSampler.newSampler(value.toString());
+        } else {
+            mean = constant(value.asDouble());
+        }
         init();
     }
 
