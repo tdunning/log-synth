@@ -641,7 +641,7 @@ This approach uses Freemarker template engine to render custom templates. The da
 To print the value of a variable in the template, use ${name.asText()} placeholder.
 
 To generate a sample vCard simply create a file template.txt:
-```json
+```
 BEGIN:VCARD
 VERSION:3.0
 N:${last_name.asText()};${first_name.asText()};;${title.asText()}
