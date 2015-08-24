@@ -90,7 +90,10 @@ The allowable arguments include:
 
 See the longer examples below.
 
-`-format CSV | TSV | JSON | XML` Defines what format the output should use.  Note that XML format assumes that the root element is called "root" and each record element should be callled "OBJECT_NODE".  There is no way that is what people really want.  Send email with what is really needed.
+`-format CSV | TSV | JSON | XML` Defines what format the output should use.  Note that XML format assumes that the root element is called "root" and each record element should be callled "OBJECT_NODE".  There is no way that is what people really want.  Send email with what is really needed.  Note that the JSON output is a list of individual maps, to convert it to a JSON array, use the following sed command:
+```
+sed -e '1 s/^/[\n/' -e '$ s/$/\n]/' -e '$ ! s/$/,/' oldfile.json > newfile.json
+```
 
  `-output output-directory-name`    Designates an output directory. Output files will be created in this directory named according to the pattern `synth-<thread>` where `<thread>` part is replaced by the thread number that created the file.
 
