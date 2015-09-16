@@ -171,6 +171,7 @@ public class Synth {
         private final AtomicLong rowCount;
         private final int count;
         private final int fileNumber;
+        private final String extension;
         int localCount;
         private ThreadMXBean mx;
         private AtomicLong wallTime;
@@ -203,6 +204,21 @@ public class Synth {
             this.count = count;
             this.fileNumber = fileNumber;
             this.template = template;
+            switch (opts.format) {
+                default:
+                case JSON:
+                    this.extension = ".json";
+                    break;
+                case TSV:
+                    this.extension = ".tsv";
+                    break;
+                case CSV:
+                    this.extension = ".csv";
+                    break;
+                case XML:
+                    this.extension = ".xml";
+                    break;
+            }
             localCount = this.count;
             lastWall = new AtomicLong(System.nanoTime());
             wallTime = new AtomicLong(lastWall.get());
@@ -218,7 +234,7 @@ public class Synth {
             if ("-".equals(opts.output)) {
                 return generateFile(opts, sampler, template, System.out, localCount);
             } else {
-                Path outputPath = new File(opts.output, String.format("synth-%04d", fileNumber)).toPath();
+                Path outputPath = new File(opts.output, String.format("synth-%04d.%s", fileNumber, extension)).toPath();
 
                 try (PrintStream out = new PrintStream(Files.newOutputStream(outputPath,
                         StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING))) {
