@@ -70,9 +70,6 @@ public class Engine {
     // this determines the time resolution of our computation (in s)
     private double dt = 0.01;
 
-    // this determines how often we emit a sample (in s)
-    private double sampleTime = 10;
-
     private double currentTime = 0;
 
     // throttle is a slow threshold function that
@@ -147,6 +144,10 @@ public class Engine {
         }
     }
 
+    /**
+     * Generates some sample data for plotting in R
+     * @param args No command line args
+     */
     public static void main(String[] args) {
         Engine car = new Engine();
         // compute time to 90 MPH
@@ -164,5 +165,17 @@ public class Engine {
             System.out.printf("%.2f, %.1f, %.1f, %.1f, %.1f, %d\n", t, speedTarget, car.currentSpeed, car.currentThrottle, car.currentRPM, car.currentGear);
         }
 
+    }
+
+    public double getSpeed() {
+        return currentSpeed;
+    }
+
+    public double getThrottle() {
+        return currentThrottle;
+    }
+
+    public double getRpm() {
+        return currentRPM;
     }
 }
