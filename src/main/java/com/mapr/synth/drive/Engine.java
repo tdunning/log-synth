@@ -66,6 +66,7 @@ public class Engine {
     // assuming 150 MPH absolute max speed
     private static final double DRAG_COEFFICIENT = 0.4875334;
     private static final double SHIFT_TIME = 0.1;
+    private static final double BRAKING_GAIN = 1;
 
     // this determines the time resolution of our computation (in s)
     private double dt = 0.01;
@@ -76,6 +77,7 @@ public class Engine {
     // rises asymptotically to a maximum as long as we are too slow
     // and falls fairly more quickly when we are too fast
     private double currentThrottle = 0;
+    private double brakeForce = 0;
     private double shiftTimeOut = 0;
 
     private int currentGear = 0;
@@ -83,15 +85,17 @@ public class Engine {
     private double currentSpeed = 0;
     private double currentRPM = 0;
     private double currentAcceleration;
+    private double currentDistance = 0;
 
     /**
      * Runs the simulation up to just past the desired sampleTime with a specified
      * target speed.
      *
-     * @param sampleTime  When to stop the simulation and return
-     * @param speedTarget The speed we would like to reach
+     * @param sampleTime   When to stop the simulation and return
+     * @param speedTarget  The speed we would like to reach
+     * @param maxBrake     The maximum amount of braking in g's. Typically 0.1 for gentle driving, 1 for maniacs.
      */
-    public void stepToTime(double sampleTime, double speedTarget) {
+    public void stepToTime(double sampleTime, double speedTarget, double maxBrake) {
         while (currentTime < sampleTime) {
 
             // throttle rises or falls quite fast unless we are close to the desired speed
@@ -131,40 +135,26 @@ public class Engine {
             // the extra drag is engine drag
             double dragForce = DRAG_COEFFICIENT * currentSpeed * currentSpeed;
 
+            if (maxBrake > 0 && currentThrottle < 2 && speedTarget < currentSpeed) {
+                brakeForce += VEHICLE_MASS * BRAKING_GAIN * (currentSpeed - speedTarget) * dt;
+                brakeForce = Math.min(brakeForce, VEHICLE_MASS * maxBrake * Constants.G);
+            } else {
+                brakeForce = 0;
+            }
+
             // force applied to change speed is a simple net, but with a hack to avoid infinite torque at zero speed
-            double netForce = engineForce - dragForce;
+            double netForce = engineForce - dragForce - brakeForce;
 
             // note that we don't allow crazy acceleration ... the tires would break loose
             currentAcceleration = Math.min(8, netForce / VEHICLE_MASS);
 
+            double oldSpeed = currentSpeed;
             currentSpeed += currentAcceleration * dt;
             currentSpeed = Math.max(0, currentSpeed);
+            currentDistance += (oldSpeed + currentSpeed) * dt / 2;
 
             currentTime += dt;
         }
-    }
-
-    /**
-     * Generates some sample data for plotting in R
-     * @param args No command line args
-     */
-    public static void main(String[] args) {
-        Engine car = new Engine();
-        // compute time to 90 MPH
-        double[] target = {20, 40, 20, 30, 10, 0};
-        double t = 0;
-        for (; t < 240; t += 0.1) {
-            double speedTarget = target[(int) t / 40] * 0.44704;
-            car.stepToTime(t, speedTarget);
-            System.out.printf("%.2f, %.1f, %.1f, %.1f, %.1f, %d\n", t, speedTarget, car.currentSpeed, car.currentThrottle, car.currentRPM, car.currentGear);
-        }
-
-        for (; t < 300; t += 0.1) {
-            double speedTarget = 90 * 0.44704;
-            car.stepToTime(t, speedTarget);
-            System.out.printf("%.2f, %.1f, %.1f, %.1f, %.1f, %d\n", t, speedTarget, car.currentSpeed, car.currentThrottle, car.currentRPM, car.currentGear);
-        }
-
     }
 
     public double getSpeed() {
@@ -177,5 +167,17 @@ public class Engine {
 
     public double getRpm() {
         return currentRPM;
+    }
+
+    public int getGear() {
+        return currentGear;
+    }
+
+    public void setDistance(double distance) {
+        this.currentDistance = distance;
+    }
+
+    public double getDistance() {
+        return currentDistance;
     }
 }
