@@ -20,13 +20,19 @@
 package com.mapr.synth.drive;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.junit.Assert;
 import org.junit.Test;
+import processing.core.PApplet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.Assert.*;
 
@@ -34,8 +40,8 @@ public class DriveTest {
     @Test
     public void testPlanning() throws FileNotFoundException {
         Random rand = new Random(3);
-        Drive.GeoPoint start = new Drive.GeoPoint((rand.nextDouble() - 0.5) * Math.PI / 2, rand.nextDouble() * Math.PI * 2);
-        Drive.GeoPoint end = start.nearby(10, rand);
+        GeoPoint start = new GeoPoint((rand.nextDouble() - 0.5) * Math.PI / 2, rand.nextDouble() * Math.PI * 2);
+        GeoPoint end = start.nearby(10, rand);
 
         Vector3D east = start.east();
         Vector3D north = start.north(east);
@@ -44,16 +50,16 @@ public class DriveTest {
             double highway = 0;
             int n = 0;
             for (int i = 0; i < 50; i++) {
-                List<Drive.Segment> plan = Drive.plan(start, end, rand);
+                List<Car.Segment> plan = Car.plan(start, end, rand);
                 assertTrue(plan.size() < 20);
                 Vector3D here = project(east, north, start.as3D());
-                for (Drive.Segment segment : plan) {
+                for (Car.Segment segment : plan) {
                     Vector3D step = project(east, north, segment.getEnd().as3D());
                     n++;
-                    if (segment instanceof Drive.Highway) {
+                    if (segment instanceof Car.Highway) {
                         highway++;
                     }
-                    out.printf("%d, %d, %.4f, %.4f, %.4f, %.4f\n", i, (segment instanceof Drive.Local) ? 1 : 0,
+                    out.printf("%d, %d, %.4f, %.4f, %.4f, %.4f\n", i, (segment instanceof Car.Local) ? 1 : 0,
                             here.getX(), here.getY(), step.getX(), step.getY());
                     here = step;
                 }
@@ -69,8 +75,8 @@ public class DriveTest {
     @Test
     public void testDriving() throws FileNotFoundException {
         Random rand = new Random(3);
-        Drive.GeoPoint start = new Drive.GeoPoint((rand.nextDouble() - 0.5) * Math.PI / 2, rand.nextDouble() * Math.PI * 2);
-        Drive.GeoPoint end = start.nearby(10, rand);
+        GeoPoint start = new GeoPoint((rand.nextDouble() - 0.5) * Math.PI / 2, rand.nextDouble() * Math.PI * 2);
+        GeoPoint end = start.nearby(10, rand);
 
         final Vector3D east = start.east();
         final Vector3D north = start.north(east);
@@ -79,31 +85,50 @@ public class DriveTest {
             for (int i = 0; i < 50; i++) {
                 final int trial = i;
                 double t = 0;
-                final Engine car = new Engine();
+                Car car = new Car();
 
-                List<Drive.Segment> plan = Drive.plan(start, end, rand);
+                List<Car.Segment> plan = Car.plan(start, end, rand);
                 assertTrue(plan.size() < 20);
-                final Drive.GeoPoint currentPosition = new Drive.GeoPoint(start.as3D());
-                for (Drive.Segment segment : plan) {
-                    t = Drive.simulate(t, currentPosition, rand, segment, car, new Drive.Callback() {
+                final GeoPoint currentPosition = new GeoPoint(start.as3D());
+                for (Car.Segment segment : plan) {
+                    t = car.simulate(t, currentPosition, rand, segment, new Car.Callback() {
                         @Override
-                        void call(double t, Engine arg, Drive.GeoPoint position) {
+                        void call(double t, Engine arg, GeoPoint position) {
                             final Vector3D here = project(east, north, currentPosition.as3D());
+                            Engine engine = car.getEngine();
                             out.printf("%d, %.2f, %.2f, %.2f, %.1f, %.1f, %.1f, %d\n",
                                     trial, t, here.getX(), here.getY(),
-                                    car.getRpm(), car.getThrottle(), car.getSpeed(), car.getGear());
+                                    engine.getRpm(), engine.getThrottle(), engine.getSpeed(), engine.getGear());
                         }
                     });
-                    assertEquals(0, currentPosition.distance(segment.getEnd()), 0.01);
+                    assertEquals(0, currentPosition.distance(segment.getEnd()), 0.04);
                 }
 
                 // should arrive at our destination!
-                assertEquals(0.0, currentPosition.distance(end), 0.01 );
+                assertEquals(0.0, currentPosition.distance(end), 0.01);
             }
         }
     }
 
-    Vector3D project(Vector3D east, Vector3D north, Vector3D step) {
+    @Test
+    public void testCrazyPlan() {
+        Random rand = new Random(3);
+        GeoPoint start = new GeoPoint(new Vector3D(0.84338521, 0.40330691, 0.35502805));
+        GeoPoint end = new GeoPoint(new Vector3D(0.84293820, 0.40512281, 0.35402076));
+        for (int i = 0; i < 100000; i++) {
+            List<Car.Segment> plan = Car.plan(start, end, rand);
+            GeoPoint old = start;
+            for (Car.Segment segment : plan.subList(1, plan.size())) {
+                double distance = old.distance(segment.getEnd());
+                if (distance > 100 || Double.isNaN(distance)) {
+                    Assert.fail("Got bad distance");
+                }
+                old = segment.getEnd();
+            }
+        }
+    }
+
+    static Vector3D project(Vector3D east, Vector3D north, Vector3D step) {
         return new Vector3D(step.dotProduct(east) * Constants.EARTH_RADIUS_KM, step.dotProduct(north) * Constants.EARTH_RADIUS_KM, 0);
     }
 }

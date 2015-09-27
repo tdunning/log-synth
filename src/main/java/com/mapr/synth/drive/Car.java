@@ -64,29 +64,21 @@ import static java.lang.Math.log;
  * Urban segments also have more variable and lower speeds. Highway
  * segments have relative consistent high speeds.
  */
-public class Drive {
-    // how far away must points be to be considered distinct?
-    private static final double GEO_FUZZ = 0.005;
-    private static final double ERRAND = 0.5;
-    private static final double ERRAND_SIZE_KM = 20;
-
+public class Car {
     // how well do the brakes work
     private static final double BRAKING_ACCELERATION = 0.1;
 
-    // convert MPH to m/s
-    private static final double MPH = (5280 * 12 * 2.54) / (100 * 3600);
+    private Engine engine;
 
-    Random rand = new Random();
+    public Car(Engine engine) {
+        this.engine = engine;
+    }
 
-    GeoPoint home;
-    GeoPoint work;
+    public Car() {
+        this(new Engine());
+    }
 
-    List<Segment> currentTrip = Lists.newArrayList();
-    GeoPoint currentPosition;
-
-    double sampleTime = 1;
-
-    public static double simulate(double t, GeoPoint currentPosition, Random rand, Segment segment, Engine car, Callback progress) {
+    public double simulate(double t, GeoPoint currentPosition, Random rand, Segment segment, Callback progress) {
         double targetSpeed = segment.travelSpeed();
         double currentSpeed = 0;
         final double dt = 1;
@@ -94,11 +86,12 @@ public class Drive {
 
         Vector3D start = currentPosition.as3D();
         double distanceToGo = currentPosition.distance(segment.end);
-        car.setDistance(0);
+        engine.setDistance(0);
         Vector3D travelDirection = segment.end.as3D().subtract(currentPosition.as3D()).normalize();
-        while (distanceToGo > GEO_FUZZ) {
+        double previousDistance = distanceToGo;
+        while (distanceToGo <= previousDistance) {
             if (rand.nextDouble() < 0.05) {
-                targetSpeed = Math.max(20 * MPH, targetSpeed + (rand.nextInt(5) - 2) * 5 * MPH);
+                targetSpeed = Math.max(20 * Constants.MPH, targetSpeed + (rand.nextInt(5) - 2) * 5 * Constants.MPH);
             }
             targetSpeed = Math.min(segment.maxSpeed(), targetSpeed);
 
@@ -108,13 +101,60 @@ public class Drive {
                 currentSpeed -= dv;
             }
             currentSpeed = Math.min(currentSpeed, maxSpeed(distanceToGo * 1000, segment.exitSpeed()));
-            car.stepToTime(t, currentSpeed, BRAKING_ACCELERATION);
+            engine.stepToTime(t, currentSpeed, BRAKING_ACCELERATION);
             t += dt;
-            currentPosition.setPosition(start.add(travelDirection.scalarMultiply(car.getDistance() / 1000 / Constants.EARTH_RADIUS_KM)));
-            progress.call(t, car, currentPosition);
+            currentPosition.setPosition(start.add(travelDirection.scalarMultiply(engine.getDistance() / 1000 / Constants.EARTH_RADIUS_KM)));
+            progress.call(t, engine, currentPosition);
+            previousDistance = distanceToGo;
             distanceToGo = currentPosition.distance(segment.end);
         }
         return t;
+    }
+
+    /**
+     * Produces a sequenct of segments that result in travel from start to end.
+     *
+     * @param start Where the trip starts
+     * @param end   Where the trip ends
+     * @param rand  Random number generator to use
+     * @return A list of trip segments
+     */
+    public static List<Segment> plan(GeoPoint start, GeoPoint end, Random rand) {
+        GeoPoint here = start;
+        List<Segment> plan = Lists.newArrayList();
+        double distanceToGo = here.distance(end);
+        while (distanceToGo > Constants.GEO_FUZZ && here.distance(start) < 3) {
+            Local step = new Local(here, end, rand);
+            plan.add(step);
+            here = step.getEnd();
+            distanceToGo = here.distance(end);
+        }
+        while (distanceToGo > Constants.GEO_FUZZ) {
+            if (pickHighway(distanceToGo, rand)) {
+                Highway step = new Highway(end.nearby(distanceToGo / 10, rand));
+                plan.add(step);
+                here = step.getEnd();
+            } else {
+                Local step = new Local(here, end, rand);
+                plan.add(step);
+                here = step.getEnd();
+            }
+            distanceToGo = here.distance(end);
+        }
+        return plan;
+    }
+
+    double driveTo(Random rand, double t, GeoPoint start, GeoPoint end, Callback callback) {
+        List<Segment> plan = plan(start, end, rand);
+        final GeoPoint currentPosition = new GeoPoint(start.as3D());
+        for (Segment segment : plan) {
+            t = simulate(t, currentPosition, rand, segment, callback);
+        }
+        return t;
+    }
+
+    public Engine getEngine() {
+        return engine;
     }
 
     public static abstract class Callback {
@@ -155,101 +195,6 @@ public class Drive {
         return log(u / (1 - u)) < logOdds;
     }
 
-    /**
-     * Produces a sequenct of segments that result in travel from start to end.
-     *
-     * @param start Where the trip starts
-     * @param end   Where the trip ends
-     * @param rand  Random number generator to use
-     * @return A list of trip segments
-     */
-    public static List<Segment> plan(GeoPoint start, GeoPoint end, Random rand) {
-        GeoPoint here = start;
-        List<Segment> plan = Lists.newArrayList();
-        double distanceToGo = here.distance(end);
-        while (distanceToGo > GEO_FUZZ && here.distance(start) < 3) {
-            Local step = new Local(here, end, rand);
-            plan.add(step);
-            here = step.getEnd();
-            distanceToGo = here.distance(end);
-        }
-        while (distanceToGo > GEO_FUZZ) {
-            if (pickHighway(distanceToGo, rand)) {
-                Highway step = new Highway(end.nearby(distanceToGo / 10, rand));
-                plan.add(step);
-                here = step.getEnd();
-            } else {
-                Local step = new Local(here, end, rand);
-                plan.add(step);
-                here = step.getEnd();
-            }
-            distanceToGo = here.distance(end);
-        }
-        return plan;
-    }
-
-    public static class GeoPoint {
-        private static final Vector3D X = new Vector3D(1, 0, 0);
-        private static final Vector3D Z = new Vector3D(0, 0, 1);
-
-        Vector3D r;
-
-        public GeoPoint(double latitude, double longitude) {
-            double c = Math.cos(latitude);
-            r = new Vector3D(Math.cos(longitude) * c, Math.sin(longitude) * c, Math.sin(latitude));
-        }
-
-        public GeoPoint(Vector3D r) {
-            this.r = r;
-        }
-
-        public Vector3D as3D() {
-            return r;
-        }
-
-        public double distance(GeoPoint x) {
-            // the dot product could also be used here, but we expect small distances mostly
-            // so the sine formulation is more accurate
-            return Constants.EARTH_RADIUS_KM * Math.asin(r.crossProduct(x.r).getNorm());
-        }
-
-        public GeoPoint nearby(double distance, Random rand) {
-            distance = distance / Constants.EARTH_RADIUS_KM;
-            double u = rand.nextGaussian();
-            double v = rand.nextGaussian();
-            return project(distance * u, distance * v);
-        }
-
-        public GeoPoint project(double u, double v) {
-            Vector3D ux = east();
-            Vector3D vx = north(ux);
-
-            return new GeoPoint(r.add(ux.scalarMultiply(u).add(vx.scalarMultiply(v))).normalize());
-        }
-
-        public Vector3D north(Vector3D ux) {
-            return r.crossProduct(ux).normalize();
-        }
-
-        public Vector3D east(Vector3D r) {
-            Vector3D ux = r.crossProduct(Z);
-            if (ux.getNorm() < 1e-4) {
-                // near the poles (i.e. < 640 meters from them), the definition of east is difficult
-                ux = this.r.crossProduct(X);
-            }
-            ux = ux.normalize();
-            return ux;
-        }
-
-        public Vector3D east() {
-            return east(r);
-        }
-
-        public void setPosition(Vector3D position) {
-            this.r = position;
-        }
-    }
-
     public static class Highway extends Segment {
         public Highway(GeoPoint end) {
             super.end = end;
@@ -257,32 +202,18 @@ public class Drive {
 
         @Override
         public double exitSpeed() {
-            return 30 * MPH;
+            return 30 * Constants.MPH;
         }
 
         @Override
         public double travelSpeed() {
-            return 65 * MPH;
+            return 65 * Constants.MPH;
         }
 
         @Override
         public double maxSpeed() {
-            return 75 * MPH;
+            return 75 * Constants.MPH;
         }
-    }
-
-    public static abstract class Segment {
-        private GeoPoint end;
-
-        public GeoPoint getEnd() {
-            return end;
-        }
-
-        public abstract double travelSpeed();
-
-        public abstract double maxSpeed();
-
-        public abstract double exitSpeed();
     }
 
     public static class Local extends Segment {
@@ -315,18 +246,32 @@ public class Drive {
 
         @Override
         public double exitSpeed() {
-            return 5 * MPH;
+            return 5 * Constants.MPH;
         }
 
         @Override
         public double travelSpeed() {
-            return 35 * MPH;
+            return 35 * Constants.MPH;
         }
 
         @Override
         public double maxSpeed() {
-            return 45 * MPH;
+            return 45 * Constants.MPH;
 
         }
+    }
+
+    public static abstract class Segment {
+        private GeoPoint end;
+
+        public GeoPoint getEnd() {
+            return end;
+        }
+
+        public abstract double travelSpeed();
+
+        public abstract double maxSpeed();
+
+        public abstract double exitSpeed();
     }
 }

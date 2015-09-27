@@ -19,6 +19,8 @@
 
 package com.mapr.synth.drive;
 
+import java.io.Serializable;
+
 /**
  * Simulates engine behavior with automatic transmission.
  * <p>
@@ -37,7 +39,7 @@ package com.mapr.synth.drive;
  * So far, this works pretty well, but it doesn't the engine braking emulation
  * is kind of a hack.
  */
-public class Engine {
+public class Engine implements Serializable {
 
     private static final double THROTTLE_CONTROL_GAIN = 50;
     private static final double MAX_THROTTLE = 100;
@@ -87,13 +89,29 @@ public class Engine {
     private double currentAcceleration;
     private double currentDistance = 0;
 
+    public Engine() {
+    }
+
+    public Engine(Engine eng) {
+        this();
+        brakeForce = eng.brakeForce;
+        currentAcceleration = eng.currentAcceleration;
+        currentDistance = eng.currentDistance;
+        currentGear = eng.currentGear;
+        currentRPM = eng.currentRPM;
+        currentSpeed = eng.currentSpeed;
+        currentThrottle = eng.currentThrottle;
+        currentTime = eng.currentTime;
+        dt = eng.dt;
+    }
+
     /**
      * Runs the simulation up to just past the desired sampleTime with a specified
      * target speed.
      *
-     * @param sampleTime   When to stop the simulation and return
-     * @param speedTarget  The speed we would like to reach
-     * @param maxBrake     The maximum amount of braking in g's. Typically 0.1 for gentle driving, 1 for maniacs.
+     * @param sampleTime  When to stop the simulation and return
+     * @param speedTarget The speed we would like to reach
+     * @param maxBrake    The maximum amount of braking in g's. Typically 0.1 for gentle driving, 1 for maniacs.
      */
     public void stepToTime(double sampleTime, double speedTarget, double maxBrake) {
         while (currentTime < sampleTime) {
@@ -179,5 +197,9 @@ public class Engine {
 
     public double getDistance() {
         return currentDistance;
+    }
+
+    public void setTime(double time) {
+        this.currentTime = time;
     }
 }

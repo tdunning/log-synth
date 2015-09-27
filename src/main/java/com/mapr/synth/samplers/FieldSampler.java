@@ -25,7 +25,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.mapr.synth.OperatingSystemSampler;
+import com.mapr.synth.drive.Commuter;
 import org.apache.mahout.math.random.Sampler;
 
 import java.io.IOException;
@@ -36,6 +38,7 @@ import java.io.IOException;
         @JsonSubTypes.Type(value=DateSampler.class, name="date"),
         @JsonSubTypes.Type(value=Changer.class, name="changer"),
         @JsonSubTypes.Type(value=ArrivalSampler.class, name="event"),
+        @JsonSubTypes.Type(value=Commuter.class, name="commuter"),
         @JsonSubTypes.Type(value=ForeignKeySampler.class, name="foreign-key"),
         @JsonSubTypes.Type(value=IdSampler.class, name="id"),
         @JsonSubTypes.Type(value=IntegerSampler.class, name="int"),
@@ -76,6 +79,17 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
 
         return mapper.readValue(def, new TypeReference<FieldSampler>() {
         });
+    }
+
+    public static FieldSampler constant(final double v) {
+        return new FieldSampler() {
+            private DoubleNode sd = new DoubleNode(v);
+
+            @Override
+            public JsonNode sample() {
+                return sd;
+            }
+        };
     }
 
     public String getName() {

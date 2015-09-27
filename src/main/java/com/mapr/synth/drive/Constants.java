@@ -23,4 +23,8 @@ public class Constants {
     static final double EARTH_RADIUS_KM = 6371.39;
     // acceleration of gravity in m/s/s
     static final double G = 9.80665;
+    // convert MPH to m/s
+    static final double MPH = (5280 * 12 * 2.54) / (100 * 3600);
+    // how far away must points be to be considered distinct?
+    static final double GEO_FUZZ = 0.005;
 }

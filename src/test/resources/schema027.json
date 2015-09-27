@@ -1,0 +1,15 @@
+[
+    {
+        "name": "vehicle",
+        "class": "vin"
+    },
+    {
+        "name": "trip",
+        "class": "commuter",
+        "home": {
+            "class":"zip"  ,
+            "fields":"latitude, longitude, zip"
+        },
+        "work": 20
+    }
+]
