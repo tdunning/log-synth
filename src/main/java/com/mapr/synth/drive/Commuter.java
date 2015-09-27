@@ -146,7 +146,9 @@ public class Commuter extends FieldSampler {
     private void recordTrip(ArrayNode trips, double start, double duration, String type, double distance) {
         ObjectNode trip = trips.addObject();
         trip.put("t", duration);
-        trip.put("timestamp", df.format(new Date((long) (duration *1000))));
+        synchronized (df) {
+            trip.put("timestamp", df.format(new Date((long) (duration *1000))));
+        }
         trip.put("type", type);
         trip.put("distance_km", distance);
         trip.put("duration", duration);
@@ -217,7 +219,9 @@ public class Commuter extends FieldSampler {
                 ObjectNode sample = data.addObject();
                 position.asJson(sample);
                 sample.put("t", t);
-                sample.put("timestamp", df.format(new Date((long) (t * 1000))));
+                synchronized (df) {
+                    sample.put("timestamp", df.format(new Date((long) (t * 1000))));
+                }
                 sample.put("mph", car.getSpeed() * Constants.MPH);
                 sample.put("rpm", car.getRpm());
                 sample.put("throttle", car.getThrottle());
