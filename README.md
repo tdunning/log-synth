@@ -83,6 +83,60 @@ The following classes of values are allowed (in approximately alphabetical order
 ```json
 {"name":"br", "class":"browser"},
 ```
+**`commuter`** - Samples simulated automotive data from commuters.
+
+The idea here is that we have some number of commuters who each have a home and work location. These commuters
+tend to drive to work in the morning rush hour and home in the evening rush hour, although they may do either 
+commute at other times. While at home, these simulated commuters may decide to run some errands.
+
+Underneath this life-style model is a traffic model that has each driver pick a route either on local roads or
+on a highway. Speeds on local roads are lower and more variable than on highways. Highways also go nearly directly to
+the destination while local roads are bound to north-sout or east-west directions. The choice of which kind of 
+segment to pick depends mostly on the distance to the destination. Note that there is no pre-defined set of roads,
+the model just makes it up as segments are chosen. This means that there really isn't any sort of congestion modeling
+happening here, just variable speeds.
+
+Below the route planning model is a physical model that involves cars that respond to the control inputs generated
+at the higher levels to try to maintain desired speeds. The cars look roughly like they have moderately powerful
+engines with 7 speed automatic transmissions. The shift points are set to roughly match a diesel engine. All shifting
+is done based on fixed shift points and all throttle settings are done using a simple closed loop model that tries
+to match the desired road speed. The performance level of the cars is chosen to be moderately good in that they can
+do 0-60 MPH in about 7-8 seconds.
+
+The output from the `commuter` model is in the form of one record per simulated vehicle. The `commuter` model produces
+nested data that contains the location of the simulated home and work for the commuter as well as two logs of 
+activity. One log contains records describing each trip. These trip records describe the duration and distance and 
+purpose for each trip. The other log contains the engine data at 1 second intervals.
+
+Here is a sample schema for the `commuter` model:
+
+```json
+[
+    {
+        "name": "vehicle",
+        "class": "vin",
+        "verbose": "true"
+    },
+    {
+        "name": "trip",
+        "class": "commuter",
+        "home": {
+            "class":"zip"  ,
+            "fields":"latitude, longitude, zip"
+        },
+        "work": 20,
+        "start": "2015-09-03 0:00:00",
+        "end": "2015-09-04 0:00:00"
+    }
+]
+```
+
+Note that the commuter model produce a lot of data per record due to the frequent sampling of engine data. 
+This means that you won't get very many output records per second, especially if you ask for long histories.
+This also means that some tools may choke on the output due to the size of each input records. You can 
+generate just a single day of data at a time or you can request a feature to make the engine sampling frequency
+to be extended. Or we may need to figure out how to generate many records per vehicle. Your feedback would be
+helpful here if you need this model.
 **`country`** - Samples from ISO country codes.
 ```json
 {"name":"co", "class":"country"},
@@ -123,12 +177,12 @@ flattener with a dash appended.  For instance, this snippet
 
 ```json
 {
-   "name": "x"
+   "name": "x",
    "class": "flatten",
    "value": { "class": "zip", "fields": "latitude, longitude" },
 },
 {
-   "name": "y"
+   "name": "y",
    "class": "flatten",
    "value": { "class": "zip", "fields": "latitude, longitude" },
 }
