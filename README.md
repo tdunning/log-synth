@@ -177,12 +177,12 @@ flattener with a dash appended.  For instance, this snippet
 
 ```json
 {
-   "name": "x"
+   "name": "x",
    "class": "flatten",
    "value": { "class": "zip", "fields": "latitude, longitude" },
 },
 {
-   "name": "y"
+   "name": "y",
    "class": "flatten",
    "value": { "class": "zip", "fields": "latitude, longitude" },
 }
