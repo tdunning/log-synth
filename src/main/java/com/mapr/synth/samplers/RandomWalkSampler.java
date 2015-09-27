@@ -143,7 +143,8 @@ public class RandomWalkSampler extends FieldSampler {
             };
         } else {
             sd = constant(value.asDouble());
-        }        init();
+        }
+        init();
     }
 
     public void setMean(final JsonNode value) throws IOException {
@@ -161,14 +162,4 @@ public class RandomWalkSampler extends FieldSampler {
         }
     }
 
-    private FieldSampler constant(final double v) {
-        return new FieldSampler() {
-            private DoubleNode sd = new DoubleNode(v);
-
-            @Override
-            public JsonNode sample() {
-                return sd;
-            }
-        };
-    }
 }
