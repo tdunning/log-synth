@@ -114,7 +114,7 @@ Here is a sample schema for the `commuter` model:
 [
     {
         "name": "vehicle",
-        "class": "vin"
+        "class": "vin",
         "verbose": "true"
     },
     {
