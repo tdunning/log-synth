@@ -69,6 +69,7 @@ public class Car {
     private static final double BRAKING_ACCELERATION = 0.1;
 
     private Engine engine;
+    private double sampleTime = 1;
 
     public Car(Engine engine) {
         this.engine = engine;
@@ -81,7 +82,8 @@ public class Car {
     public double simulate(double t, GeoPoint currentPosition, Random rand, Segment segment, Callback progress) {
         double targetSpeed = segment.travelSpeed();
         double currentSpeed = 0;
-        final double dt = 1;
+        sampleTime = 1;
+        final double dt = sampleTime;
         final double dv = 0.1 * Constants.G * dt;
 
         Vector3D start = currentPosition.as3D();
@@ -155,6 +157,10 @@ public class Car {
 
     public Engine getEngine() {
         return engine;
+    }
+
+    public void setSampleTime(double sampleTime) {
+        this.sampleTime = sampleTime;
     }
 
     public static abstract class Callback {

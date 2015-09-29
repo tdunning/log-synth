@@ -96,6 +96,7 @@ public class Commuter extends FieldSampler {
     @Override
     public JsonNode sample() {
         final Car car = new Car();
+        car.setSampleTime(sampleTime);
 
         ObjectNode r = new ObjectNode(FACTORY);
         JsonNode homeLocation = homeSampler.sample();
@@ -146,6 +147,7 @@ public class Commuter extends FieldSampler {
     private void recordTrip(ArrayNode trips, double start, double duration, String type, double distance) {
         ObjectNode trip = trips.addObject();
         trip.put("t", duration);
+        //noinspection SynchronizeOnNonFinalField
         synchronized (df) {
             trip.put("timestamp", df.format(new Date((long) (duration *1000))));
         }
@@ -219,6 +221,7 @@ public class Commuter extends FieldSampler {
                 ObjectNode sample = data.addObject();
                 position.asJson(sample);
                 sample.put("t", t);
+                //noinspection SynchronizeOnNonFinalField
                 synchronized (df) {
                     sample.put("timestamp", df.format(new Date((long) (t * 1000))));
                 }
@@ -246,6 +249,10 @@ public class Commuter extends FieldSampler {
     @SuppressWarnings("UnusedDeclaration")
     public void setEnd(String end) throws ParseException {
         this.end = df.parse(end).getTime() / 1000.0;
+    }
+
+    public void setSampleTime(double sampleTime) {
+        this.sampleTime = sampleTime;
     }
 
     public void setHome(JsonNode value) throws IOException {
