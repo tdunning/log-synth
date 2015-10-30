@@ -1,0 +1,18 @@
+[
+    {
+        "name": "vehicle",
+        "class": "vin"
+    },
+    {
+        "class": "commuter",
+        "name": "sample",
+        "start": "2014-01-01 00:00:00",
+        "end":"2014-01-01 12:00:00",
+        "home": {
+            "class": "zip",
+            "fields": "latitude, longitude, zip"
+        },
+        "work": 20,
+        "flat": true
+    }
+]

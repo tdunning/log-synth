@@ -32,8 +32,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.TimeZone;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Emulates a commuter who drives to work and back home and who runs errands around their home.
@@ -70,6 +73,7 @@ public class Commuter extends FieldSampler {
 
     private static final double DAY_IN_S = 24 * 3600.0;
     private static final JsonNodeFactory FACTORY = JsonNodeFactory.withExactBigDecimals(false);
+    private static final int RECORD_LIMIT = 2000;
 
     // simulation period in seconds
     private double start;
@@ -78,7 +82,12 @@ public class Commuter extends FieldSampler {
     // internal mechanics
     Random rand = new Random();
     DateFormat df;
-    final GregorianCalendar cal = new GregorianCalendar();
+    final static private ThreadLocal<GregorianCalendar> cal = new ThreadLocal<GregorianCalendar>() {
+        @Override
+        protected GregorianCalendar initialValue() {
+            return new GregorianCalendar();
+        }
+    };
 
     // is the commuter at home?
     boolean atHome;
@@ -87,90 +96,125 @@ public class Commuter extends FieldSampler {
     private FieldSampler homeSampler;
     private FieldSampler workSampler;
 
+    private BlockingQueue<JsonNode> resultBuffer = new LinkedBlockingQueue<>();
+
+    private boolean isFlat;
+
     public Commuter() throws ParseException {
         setFormat("yyyy-MM-dd HH:mm:ss");
         start = df.parse("2014-01-01 00:00:00").getTime() / 1000.0;
         end = df.parse("2014-01-05 00:00:00").getTime() / 1000.0;
     }
 
+    public static boolean isWeekend(double t) {
+        GregorianCalendar c = cal.get();
+        c.setTimeInMillis((long) (t * 1000));
+        int d = c.get(GregorianCalendar.DAY_OF_WEEK);
+        return d == GregorianCalendar.SATURDAY || d == GregorianCalendar.SUNDAY;
+    }
+
     @Override
     public JsonNode sample() {
         final Car car = new Car();
         car.setSampleTime(sampleTime);
+        car.getEngine().setTime(start);
 
-        ObjectNode r = new ObjectNode(FACTORY);
         JsonNode homeLocation = homeSampler.sample();
-        r.putObject("home").setAll((ObjectNode) homeLocation);
-        GeoPoint home = new GeoPoint(toDegrees(homeLocation, "latitude"), toDegrees(homeLocation, "longitude"));
+        GeoPoint home = new GeoPoint(Util.toDegrees(homeLocation, "latitude"), Util.toDegrees(homeLocation, "longitude"));
 
         double radius = workSampler.sample().asDouble();
         GeoPoint work = home.nearby(radius, rand);
-        work.asJson(r.putObject("work"));
 
-        ArrayNode data = r.putArray("data");
-        ArrayNode trips = r.putArray("trips");
-        car.getEngine().setTime(start);
+        //---------------
+        ObjectNode base = new ObjectNode(FACTORY);
+        base.putObject("home").setAll((ObjectNode) homeLocation);
+
+        work.asJson(base.putObject("work"));
+        ArrayNode trips = new ArrayNode(FACTORY);
+
         for (double t = start; t < end; ) {
-            double tCommute = search(atHome, t, nextExponentialTime(1));
+            double tCommute = search(atHome, t, Util.nextExponentialTime(rand, 1));
             if (atHome) {
-                double tErrand = t + nextExponentialTime((isWeekend(t) ? WEEKEND_ERRAND_RATE : WEEKDAY_ERRAND_RATE) / DAY_IN_S);
+                double tErrand = t + Util.nextExponentialTime(rand, (isWeekend(t) ? WEEKEND_ERRAND_RATE : WEEKDAY_ERRAND_RATE) / DAY_IN_S);
                 while (tErrand < tCommute && tErrand < end) {
                     GeoPoint nearby = home.nearby(ERRAND_SIZE_KM, rand);
+                    ObjectNode trip = trips.addObject();
+                    ArrayNode data = trip.putArray("data");
                     t = drive(tErrand, car, home, nearby, data);
-                    recordTrip(trips, tErrand, t - tErrand, "errand_out", 2 * home.distance(nearby));
+                    recordTrip(tErrand, t - tErrand, "errand_out", 2 * home.distance(nearby), trip);
                     t += rand.nextDouble() * 900 + 300;
                     double t0 = t;
-                    t = drive(t, car, nearby, home, data);
-                    recordTrip(trips, t0, t - t0, "errand_return", 2 * home.distance(nearby));
-                    tErrand = t + nextExponentialTime(WEEKEND_ERRAND_RATE / DAY_IN_S);
+                    trip = trips.addObject();
+                    data = trip.putArray("data");
+                    t = drive(t0, car, nearby, home, data);
+                    recordTrip(t0, t - t0, "errand_return", 2 * home.distance(nearby), trip);
+                    tErrand = t + Util.nextExponentialTime(rand, WEEKEND_ERRAND_RATE / DAY_IN_S);
                 }
                 if (tCommute < end) {
+                    ObjectNode trip = trips.addObject();
+                    ArrayNode data = trip.putArray("data");
                     t = drive(tCommute, car, home, work, data);
-                    recordTrip(trips, tCommute, t - tCommute, "to_work", home.distance(work));
+                    recordTrip(tCommute, t - tCommute, "to_work", home.distance(work), trip);
 
                     atHome = !atHome;
                 }
             } else {
+                ObjectNode trip = trips.addObject();
+                ArrayNode data = trip.putArray("data");
                 t = drive(tCommute, car, work, home, data);
-                recordTrip(trips, tCommute, t - tCommute, "to_home", home.distance(work));
+                recordTrip(tCommute, t - tCommute, "to_home", home.distance(work), trip);
                 atHome = !atHome;
             }
         }
 
-        return r;
+        if (!isFlat) {
+            ObjectNode x = base.deepCopy();
+            x.set("trips", trips);
+            return x;
+        } else {
+            ArrayNode r = new ArrayNode(FACTORY);
+            for (JsonNode trip : trips) {
+                ObjectNode x = base.deepCopy();
+                Iterator<String> jx = trip.fieldNames();
+                while (jx.hasNext()) {
+                    String field = jx.next();
+                    if (!field.equals("data")) {
+                        x.set(field, trip.get(field));
+                    }
+                }
+                for (JsonNode dataPoint : trip.get("data")) {
+                    ObjectNode y = x.deepCopy();
+                    y.setAll((ObjectNode) dataPoint);
+                    r.add(y);
+                }
+            }
+
+            return r;
+        }
     }
 
-    private double toDegrees(JsonNode h, String fieldName) {
-        return h.get(fieldName).asDouble() * Math.PI / 180;
-    }
-
-    private void recordTrip(ArrayNode trips, double start, double duration, String type, double distance) {
-        ObjectNode trip = trips.addObject();
+    private void recordTrip(double start, double duration, String type, double distance, ObjectNode trip) {
         trip.put("t", duration);
         //noinspection SynchronizeOnNonFinalField
         synchronized (df) {
-            trip.put("timestamp", df.format(new Date((long) (duration *1000))));
+            trip.put("start", df.format(new Date((long) (start * 1000))));
         }
+        trip.put("timestamp", (long) start * 1000);
         trip.put("type", type);
         trip.put("distance_km", distance);
         trip.put("duration", duration);
     }
 
-    public long evenHour(double t) {
-        return 3600 * ((long) t / 3600);
-    }
-
     public int hourOfDay(double t) {
-        synchronized (cal) {
-            cal.setTimeInMillis((long) (t * 1000.0));
-            cal.setTimeZone(TimeZone.getTimeZone("US/Central"));
-            return cal.get(GregorianCalendar.HOUR_OF_DAY);
-        }
+        GregorianCalendar c = cal.get();
+        c.setTimeInMillis((long) (t * 1000.0));
+        c.setTimeZone(TimeZone.getTimeZone("US/Central"));
+        return c.get(GregorianCalendar.HOUR_OF_DAY);
     }
 
     public double search(boolean toWork, double t, double bound) {
         while (true) {
-            double nextHour = evenHour(t + 3600);
+            double nextHour = Util.evenHour(t + 3600);
             int hour = hourOfDay(t);
 
             double rate = lookupRate(isWeekend(t), toWork, hour);
@@ -185,7 +229,7 @@ public class Commuter extends FieldSampler {
         }
     }
 
-    public double lookupRate(boolean isWeekend, boolean toWork, int hour) {
+    public static double lookupRate(boolean isWeekend, boolean toWork, int hour) {
         if (isWeekend) {
             return WEEKEND_COMMUTE_RATE / DAY_IN_S;
         } else {
@@ -202,14 +246,6 @@ public class Commuter extends FieldSampler {
                     return WEEKDAY_COMMUTE_RATE / DAY_IN_S;
                 }
             }
-        }
-    }
-
-    public boolean isWeekend(double t) {
-        synchronized (cal) {
-            cal.setTimeInMillis((long) (t * 1000));
-            int d = cal.get(GregorianCalendar.DAY_OF_WEEK);
-            return d == GregorianCalendar.SATURDAY || d == GregorianCalendar.SUNDAY;
         }
     }
 
@@ -232,10 +268,6 @@ public class Commuter extends FieldSampler {
         });
     }
 
-    private double nextExponentialTime(double rate) {
-        return -Math.log(1 - rand.nextDouble()) / rate;
-    }
-
     @SuppressWarnings("UnusedDeclaration")
     public void setFormat(String format) {
         df = new SimpleDateFormat(format);
@@ -251,10 +283,12 @@ public class Commuter extends FieldSampler {
         this.end = df.parse(end).getTime() / 1000.0;
     }
 
+    @SuppressWarnings("unused")
     public void setSampleTime(double sampleTime) {
         this.sampleTime = sampleTime;
     }
 
+    @SuppressWarnings("unused")
     public void setHome(JsonNode value) throws IOException {
         if (value.isObject()) {
             homeSampler = FieldSampler.newSampler(value.toString());
@@ -276,5 +310,15 @@ public class Commuter extends FieldSampler {
         } else if (value.isNumber()) {
             workSampler = constant(value.asDouble());
         }
+    }
+
+    @SuppressWarnings("unused")
+    public void setFlat(boolean isFlat) {
+        this.isFlat = isFlat;
+    }
+
+    @Override
+    public boolean isFlat() {
+        return isFlat;
     }
 }

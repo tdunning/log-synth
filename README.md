@@ -103,10 +103,13 @@ is done based on fixed shift points and all throttle settings are done using a s
 to match the desired road speed. The performance level of the cars is chosen to be moderately good in that they can
 do 0-60 MPH in about 7-8 seconds.
 
-The output from the `commuter` model is in the form of one record per simulated vehicle. The `commuter` model produces
-nested data that contains the location of the simulated home and work for the commuter as well as two logs of 
-activity. One log contains records describing each trip. These trip records describe the duration and distance and 
-purpose for each trip. The other log contains the engine data at 1 second intervals.
+The output from the `commuter` model can be either in nested or flattened form according to whether `flat: true` is 
+used in the schema. In nested form there is one record per simulated vehicle. Inside each of these vehicle traces is 
+a history of what the vehicle did during the test in the form of a list of trips. Each trip has descriptive information
+about the trip such as distance, start time, duration and type (`errand`, `to_home`, `to_work`).
+
+In the flattened form, each sample in the nested form is retained, but all nesting is removed with all of the
+fields from the outer structures being repeated in each sample record.
 
 Here is a sample schema for the `commuter` model:
 
@@ -132,11 +135,12 @@ Here is a sample schema for the `commuter` model:
 ```
 
 Note that the commuter model produce a lot of data per record due to the frequent sampling of engine data. 
-This means that you won't get very many output records per second, especially if you ask for long histories.
-This also means that some tools may choke on the output due to the size of each input records. You can 
-generate just a single day of data at a time or you can request a feature to make the engine sampling frequency
-to be extended. Or we may need to figure out how to generate many records per vehicle. Your feedback would be
-helpful here if you need this model.
+This means that you won't get very many output records per second of simulator run-time, especially if 
+you ask for long histories. This also means that some tools may choke on the output due to the size of 
+each input records. To deal with this, you can produce flattened data, you can generate just a single day 
+of data at a time or you can request a feature to make the engine sampling frequency to be extended. Your 
+feedback would be helpful here if you need this model.
+
 **`country`** - Samples from ISO country codes.
 ```json
 {"name":"co", "class":"country"},
