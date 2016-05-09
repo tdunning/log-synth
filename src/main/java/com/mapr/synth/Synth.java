@@ -454,7 +454,7 @@ public class Synth {
 
             @Override
             protected Integer parse(String argument) throws NumberFormatException {
-                int n = Integer.parseInt(argument.replaceAll("[KMG]?$", ""));
+                int n = Integer.parseInt(argument.replaceAll("[kKMG]?$", ""));
 
                 switch (argument.charAt(argument.length() - 1)) {
                     case 'G':
@@ -464,6 +464,7 @@ public class Synth {
                         n *= 1e6;
                         break;
                     case 'K':
+                    case 'k':
                         n *= 1e3;
                         break;
                     default:
