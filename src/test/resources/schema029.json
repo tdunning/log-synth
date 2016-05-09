@@ -1,0 +1,50 @@
+[
+    {
+        "name": "id",
+        "class": "id"
+    },
+    {
+        "class": "vector",
+        "name": "prices",
+        "mean": 4.60517,
+        "sd": 0.01,
+        "length": 10000,
+        "transform": "exp",
+        "seed": 1
+    },
+    {
+        "class": "vector",
+        "name": "zero",
+        "mean": 0,
+        "sd": 10,
+        "length": 10000,
+        "seed": 2
+    },
+    {
+        "class": "vector",
+        "name": "clipped",
+        "mean": 0,
+        "sd": 10,
+        "length": 10000,
+        "max": 0,
+        "seed": 3
+    },
+    {
+        "class": "vector",
+        "name": "ten",
+        "min": 1,
+        "max": 10,
+        "length": 20000,
+        "transform": "log",
+        "seed": 4
+    },
+    {
+        "class": "vector",
+        "name": "coarse",
+        "min": 1,
+        "max": 10,
+        "length": 20000,
+        "resolution": 0.1,
+        "seed": 4
+    }
+]
