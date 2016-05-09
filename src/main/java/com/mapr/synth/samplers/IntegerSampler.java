@@ -21,6 +21,7 @@ package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.mahout.common.RandomUtils;
 
 import java.util.Random;
@@ -36,6 +37,7 @@ public class IntegerSampler extends FieldSampler {
     private int max = 100;
     private int power = 0;
     private Random base;
+    private String format = null;
 
     public IntegerSampler() {
         base = RandomUtils.getRandom();
@@ -63,6 +65,10 @@ public class IntegerSampler extends FieldSampler {
         this.power = skew;
     }
 
+    public void setFormat(String format) {
+        this.format = format;
+    }
+
     @Override
     public JsonNode sample() {
       synchronized (this) {
@@ -77,7 +83,11 @@ public class IntegerSampler extends FieldSampler {
                 r = Math.max(r, min + base.nextInt(max - min));
             }
         }
-        return new IntNode(r);
+        if (format == null) {
+            return new IntNode(r);
+        }else {
+            return new TextNode(String.format(format, r));
+        }
       }
     }
 
