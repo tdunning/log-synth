@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Sample from US names.
- * <p/>
+ * <p>
  * See http://www.census.gov/genealogy/www/data/1990surnames/names_files.html for data.
  *
  * Thread safe

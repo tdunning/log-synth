@@ -28,7 +28,7 @@ import java.util.Random;
 /**
  * Samples from a gamma distribution.  This is often useful for modeling the unknown value of the standard
  * deviation of a normal distribution.
- * <p/>
+ * <p>
  * Note that the mean is alpha * scale = alpha / rate
  */
 public class GammaSampler extends FieldSampler {

@@ -41,9 +41,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Generate a bunch of web purchase log records.  These will be out of order with respect to time and should be sorted.
- * <p/>
+ * <p>
  * The tab delimited output fields include:
- * <p/>
+ * <p>
  * hit_time, hit_id
  * product_category, campaign_list, search_keywords, event_list
  * user_id, user_category, state, browser, country, language, os,

@@ -27,7 +27,7 @@ import org.apache.mahout.math.random.Multinomial;
 
 /**
  * Samples from a "foreign key" which is really just an integer.
- * <p/>
+ * <p>
  * The only cleverness here is that we allow a variable amount of key skew.
  *
  * Thread safe

@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Samples from a "foreign key" which is really just an integer.
- * <p/>
+ * <p>
  * The only cleverness here is that we allow a variable amount of key skew.
  */
 public class IdSampler extends FieldSampler {

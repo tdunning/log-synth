@@ -28,7 +28,7 @@ import java.util.Random;
 
 /**
  * Generates samples from a generalized Chinese restaurant process (or Pittman-Yor process).
- * <p/>
+ * <p>
  * The number of values drawn exactly once will asymptotically be equal to the discount parameter
  * as the total number of draws T increases without bound.  The number of unique values sampled will
  * increase as O(alpha * log T) if discount = 0 or O(alpha * T^discount) for discount > 0.

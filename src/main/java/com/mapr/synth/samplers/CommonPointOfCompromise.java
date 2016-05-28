@@ -38,18 +38,18 @@ import java.util.concurrent.TimeUnit;
  * are chosen from a long-tailed distribution so there are a few very common
  * merchants and a few less common ones.  All users generate events for the
  * entire period of data generation.
- * <p/>
+ * <p>
  * Users also visit ATM's.  For a period of time, one ATM is "compromised" and
  * all users who visit that ATM during that time will be switched to the
  * vulnerable state.  During the vulnerable period, transactions have a higher
  * probability of being marked as "possible fraud".  The vulnerable period starts
  * a short period of time after the compromise and extends a short period after
  * that.  Transactions at a compromised ATM are marked.
- * <p/>
+ * <p>
  * There is no correlation between the content of the transactions and the fraud flag.
- * <p/>
+ * <p>
  * A transaction has the following fields:
- * <p/>
+ * <p>
  * <ul>
  * <li><em>merchant</em>merchant ID, 0 is ATM</li>
  * <li><em>date</em>date and time in YYYY-MM-dd HH:mm:ss format</li>

@@ -55,7 +55,7 @@ public class IntegerSampler extends FieldSampler {
      * Sets the amount of skew.  Skew is added by taking the min of several samples.
      * Setting power = 0 gives uniform distribution, setting it to 5 gives a very
      * heavily skewed distribution.
-     * <p/>
+     * <p>
      * If you set power to a negative number, the skew is reversed so large values
      * are preferred.
      *

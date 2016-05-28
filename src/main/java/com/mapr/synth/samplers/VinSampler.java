@@ -40,9 +40,9 @@ import java.util.regex.Pattern;
 
 /**
  * Samples somewhat realistic Vehicle Identification Numbers (VIN).
- * <p/>
+ * <p>
  * Parameters can be used to limit the samples produced:
- * <p/>
+ * <p>
  * <ul>
  * <li><em>countries</em> Comma separated list of two letter country codes.  Acceptable codes include
  * us, ca, north_america, eu, uk, de, kr, jp</li>

@@ -42,7 +42,7 @@ import java.util.Iterator;
  *
  * By default, the promoted values have names prefixed by the name of the flattener. You can set this
  * prefix to any value you like including the empty string.
- * <p/>
+ * <p>
  * Thread safe for sampling
  */
 public class FlattenSampler extends FieldSampler {
