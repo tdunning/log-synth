@@ -51,6 +51,7 @@ import java.io.IOException;
         @JsonSubTypes.Type(value = IntegerSampler.class, name = "int"),
         @JsonSubTypes.Type(value = JoinSampler.class, name = "join"),
         @JsonSubTypes.Type(value = LanguageSampler.class, name = "language"),
+        @JsonSubTypes.Type(value = LongTailSampler.class, name = "pitman_yor"),
         @JsonSubTypes.Type(value = MapSampler.class, name = "map"),
         @JsonSubTypes.Type(value = NameSampler.class, name = "name"),
         @JsonSubTypes.Type(value = OperatingSystemSampler.class, name = "os"),
