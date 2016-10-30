@@ -1,0 +1,55 @@
+GET /personal/comparison-table.jsp?iODg2OQ=51a90 HTTP/1.1
+Host: www.sometarget.com
+User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;)
+Accept-Encoding: deflate
+Accept-Charset: UTF-8
+Accept-Language: fr
+Cache-Control: no-cache
+Pragma: no-cache
+Connection: Keep-Alive
+
+Normal:
+GET /photo.jpg HTTP/1.1
+Host: lh4.googleusercontent.com
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:44.0) Gecko/20100101 Firefox/44.0
+Accept: image/png,image/*;q=0.8,*/*;q=0.5
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: https://www.google.com
+Connection: keep-alive
+If-None-Match: "v9”
+Cache-Control: max-age=0
+
+"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+
+Malware Examples:
+Normal:
+Accept-Encoding: gzip, deflate
+
+Malware 1:
+Accept-Encoding: identity
+
+While identity is a valid RFC compliant AE header, seeing a customer who always came in on browser X (which never uses identity by default) suddenly switch to identity was a key indicator of a malware infection. Hypothesis on why this occured: Malware writers were lazy and wanted to be able to read the page without including a gzip library.  (this forced the server to send the page uncompressed
+
+Malware 2:
+Accept-Encoding: (14 spaces before newline)
+
+In this case, the malware writer was trying to do the same thing as identity, but didn't want to
+update the request length field. instead they took  " gzip, deflate" (14 chars after the :)
+and replaced with spaces, this resulted in the same request length, but the server assumes it
+doesn't speak the encoding offered by the client, and produced an uncompressed page.
+
+Malware 3:
+All headers would look like this (took from the "Normal" below). Basically, the malware
+writer tried to rewrite the headers as his, but didn't preserve the RFC specified case for headers.
+
+GET /photo.jpg HTTP/1.1
+host: lh4.googleusercontent.com
+user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:44.0) Gecko/20100101 Firefox/44.0
+accept: image/png,image/*;q=0.8,*/*;q=0.5
+accept-language: en-US,en;q=0.5
+accept-encoding: gzip, deflate, br
+referer: https://www.google.com
+connection: keep-alive
+if-none-match: "v9”
+cache-control: max-age=0

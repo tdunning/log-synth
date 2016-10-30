@@ -1,0 +1,10 @@
+GET ${url} HTTP/1.1
+host: ${host}
+user-agent: ${userAgent}
+accept: ${accept}
+accept-language: ${language}
+accept-encoding: ${encoding}
+referer: ${referer}
+connection: keep-alive
+if-none-match: "v9”
+cache-control: max-age=0

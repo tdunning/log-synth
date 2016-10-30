@@ -45,17 +45,28 @@ public class StringSampler extends FieldSampler {
     public StringSampler() {
     }
 
+    public StringSampler(String resource) {
+        readDistribution(resource);
+    }
+
     protected void readDistribution(String resourceName) {
         try {
             if (distribution.compareAndSet(null, new Multinomial<String>())) {
                 Splitter onTab = Splitter.on("\t").trimResults();
+                double i = 20;
                 for (String line : Resources.readLines(Resources.getResource(resourceName), Charsets.UTF_8)) {
                     if (!line.startsWith("#")) {
                         Iterator<String> parts = onTab.split(line).iterator();
                         String name = translate(parts.next());
-                        double weight = Double.parseDouble(parts.next());
+                        double weight;
+                        if (parts.hasNext()) {
+                            weight = Double.parseDouble(parts.next());
+                        } else {
+                            weight = 1.0 / i;
+                        }
                         distribution.get().add(name, weight);
                     }
+                    i++;
                 }
             }
 

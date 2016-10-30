@@ -1,5 +1,5 @@
 /*
- * Licensed to the Ted Dunning under one or more contributor license
+ * Licensed to Ted Dunning under one or more contributor license
  * agreements.  See the NOTICE file that may be
  * distributed with this work for additional information
  * regarding copyright ownership.  Ted Dunning licenses this file
@@ -47,6 +47,7 @@ import java.io.IOException;
         @JsonSubTypes.Type(value = FlattenSampler.class, name = "flatten"),
         @JsonSubTypes.Type(value = ForeignKeySampler.class, name = "foreign-key"),
         @JsonSubTypes.Type(value = GammaSampler.class, name = "gamma"),
+        @JsonSubTypes.Type(value = HeaderSampler.class, name = "header"),
         @JsonSubTypes.Type(value = IdSampler.class, name = "id"),
         @JsonSubTypes.Type(value = IntegerSampler.class, name = "int"),
         @JsonSubTypes.Type(value = JoinSampler.class, name = "join"),
