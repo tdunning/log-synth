@@ -26,7 +26,6 @@ import org.apache.mahout.common.RandomUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
