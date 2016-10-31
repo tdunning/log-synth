@@ -26,6 +26,7 @@ import org.apache.mahout.common.RandomUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
@@ -62,6 +63,7 @@ public class ArrivalSampler extends FieldSampler {
     private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
     private double start = System.currentTimeMillis();
+    private boolean sinceEpoch = false;
 
     public ArrivalSampler() {
         base = RandomUtils.getRandom();
@@ -94,10 +96,23 @@ public class ArrivalSampler extends FieldSampler {
         this.start = df.parse(start).getTime();
     }
 
+    public void setSinceEpoch(String epoch) {
+        this.sinceEpoch = Boolean.parseBoolean(epoch);
+    }
+
     @Override
     public JsonNode sample() {
       synchronized (this) {
-        TextNode r = new TextNode(df.format(new Date((long) start)));
+        Date d = new Date((long) start);
+        String t;
+
+        if (sinceEpoch) {
+            t = Long.toString(d.getTime());
+        } else {
+            t = df.format(d);
+        }
+
+        TextNode r = new TextNode(t);
         start += minInterval - meanInterval * Math.log(1 - base.nextDouble());
         return r;
       }
