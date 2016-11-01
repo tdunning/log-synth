@@ -62,7 +62,8 @@ public class ArrivalSampler extends FieldSampler {
     private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
     private double start = System.currentTimeMillis();
-    private boolean sinceEpoch = false;
+    private boolean useEpochTimestamp = false;
+    private boolean millisSinceEpoch = true;
 
     public ArrivalSampler() {
         base = RandomUtils.getRandom();
@@ -95,8 +96,14 @@ public class ArrivalSampler extends FieldSampler {
         this.start = df.parse(start).getTime();
     }
 
-    public void setSinceEpoch(String epoch) {
-        this.sinceEpoch = Boolean.parseBoolean(epoch);
+    @SuppressWarnings("UnusedDeclaration")
+    public void setMillisSinceEpoch(String millisSinceEpoch) {
+        this.millisSinceEpoch = Boolean.parseBoolean(millisSinceEpoch);
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setUseEpochTimestamp(String useEpochTimestamp) {
+        this.useEpochTimestamp = Boolean.parseBoolean(useEpochTimestamp);
     }
 
     @Override
@@ -105,8 +112,8 @@ public class ArrivalSampler extends FieldSampler {
         Date d = new Date((long) start);
         String t;
 
-        if (sinceEpoch) {
-            t = Long.toString(d.getTime());
+        if (useEpochTimestamp) {
+            t = String.format(millisSinceEpoch ? "%TQ" : "%Ts", d);
         } else {
             t = df.format(d);
         }

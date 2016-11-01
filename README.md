@@ -160,7 +160,7 @@ feedback would be helpful here if you need this model.
 {"name":"foo4", "class":"event", "sinceEpoch": "true", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
 ```
 
-Using `"sinceEpoch": "true"` will print the number of milliseconds since 1970, ignoring any `format`.
+Using `"useEpochTimestamp": "true"` will print the number of milliseconds or seconds since 1970, depending on the value of `"millisSinceEpoch"`. If `true`, you get milliseconds since the epoch, if `false` you get seconds.
 
 **`flatten`** - Turns an object into fields.
 
