@@ -39,6 +39,7 @@ import java.util.Random;
 public class HeaderSampler extends FieldSampler {
 
     private Template template;
+    private String prolog;
 
     private enum Type {
         NORMAL,
@@ -66,6 +67,10 @@ public class HeaderSampler extends FieldSampler {
     public void setType(String headerType) throws IOException {
         this.headerType = Type.valueOf(headerType.toUpperCase());
         setupTemplate();
+    }
+
+    public void setProlog(String prolog) {
+        this.prolog = prolog;
     }
 
     // picks which template to use based on header type
@@ -129,17 +134,17 @@ public class HeaderSampler extends FieldSampler {
         }
     }
 
-    String url() {
-        return String.format("http://foo.bar.com/%06d/%06x", gen.nextInt(1_000_000), gen.nextInt(0x1_000_000));
+    String url(boolean isImage) {
+        return String.format("http://foo.bar.com/%06d/%06x%s",
+                gen.nextInt(1_000_000), gen.nextInt(0x1_000_000),
+                isImage ? ".jpg" : ".html");
     }
 
-    String accept() {
-        switch (gen.nextInt(2)) {
-            case 0:
-                return "image/png,image/*;q=0.8,*/*;q=0.5";
-            case 1:
-            default:
-                return "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+    String accept(boolean isImage) {
+        if (isImage) {
+            return "image/png,image/*;q=0.8,*/*;q=0.5";
+        } else {
+            return "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
         }
     }
 
@@ -149,16 +154,20 @@ public class HeaderSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
+        boolean isImage = gen.nextDouble() < 0.3;
         Map<String, String> params = ImmutableMap.<String, String>builder()
-                .put("url", url())
+                .put("url", url(isImage))
                 .put("host", String.format("x%03d.foo.com", gen.nextInt(5)))
-                .put("accept", accept())
+                .put("accept", accept(isImage))
                 .put("userAgent", userAgent())
                 .put("language", language())
                 .put("encoding", encoding())
-                .put("referer", url())
+                .put("referer", url(false))
                 .build();
         StringWriter out = new StringWriter();
+        if (prolog != null) {
+            out.append(prolog);
+        }
         try {
             template.process(params, out);
         } catch (TemplateException e) {

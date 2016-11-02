@@ -31,9 +31,6 @@ import java.util.TreeSet;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by tdunning on 10/29/16.
- */
 public class HeaderSamplerTest {
 
     @Test
@@ -99,6 +96,14 @@ public class HeaderSamplerTest {
             languages.add(s.language());
         }
         assertEquals(1, languages.elementSet().size());
+    }
+
+    @Test
+    public void testUrl() throws Exception {
+        HeaderSampler s = new HeaderSampler();
+        s.setType("normal");
+        assertTrue(s.url(true).endsWith(".jpg"));
+        assertTrue(s.url(false).endsWith(".html"));
     }
 
     @Test
