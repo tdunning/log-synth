@@ -262,9 +262,17 @@ public class SchemaSamplerTest {
         long old3 = df2.parse(old.get("foo3").asText()).getTime();
         assertEquals(old3, df1.parse("2014-02-01 00:00:00").getTime(), 10);
 
+        long old4 = old.get("foo4").asLong();
+        assertEquals(0, old4);
+
+        long old5 = old.get("foo5").asLong();
+        assertEquals(5432, old5);
+
         double sum1 = 0;
         double sum2 = 0;
         double sum3 = 0;
+        double sum4 = 0;
+        double sum5 = 0;
 
         final int N = 10000;
 
@@ -282,11 +290,22 @@ public class SchemaSamplerTest {
             long t3 = df2.parse(r.get("foo3").asText()).getTime();
             sum3 += t3 - old3;
             old3 = t3;
+
+            long t4 = r.get("foo4").asLong();
+            sum4 += t4 - old4;
+            old4 = t4;
+
+            long t5 = r.get("foo5").asLong();
+            sum5 += t5 - old5;
+            old5 = t5;
         }
 
         assertEquals((double) TimeUnit.MILLISECONDS.convert(10, TimeUnit.DAYS), (sum1 / N), 0.03 * (sum1 / N));
         assertEquals(100, sum2 / N, 3);
         assertEquals(2000, sum3 / N, 2000 * 0.03);
+
+        assertEquals(10.0, sum4 / N, 10 * 0.03);
+        assertEquals(100.0, sum5 / N, 100 * 0.03);
     }
 
     public static class StringSamplerTest {
@@ -294,7 +313,7 @@ public class SchemaSamplerTest {
         public void testEmptyDist() {
             StringSampler s = new StringSampler();
             try {
-                s.setDist(new HashMap<String, Object>());
+                s.setDist(new HashMap<>());
                 fail("Should have detected empty distribution");
             } catch (IllegalArgumentException e) {
                 // whew ... that's what we wanted

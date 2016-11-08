@@ -22,10 +22,10 @@ package com.mapr.synth.samplers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.collect.ImmutableMap;
+import com.mapr.synth.FancyTimeFormatter;
 import org.apache.mahout.common.RandomUtils;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
@@ -59,7 +59,7 @@ public class ArrivalSampler extends FieldSampler {
 
     private double meanInterval = 1000;  // interval - offset will have this mean
     private double minInterval = 0;      // no interval can be less than this
-    private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    private FancyTimeFormatter df = new FancyTimeFormatter("yyyy-MM-dd");
 
     private double start = System.currentTimeMillis();
 
@@ -86,7 +86,7 @@ public class ArrivalSampler extends FieldSampler {
     }
 
     public void setFormat(String format) {
-        df = new SimpleDateFormat(format);
+        df = new FancyTimeFormatter(format);
     }
 
     @SuppressWarnings("UnusedDeclaration")

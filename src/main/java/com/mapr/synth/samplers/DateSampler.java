@@ -21,13 +21,13 @@ package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.mapr.synth.FancyTimeFormatter;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.jet.random.AbstractContinousDistribution;
 import org.apache.mahout.math.jet.random.Exponential;
 import org.apache.mahout.math.jet.random.Uniform;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
 
@@ -47,7 +47,7 @@ public class DateSampler extends FieldSampler {
     private long start = 0;
     private long end = EPOCH;
 
-    private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    private FancyTimeFormatter df = new FancyTimeFormatter("yyyy-MM-dd");
     private AbstractContinousDistribution base =
             new Exponential(1.0 / TimeUnit.MILLISECONDS.convert(100, TimeUnit.DAYS), RandomUtils.getRandom());
 
@@ -55,7 +55,7 @@ public class DateSampler extends FieldSampler {
     }
 
     public void setFormat(String format) {
-        df = new SimpleDateFormat(format);
+        df = new FancyTimeFormatter(format);
     }
 
     @SuppressWarnings("UnusedDeclaration")

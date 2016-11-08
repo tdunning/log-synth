@@ -1,5 +1,7 @@
 [
     {"name":"foo1", "class":"event", "rate": "0.1/d"},
     {"name":"foo2", "class":"event", "start": "2014-01-01", "format":"yyyy-MM-dd HH:mm:ss", "rate": "10/s"},
-    {"name":"foo3", "class":"event", "format": "MM/dd/yyyy HH:mm:ss", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
+    {"name":"foo3", "class":"event", "format": "MM/dd/yyyy HH:mm:ss", "start": "02/01/2014 00:00:00", "rate": "0.5/s"},
+    {"name":"foo4", "class":"event", "format": "s", "start": "0", "rate": "0.1/s"},
+    {"name":"foo5", "class":"event", "format": "Q", "start": "5432", "rate": "10/s"}
 ]

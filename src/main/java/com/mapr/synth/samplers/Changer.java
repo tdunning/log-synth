@@ -25,10 +25,10 @@ import com.fasterxml.jackson.databind.node.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mapr.synth.FancyTimeFormatter;
 import org.apache.mahout.math.jet.random.Gamma;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -110,7 +110,7 @@ public class Changer extends FieldSampler {
 
     private double meanInterval = 1000;  // interval - offset will have this mean
     private double minInterval = 0;      // no interval can be less than this
-    private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    private FancyTimeFormatter df = new FancyTimeFormatter("yyyy-MM-dd");
 
     public Changer(@JsonProperty("values") List<FieldSampler> fields) {
         this.fields = fields;
@@ -144,7 +144,7 @@ public class Changer extends FieldSampler {
      * which means 5 events per minute.  The supported units are seconds (s), minutes (m), hours (h),
      * and days (d).
      *
-     * @param rate
+     * @param rate   The rate at which events arrive.
      */
     @SuppressWarnings("UnusedDeclaration")
     public void setRate(String rate) {
@@ -162,7 +162,7 @@ public class Changer extends FieldSampler {
      * with an exponential distribution and then adding this offset.  The offset is specified in
      * seconds.
      *
-     * @param offset
+     * @param offset The minimum separation between events
      */
     @SuppressWarnings("UnusedDeclaration")
     public void setOffset(String offset) {
@@ -177,18 +177,23 @@ public class Changer extends FieldSampler {
 
     /**
      * Sets the format to be used in outputing event times.  Standard Java date formatting rules apply.  The
-     * default format is yyyy-MM-dd.  Another popular option is "yyyy-MM-dd HH:mm:ss.SS X"
+     * default format is yyyy-MM-dd.  Another popular option is "yyyy-MM-dd HH:mm:ss.SS X".
      *
-     * @param format
+     * As a special treat, "s" can be used for seconds since epoch and "Q" can be used for milliseconds since
+     * the epoch.
+     *
+     * @param format The preferred data format.
      */
     public void setFormat(String format) {
-        df = new SimpleDateFormat(format);
+        df = new FancyTimeFormatter(format);
     }
 
     /**
-     * Sets the starting time for events. This will be exactly the time of the first event.
+     * Sets the starting time for events. This will be exactly the time of the first event. Note that
+     * the format for the starting time will be the default format unless the format argument precedes
+     * this attribute.
      *
-     * @param start
+     * @param start The start time for the sequence
      * @throws ParseException
      */
     @SuppressWarnings("UnusedDeclaration")
@@ -199,7 +204,7 @@ public class Changer extends FieldSampler {
     /**
      * Sets the ending time for events. This will be after the time of any event we generate.
      *
-     * @param end
+     * @param end   The upper bound for event time
      * @throws ParseException
      */
     @SuppressWarnings("UnusedDeclaration")
