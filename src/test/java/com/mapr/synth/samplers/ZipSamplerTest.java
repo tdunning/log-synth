@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
 
 public class ZipSamplerTest {
 
-    private static final int N = 50000;
+    private static final int N = 50_000;
 
     @Test
     public void testZips() throws IOException {

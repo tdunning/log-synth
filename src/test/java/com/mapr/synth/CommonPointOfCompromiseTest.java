@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 public class CommonPointOfCompromiseTest {
 
     private static final int DAYS_COUNTED = 200;
-    private static final int USER_COUNT = 50000;
+    private static final int USER_COUNT = 5000;
 
     // this isn't quite a unit test.  It produces files to be visualized with R
     @Test
@@ -72,7 +72,14 @@ public class CommonPointOfCompromiseTest {
         int[] nonAtmFraud = new int[exploitLength];
         int[] nonAtmNonFraud = new int[exploitLength];
 
+        long t0 = System.currentTimeMillis();
         for (int userId = 0; userId < USER_COUNT; userId++) {
+            if (userId > 0 && userId % (USER_COUNT / 100) == 0) {
+                double t1 = (System.currentTimeMillis() - t0) / 1000.0;
+                double t2 = USER_COUNT * t1 / userId;
+                System.out.printf("%d\t%.0f\t%.1f\n",
+                        userId, 100.0 * userId / USER_COUNT, t2 - t1);
+            }
             JsonNode sample = s.sample();
             merchantHistory.clear();
             boolean userHasFraud = false;
