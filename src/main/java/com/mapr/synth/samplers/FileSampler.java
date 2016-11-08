@@ -49,6 +49,7 @@ public class FileSampler extends FieldSampler {
     public FileSampler() {
     }
 
+    @SuppressWarnings("unused")
     public void setFile(String lookup) throws IOException {
         if (lookup.matches(".*\\.json")) {
             readJsonData(Files.newInputStreamSupplier(new File(lookup)));

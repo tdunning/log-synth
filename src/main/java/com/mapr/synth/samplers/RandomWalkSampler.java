@@ -147,6 +147,7 @@ public class RandomWalkSampler extends FieldSampler {
         init();
     }
 
+    @SuppressWarnings("unused")
     public void setMean(final JsonNode value) throws IOException {
         if (value.isObject()) {
             mean = FieldSampler.newSampler(value.toString());

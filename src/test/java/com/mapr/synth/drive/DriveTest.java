@@ -22,17 +22,12 @@ package com.mapr.synth.drive;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.junit.Assert;
 import org.junit.Test;
-import processing.core.PApplet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static org.junit.Assert.*;
 

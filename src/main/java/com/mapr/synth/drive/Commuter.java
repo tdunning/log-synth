@@ -73,6 +73,7 @@ public class Commuter extends FieldSampler {
 
     private static final double DAY_IN_S = 24 * 3600.0;
     private static final JsonNodeFactory FACTORY = JsonNodeFactory.withExactBigDecimals(false);
+    @SuppressWarnings("unused")
     private static final int RECORD_LIMIT = 2000;
 
     // simulation period in seconds
@@ -96,6 +97,7 @@ public class Commuter extends FieldSampler {
     private FieldSampler homeSampler;
     private FieldSampler workSampler;
 
+    @SuppressWarnings("unused")
     private BlockingQueue<JsonNode> resultBuffer = new LinkedBlockingQueue<>();
 
     private boolean isFlat;
@@ -297,6 +299,7 @@ public class Commuter extends FieldSampler {
         }
     }
 
+    @SuppressWarnings("unused")
     public void setWork(JsonNode value) throws IOException {
         if (value.isObject()) {
             workSampler = new FieldSampler() {

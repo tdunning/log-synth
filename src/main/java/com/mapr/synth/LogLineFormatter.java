@@ -48,7 +48,7 @@ public abstract class LogLineFormatter {
         return null;
     }
 
-    public abstract void write(LogLine sample) throws IOException;
+    public abstract void write(LogLine sample);
 
     public PrintWriter getLog() {
         return log;
@@ -59,7 +59,7 @@ public abstract class LogLineFormatter {
             super(log, withResponseTimes);
         }
 
-        public void write(LogLine sample) throws IOException {
+        public void write(LogLine sample) {
             getLog().printf("%.3f,%08x,%s,", sample.getT(), sample.getCookie(), sample.getIp().getHostAddress());
             String sep = "\"";
             for (String term : sample.getQuery()) {
@@ -79,7 +79,7 @@ public abstract class LogLineFormatter {
             super(log, withResponseTimes);
         }
 
-        public void write(LogLine sample) throws IOException {
+        public void write(LogLine sample) {
             getLog().printf("{\"t\": %.3f, \"cookie\":\"%08x\", \"ip\":\"%s\", \"query\":", sample.getT(), sample.getCookie(), sample.getIp().getHostAddress());
             String sep = "[";
             for (String term : sample.getQuery()) {

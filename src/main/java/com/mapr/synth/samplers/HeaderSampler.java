@@ -69,6 +69,7 @@ public class HeaderSampler extends FieldSampler {
         setupTemplate();
     }
 
+    @SuppressWarnings("unused")
     public void setProlog(String prolog) {
         this.prolog = prolog;
     }

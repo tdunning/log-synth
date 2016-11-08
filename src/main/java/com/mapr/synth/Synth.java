@@ -270,7 +270,7 @@ public class Synth {
             }
         }
 
-        public static void header(Format format, List<String> names, PrintStream out) throws XMLStreamException {
+        public static void header(Format format, List<String> names, PrintStream out) {
             switch (format) {
                 case TSV:
                     out.printf("%s\n", withTabs.join(names));
@@ -416,12 +416,12 @@ public class Synth {
         out.printf("\n");
     }
 
-    public static enum Format {
+    public enum Format {
         JSON, TSV, CSV, XML
     }
 
 
-    public static enum Quote {
+    public enum Quote {
         DOUBLE_QUOTE, BACK_SLASH, OPTIMISTIC
     }
 

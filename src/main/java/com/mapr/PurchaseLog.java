@@ -128,9 +128,11 @@ public class PurchaseLog {
     }
 
     private static class Options {
+        @SuppressWarnings("unused")
         @Option(name = "-users")
         int users;
 
+        @SuppressWarnings("unused")
         @Option(name = "-log-file")
         String out;
 

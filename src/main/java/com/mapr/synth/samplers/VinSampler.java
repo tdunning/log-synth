@@ -56,11 +56,6 @@ public class VinSampler extends FieldSampler {
     private static Splitter onComma = Splitter.on(",").trimResults().omitEmptyStrings();
     private static Pattern rangePattern = Pattern.compile("([12][09]\\d\\d)(-[12][09]\\d\\d)");
 
-    @Override
-    public String getName() {
-        return super.getName();
-    }
-
     private static Map<String, String> makes;
 
     private static SetMultimap<String, String> byCountry = HashMultimap.create();

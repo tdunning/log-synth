@@ -21,9 +21,6 @@ package com.mapr.synth;
 
 import com.google.common.collect.ImmutableSet;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.Formatter;
 import java.util.List;

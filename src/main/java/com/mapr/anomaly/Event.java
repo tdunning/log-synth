@@ -50,7 +50,7 @@ public class Event implements Comparable<Event> {
         this.op = op;
     }
 
-    public static Event read(BufferedReader in) throws IOException, ParseException, EventFormatException {
+    public static Event read(BufferedReader in) throws IOException {
         in.mark(1000);
         String line = in.readLine();
         if (line == null) {
@@ -124,9 +124,8 @@ public class Event implements Comparable<Event> {
         if (ip != event.ip) return false;
         if (time != event.time) return false;
         if (uid != event.uid) return false;
-        if (!op.equals(event.op)) return false;
+        return op.equals(event.op);
 
-        return true;
     }
 
     @Override
@@ -139,6 +138,7 @@ public class Event implements Comparable<Event> {
     }
 
     public static class EventFormatException extends Throwable {
+        @SuppressWarnings("unused")
         public EventFormatException(String line) {
             super(String.format("Invalid event format found: \"%s\"", line));
         }

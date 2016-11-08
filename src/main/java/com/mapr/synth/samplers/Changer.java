@@ -184,6 +184,7 @@ public class Changer extends FieldSampler {
      *
      * @param format The preferred data format.
      */
+    @SuppressWarnings("unused")
     public void setFormat(String format) {
         df = new FancyTimeFormatter(format);
     }

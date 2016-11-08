@@ -85,6 +85,7 @@ public class ArrivalSampler extends FieldSampler {
         minInterval = offset;
     }
 
+    @SuppressWarnings("unused")
     public void setFormat(String format) {
         df = new FancyTimeFormatter(format);
     }

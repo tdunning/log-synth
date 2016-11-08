@@ -83,6 +83,7 @@ public class ZipSampler extends FieldSampler {
         }
     }
 
+    @SuppressWarnings("unused")
     public void setSeed(long seed) {
         rand = new Random(seed);
     }

@@ -44,6 +44,7 @@ public class FancyTimeFormatter {
         }
     }
 
+    @SuppressWarnings("unused")
     public String format(long t) {
         if (formatter != null) {
             return formatter.format(new Date(t));

@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class StreetNameSampler extends FieldSampler {
     List<Multinomial<String>> sampler = ImmutableList.of(
-            new Multinomial<String>(), new Multinomial<String>(), new Multinomial<String>()
+            new Multinomial<>(), new Multinomial<>(), new Multinomial<>()
     );
 
     public StreetNameSampler() {

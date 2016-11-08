@@ -45,6 +45,7 @@ public class SequenceSampler extends FieldSampler {
     public SequenceSampler() {
     }
 
+    @SuppressWarnings("unused")
     public void setLength(double length) {
         this.length = exponential(length);
     }
@@ -73,6 +74,7 @@ public class SequenceSampler extends FieldSampler {
         }
     }
 
+    @SuppressWarnings("unused")
     public void setBase(FieldSampler base) {
         this.base = base;
     }

@@ -50,8 +50,8 @@ public class NameSampler extends FieldSampler {
 
     public NameSampler() {
         try {
-            if (first.compareAndSet(null, new Multinomial<String>())) {
-                Preconditions.checkState(last.getAndSet(new Multinomial<String>()) == null);
+            if (first.compareAndSet(null, new Multinomial<>())) {
+                Preconditions.checkState(last.getAndSet(new Multinomial<>()) == null);
 
                 Splitter onTab = Splitter.on(CharMatcher.WHITESPACE).omitEmptyStrings().trimResults();
                 for (String resourceName : ImmutableList.of("dist.male.first", "dist.female.first")) {

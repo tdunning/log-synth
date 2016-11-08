@@ -75,7 +75,7 @@ public class Main {
         profile.close();
     }
 
-    public static enum Format {
+    public enum Format {
         JSON, LOG, CSV
     }
 

@@ -45,6 +45,7 @@ public final class ChineseRestaurant implements Sampler<Integer> {
      *
      * @param alpha The strength parameter for the Dirichlet process.
      */
+    @SuppressWarnings("unused")
     public ChineseRestaurant(double alpha) {
         this(alpha, 0);
     }
@@ -86,6 +87,7 @@ public final class ChineseRestaurant implements Sampler<Integer> {
     /**
      * @return the number of unique values that have been returned.
      */
+    @SuppressWarnings("unused")
     public int size() {
         return weights.size();
     }
@@ -93,6 +95,7 @@ public final class ChineseRestaurant implements Sampler<Integer> {
     /**
      * @return the number draws so far.
      */
+    @SuppressWarnings("unused")
     public int count() {
         return (int) weight;
     }
@@ -101,6 +104,7 @@ public final class ChineseRestaurant implements Sampler<Integer> {
      * @param j Which value to test.
      * @return The number of times that j has been returned so far.
      */
+    @SuppressWarnings("unused")
     public int count(int j) {
         Preconditions.checkArgument(j >= 0);
 

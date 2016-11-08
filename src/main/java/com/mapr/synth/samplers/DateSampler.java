@@ -54,6 +54,7 @@ public class DateSampler extends FieldSampler {
     public DateSampler() {
     }
 
+    @SuppressWarnings("unused")
     public void setFormat(String format) {
         df = new FancyTimeFormatter(format);
     }

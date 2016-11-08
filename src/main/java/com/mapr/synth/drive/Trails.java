@@ -25,8 +25,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import processing.core.PApplet;
 import processing.core.PFont;
 
-import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.util.Queue;
 import java.util.Random;
@@ -35,9 +33,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Created by tdunning on 9/21/15.
- */
 public class Trails extends PApplet {
     Queue<State> input;
     private State old = null;

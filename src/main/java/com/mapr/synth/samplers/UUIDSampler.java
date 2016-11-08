@@ -38,6 +38,7 @@ public class UUIDSampler extends FieldSampler {
     public UUIDSampler() {
     }
 
+    @SuppressWarnings("unused")
     public void setSeed(long seed) {
         rand.setSeed(seed);
     }

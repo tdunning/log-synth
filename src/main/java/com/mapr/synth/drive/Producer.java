@@ -24,9 +24,6 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 
-/**
- * Created by tdunning on 9/21/15.
- */
 public class Producer implements Runnable {
     BlockingQueue<Trails.State> output;
 
@@ -46,6 +43,7 @@ public class Producer implements Runnable {
         Vector3D zz = project(east, north, end.as3D());
         System.out.printf("==> %.2f %.2f\n", zz.getX(), zz.getY());
 
+        //noinspection InfiniteLoopStatement
         while (true) {
             double t = 0;
             final Car car = new Car();

@@ -51,7 +51,7 @@ public class StringSampler extends FieldSampler {
 
     protected void readDistribution(String resourceName) {
         try {
-            if (distribution.compareAndSet(null, new Multinomial<String>())) {
+            if (distribution.compareAndSet(null, new Multinomial<>())) {
                 Splitter onTab = Splitter.on("\t").trimResults();
                 double i = 20;
                 for (String line : Resources.readLines(Resources.getResource(resourceName), Charsets.UTF_8)) {
@@ -77,7 +77,7 @@ public class StringSampler extends FieldSampler {
 
     public void setDist(Map<String, ?> dist) {
         Preconditions.checkArgument(dist.size() > 0);
-        distribution.compareAndSet(null, new Multinomial<String>());
+        distribution.compareAndSet(null, new Multinomial<>());
         for (String key : dist.keySet()) {
             distribution.get().add(key, Double.parseDouble(dist.get(key).toString()));
         }

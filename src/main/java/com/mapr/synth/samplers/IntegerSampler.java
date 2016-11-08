@@ -65,6 +65,7 @@ public class IntegerSampler extends FieldSampler {
         this.power = skew;
     }
 
+    @SuppressWarnings("unused")
     public void setFormat(String format) {
         this.format = format;
     }

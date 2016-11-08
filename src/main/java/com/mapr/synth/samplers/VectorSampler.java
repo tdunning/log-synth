@@ -52,6 +52,7 @@ public class VectorSampler extends FieldSampler {
 
     private double resolution = Double.NaN;
 
+    @SuppressWarnings("unused")
     private int seed = Integer.MIN_VALUE;
 
     private Function transform = input -> input;
@@ -93,18 +94,11 @@ public class VectorSampler extends FieldSampler {
                 if (Double.isNaN(resolution)) {
                     rounder = input -> input;
                 } else {
-                    rounder = (double input) -> {
-                        return Math.rint(input / resolution) * resolution;
-                    };
+                    rounder = (double input) -> Math.rint(input / resolution) * resolution;
                 }
 
                 if (Double.isNaN(mean)) {
-                    sampler = new Sampler() {
-                        @Override
-                        public double eval() {
-                            return rounder.apply(transform.apply(gen.nextDouble() * (max - min) + min));
-                        }
-                    };
+                    sampler = () -> rounder.apply(transform.apply(gen.nextDouble() * (max - min) + min));
                 } else {
                     sampler = new Sampler() {
                         @Override
@@ -136,25 +130,28 @@ public class VectorSampler extends FieldSampler {
         return r;
     }
 
+    @SuppressWarnings("unused")
     public void setTransform(String xform) {
         switch (xform) {
             case "exp":
-                transform = input -> Math.exp(input);
-                inverse = input -> Math.log(input);
+                transform = Math::exp;
+                inverse = Math::log;
                 break;
             case "log":
-                transform = input -> Math.log(input);
-                inverse = input -> Math.exp(input);
+                transform = Math::log;
+                inverse = Math::exp;
                 break;
             default:
                 throw new IllegalArgumentException("Transform can only be \"exp\" or \"log\"");
         }
     }
 
+    @SuppressWarnings("unused")
     public void setMax(double max) {
         this.max = max;
     }
 
+    @SuppressWarnings("unused")
     public void setMean(double mean) {
         this.mean = mean;
         if (sd < 0) {
@@ -162,10 +159,12 @@ public class VectorSampler extends FieldSampler {
         }
     }
 
+    @SuppressWarnings("unused")
     public void setMin(double min) {
         this.min = min;
     }
 
+    @SuppressWarnings("unused")
     public void setSd(double sd) {
         this.sd = sd;
         if (Double.isNaN(mean)) {
@@ -173,10 +172,12 @@ public class VectorSampler extends FieldSampler {
         }
     }
 
+    @SuppressWarnings("unused")
     public void setResolution(double resolution) {
         this.resolution = resolution;
     }
 
+    @SuppressWarnings("unused")
     public void setLength(JsonNode value) throws IOException {
         if (value.isObject()) {
             length = FieldSampler.newSampler(value.toString());
@@ -186,6 +187,7 @@ public class VectorSampler extends FieldSampler {
 
     }
 
+    @SuppressWarnings("unused")
     public void setSeed(int seed) {
         gen = new Random(seed);
     }
