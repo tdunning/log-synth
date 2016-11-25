@@ -62,6 +62,8 @@ public class ArrivalSampler extends FieldSampler {
     private FancyTimeFormatter df = new FancyTimeFormatter("yyyy-MM-dd");
 
     private double start = System.currentTimeMillis();
+    private boolean useEpochTimestamp = false;
+    private boolean millisSinceEpoch = true;
 
     public ArrivalSampler() {
         base = RandomUtils.getRandom();
@@ -95,10 +97,29 @@ public class ArrivalSampler extends FieldSampler {
         this.start = df.parse(start).getTime();
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    public void setMillisSinceEpoch(String millisSinceEpoch) {
+        this.millisSinceEpoch = Boolean.parseBoolean(millisSinceEpoch);
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setUseEpochTimestamp(String useEpochTimestamp) {
+        this.useEpochTimestamp = Boolean.parseBoolean(useEpochTimestamp);
+    }
+
     @Override
     public JsonNode sample() {
       synchronized (this) {
-        TextNode r = new TextNode(df.format(new Date((long) start)));
+        Date d = new Date((long) start);
+        String t;
+
+        if (useEpochTimestamp) {
+            t = String.format(millisSinceEpoch ? "%TQ" : "%Ts", d);
+        } else {
+            t = df.format(d);
+        }
+
+        TextNode r = new TextNode(t);
         start += minInterval - meanInterval * Math.log(1 - base.nextDouble());
         return r;
       }

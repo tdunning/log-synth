@@ -157,7 +157,11 @@ feedback would be helpful here if you need this model.
 {"name":"foo1", "class":"event", "rate": "0.1/d"},
 {"name":"foo2", "class":"event", "start": "2014-01-01", "format":"yyyy-MM-dd HH:mm:ss", "rate": "10/s"},
 {"name":"foo3", "class":"event", "format": "MM/dd/yyyy HH:mm:ss", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
+{"name":"foo4", "class":"event", "sinceEpoch": "true", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
 ```
+
+Using `"useEpochTimestamp": "true"` will print the number of milliseconds or seconds since 1970, depending on the value of `"millisSinceEpoch"`. If `true`, you get milliseconds since the epoch, if `false` you get seconds.
+
 **`flatten`** - Turns an object into fields.
 
 Some samplers such as `zip` or `vin` return complex objects with many fields.  If you want to output each of these fields
