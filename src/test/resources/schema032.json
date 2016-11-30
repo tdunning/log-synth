@@ -1,0 +1,3 @@
+[
+  {"name":"delayed", "class":"cars", "speed": "60 mph", "variance": "1 mph", "arrival": "5/min", "sensors": {"locations":[1.6, 3.2], "unit":"km"}}
+]

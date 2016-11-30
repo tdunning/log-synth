@@ -1,0 +1,4 @@
+[
+  {"name":"traffic", "class":"cars", "speed": "60 kph", "variance": "10 kph", "arrival": "5/min", "sensors": {"locations":[1, 1.5, 2, 3, 4, 5], "unit":"km"},
+    "slowdown":[{"speed":"30 kph", "location":"3 km - 5 km", "time": "5min - 10min"}]}
+]

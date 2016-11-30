@@ -39,6 +39,7 @@ import java.io.IOException;
         @JsonSubTypes.Type(value = ArrivalSampler.class, name = "event"),
         @JsonSubTypes.Type(value = BrowserSampler.class, name = "browser"),
         @JsonSubTypes.Type(value = Changer.class, name = "changer"),
+        @JsonSubTypes.Type(value = CarOnRoadSampler.class, name = "cars"),
         @JsonSubTypes.Type(value = CommonPointOfCompromise.class, name = "common-point-of-compromise"),
         @JsonSubTypes.Type(value = Commuter.class, name = "commuter"),
         @JsonSubTypes.Type(value = CountrySampler.class, name = "country"),
