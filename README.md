@@ -70,7 +70,7 @@ Note also that the number of threads that gives best throughput is somewhat surp
  
 ## Samplers Allowed in a Schema
 
-Check the [end of this README](https://github.com/tdunning/log-synth/blob/master/README.md#Longer%20Examples) for worked examples.
+Check the [end of this README](https://github.com/tdunning/log-synth/blob/master/README.md#longer-examples) for worked examples.
 
 The following classes of values are allowed (in approximately alphabetical order):
 
