@@ -70,6 +70,8 @@ Note also that the number of threads that gives best throughput is somewhat surp
  
 ## Samplers Allowed in a Schema
 
+Check the [end of this README](https://github.com/tdunning/log-synth/blob/master/README.md#Longer%20Examples) for worked examples.
+
 The following classes of values are allowed (in approximately alphabetical order):
 
 #### `address`
@@ -601,6 +603,7 @@ If you only want the zip code as a string without all the supporting information
 ```
 
 ## Longer Examples
+### Star schema
 The following schema generates a typical fact table from a simulated star schema:
 
 ```json
@@ -635,6 +638,7 @@ Items are simpler and are generated using this schema
 ```
 Each item has an id and a size which is just a random integer from 10 to 99.
 
+### Users and queries
 You can use the sequence type to generate variable or fixed-length arrays of values which can themselves be complex.  If you use the JSON output format, this structure will be preserved.  If you want to flatten an array produced by sequence, you can use the flatten sampler.
 
 For example, this produces users with names and variable length query strings
@@ -651,6 +655,7 @@ For example, this produces users with names and variable length query strings
 ```
 If you use the TSV format with this schema, the queries will be comma delimited unquoted strings.  If you omit the `array-flatten` step, you will get a list of strings surrounded by square brackets and each string will be quoted (i.e. an array in JSON format).
 
+### Nested data
 You can also generate arbitrarily nested data by using the map sampler.  For example, this schema will produce records with an id and a map named stuff that has two integers ("a" and "b") in it.
 
 ```json
@@ -665,7 +670,83 @@ You can also generate arbitrarily nested data by using the map sampler.  For exa
    }
 ]
 ```
+### Complex names
+Suppose that we want to generate this kind of data:
+```json
+{
+  "name":{"first":"Marcelene","last":"Gillette"},
+  "student":{
+    "details":{"school.id":7608,"school.name":"Lloyd Burton Junior High School"}}}
+{
+  "name":{"first":"Samuel","last":"Colston"},
+  "student":{
+    "details":{"school.id":3555,"school.name":"Kenneth Smith Junior High School"}}}
+{
+  "name":{"first":"Jan","last":"Acton"},
+  "student":{
+    "details":{"school.id":4295,"school.name":"Jeanette Harden Elementary School"}}}
+```
+This is harder than it looks because there are some surprises:
+- The name is a structure, not a string
+- The school name is all fancy with a name and a kind of a school
 
+The schema to generate this is a little long, but not really all that complicated.
+There are a few tricks that I used:
+
+1) the [map type](https://github.com/tdunning/log-synth/blob/master/README.md#map) allows me to generate a structure for the name and the details structure. 
+
+2) the [join combined with the sequence](https://github.com/tdunning/log-synth/blob/master/README.md#sequence)
+type allows me to build the school name by combining a name and a
+randomly selected string.
+
+Here is the schema (it looks fancier than it is):
+```json
+[{
+	"name": "name",
+	"class": "map",
+	"value": [{
+		"name": "first",
+		"class": "name",
+		"type": "first"
+	}, {
+		"name": "last",
+		"class": "name",
+		"type": "last"
+	}]
+}, {
+	"name": "student",
+	"class": "map",
+	"value": [{
+		"name": "details",
+		"class": "map",
+		"value": [{
+			"name": "school.id",
+			"class": "int",
+			"min": 1000,
+			"max": 9999
+		}, {
+			"name": "school.name",
+			"class": "join",
+			"separator": " ",
+			"value": {
+				"class": "sequence",
+				"length": 2,
+				"array": [{
+					"class": "name",
+					"type": "first_last"
+				}, {
+					"class": "string",
+					"dist": {
+						"High School": 1,
+						"Junior High School": 2,
+						"Elementary School": 5
+					}
+				}]
+			}
+		}]
+	}]
+}]
+```
 ## Quoting of Strings
 
 By default all strings in CSV or TSV formats are fully quoted.  This can confuse some software (sadly) so there are additional options to control how quoting is done.  
