@@ -72,18 +72,22 @@ Note also that the number of threads that gives best throughput is somewhat surp
 
 The following classes of values are allowed (in approximately alphabetical order):
 
-**`address`** - This distribution generates fairly plausible, if somewhat fanciful street addresses.  There are no additional parameters allowed.
+#### `address`
+This distribution generates fairly plausible, if somewhat fanciful street addresses.  There are no additional parameters allowed.
 
     {"name":"address", "class":"address"},
         
-**`array-flattener`** - This sampler converts a nested list of lists into a flat list.  This can be useful if used in conjunction with the `sequence` sampler (see the example for `sequence`).
+#### `array-flattener`
+This sampler converts a nested list of lists into a flat list.  This can be useful if used in conjunction with the `sequence` sampler (see the example for `sequence`).
 
-**`browser`** - Samples from browser types with kind of plausible frequency distribution.
+#### `browser`
+Samples from browser types with kind of plausible frequency distribution.
 
 ```json
 {"name":"br", "class":"browser"},
 ```
-**`commuter`** - Samples simulated automotive data from commuters.
+#### `commuter`
+Samples simulated automotive data from commuters.
 
 The idea here is that we have some number of commuters who each have a home and work location. These commuters
 tend to drive to work in the morning rush hour and home in the evening rush hour, although they may do either 
@@ -141,24 +145,28 @@ each input records. To deal with this, you can produce flattened data, you can g
 of data at a time or you can request a feature to make the engine sampling frequency to be extended. Your 
 feedback would be helpful here if you need this model.
 
-**`country`** - Samples from ISO country codes.
+#### `country`
+Samples from ISO country codes.
 ```json
 {"name":"co", "class":"country"},
 ```
-**`date`** - This distribution generates dates which are some time before an epoch date.  Dates shortly before the epoch are more common than those long before.  On average, the dates generated are 100 days before the epoch.  A format field is allowed which takes a format for the data in the style of Java's SimpleDateFormatter.  Note that the order of options is significant in that the format will apply to the start and end options if it comes before them.  By default, these are formatted like yyyy-MM-dd, but you can specify a different format using the format option.  Dates are selected by default to be before July 1, 2013.  The amount before is selected exponentially with mean of 100 days.  If you specify start or end dates, the dates will be sampled uniformly between your dates. The default start is January 1, 1970.  The default end is July 1, 2013.
+#### `date`
+This distribution generates dates which are some time before an epoch date.  Dates shortly before the epoch are more common than those long before.  On average, the dates generated are 100 days before the epoch.  A format field is allowed which takes a format for the data in the style of Java's SimpleDateFormatter.  Note that the order of options is significant in that the format will apply to the start and end options if it comes before them.  By default, these are formatted like yyyy-MM-dd, but you can specify a different format using the format option.  Dates are selected by default to be before July 1, 2013.  The amount before is selected exponentially with mean of 100 days.  If you specify start or end dates, the dates will be sampled uniformly between your dates. The default start is January 1, 1970.  The default end is July 1, 2013.
 ```json
 {"name":"first_visit", "class":"date", "format":"MM/dd/yyyy"},
 {"name":"second_date", "class":"date", "start":"2014-01-31", "end":"2014-02-07"},
 {"name":"third_date", "class":"date", "format":"MM/dd/yyyy", "start":"01/31/1995", "end":"02/07/1999"}
 ```    
-**`event`** - Samples Poisson distributed event times with specified rates.
+#### `event`
+Samples Poisson distributed event times with specified rates.
 
 ```json
 {"name":"foo1", "class":"event", "rate": "0.1/d"},
 {"name":"foo2", "class":"event", "start": "2014-01-01", "format":"yyyy-MM-dd HH:mm:ss", "rate": "10/s"},
 {"name":"foo3", "class":"event", "format": "MM/dd/yyyy HH:mm:ss", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
 ```
-**`flatten`** - Turns an object into fields.
+#### `flatten`
+Turns an object into fields.
 
 Some samplers such as `zip` or `vin` return complex objects with many fields.  If you want to output each of these fields
 as a separate field in CSV format, you could post process a JSON output file or you can use the `flatten` sampler
@@ -194,21 +202,25 @@ flattener with a dash appended.  For instance, this snippet
 would give samples with fields named `x-latitude`, `x-longitude`, `y-latitude` and `y-longitude` which makes it
 easy to keep track of which fields are associated with each other.
 
-**`foreign-key`** - This distribution generates randomized references to an integer key from another table.  You must specify the size of the table being referenced using the size parameter. The default value of size is 1000.  You may optionally specify a skewness factor in the range [0,3].  A value of 0 gives uniform distribution.  A value of 1 gives a classic Zipf distribution.  The default skew is 0.5.  Values are biased towards smaller values.  This sampler uses space proportional to size so be slightly cautious.
+#### `foreign-key`
+This distribution generates randomized references to an integer key from another table.  You must specify the size of the table being referenced using the size parameter. The default value of size is 1000.  You may optionally specify a skewness factor in the range [0,3].  A value of 0 gives uniform distribution.  A value of 1 gives a classic Zipf distribution.  The default skew is 0.5.  Values are biased towards smaller values.  This sampler uses space proportional to size so be slightly cautious.
 
-**`id`** - This distribution returns consecutive integers starting at the value of the start parameter.
+#### `id`
+This distribution returns consecutive integers starting at the value of the start parameter.
 
 ```json
 {"name":"id", "class":"id"},
 ```
-**`int`** - Samples values from min (inclusive) to max (exclusive) with an adjustable skew toward small values.  If you set skew to a negative number, larger values will be preferred.
+#### `int`
+Samples values from min (inclusive) to max (exclusive) with an adjustable skew toward small values.  If you set skew to a negative number, larger values will be preferred.
 
 ```json
 {"name":"size", "class":"int", "min":10, "max":99}
 {"name": "z", "class": "int", "min": 10, "max": 20, "skew": -1},
 {"name":"x", "class":"lookup", "resource":"data.json", "skew":1},
 ```
-**`join`** - Glues together an array of strings.  You can specify a separator that goes between the joined strings with the `separator` parameter.  The `value` parameter specifies how to generate the arrays of strings.
+#### `join`
+Glues together an array of strings.  You can specify a separator that goes between the joined strings with the `separator` parameter.  The `value` parameter specifies how to generate the arrays of strings.
 
 This snippet will generate silly file names nested three deep:
 
@@ -228,14 +240,17 @@ This snippet will generate silly file names nested three deep:
  }
 }
 ```
-**`language`** - Samples from ISO language codes according to prevalence on the web.
+#### `language`
+Samples from ISO language codes according to prevalence on the web.
 
 ```json
 {"name":"la", "class":"language"},
 ```        
-**`lookup`** - Samples from lines of a file.
+#### `lookup`
+Samples from lines of a file.
 
-**`map`** - Samples from complex objects, fields of which are sampled according to a recursive schema you specify.
+#### `map`
+Samples from complex objects, fields of which are sampled according to a recursive schema you specify.
 
 ```json
 {
@@ -247,13 +262,15 @@ This snippet will generate silly file names nested three deep:
  ]
 }
 ```
-**`name`** - Samples from (slightly) plausible names.  The allowable types are
+#### `name`
+Samples from (slightly) plausible names.  The allowable types are
 `first`, `last`, `first_last` and `last_first`.  The default type is `first_last`.
 
 ```json
 {"name":"name", "class":"name", "type":"first_last"},
 ```
-**`sequence`** - Repeatedly samples from a single distribution and returns an array of the results.
+#### `sequence`
+Repeatedly samples from a single distribution and returns an array of the results.
 
 This example produces variable length results with exponentially distributed lengths.  Some of the results have length 0.
 
@@ -312,7 +329,8 @@ time.  Here are some examples:
       "base": ...
     }
 ```
-**`ssn`** - Samples somewhat realistic SSN's
+#### `ssn`
+Samples somewhat realistic SSN's
 
 A social security number (SSN) has fields `ssn`, `state`, `description` and `type`.  The `ssn` field is what you might expect.  The
 `state` field is the two letter abbreviation of the state that the SSN was issued in (assuming that the SSN was issued before the 2011 conversion to
@@ -352,28 +370,34 @@ If you only want a string with the SSN in it, you can set the `verbose` flag to 
 },
 ```
 
-**`state`** - Samples from any of the 58 USPS state abbreviations.  Yes, there are 58 possible values.
+#### `state`
+Samples from any of the 58 USPS state abbreviations.  Yes, there are 58 possible values.
 
 ```json
 {"name":"st", "class":"state"},
 ```
-**`street-name`** - This distribution generates fanciful three word street names.
+#### `street-name`
+This distribution generates fanciful three word street names.
 
-**`string`** - This distribution generates a specified distribution of strings.  One parameter called `dist` is 
+#### `string`
+This distribution generates a specified distribution of strings.  One parameter called `dist` is 
 required.  This parameter should be a structure with string keys and numerical values.  The probability for each 
 key is proportional to the value.
 
 ```json
 {"name":"foo", "class":"string", "dist":{"YES":0.95, "NO":0.05, "NA":1}}
 ```
-**`uuid`** - Generates random UUIDs.
+#### `uuid`
+Generates random UUIDs.
 
-**`os`** - Samples from operating system codes.  My own bias will show here.
+#### `os`
+Samples from operating system codes.  My own bias will show here.
 
 ```json
 {"name":"os", "class":"os"}
 ```    
-**`random-walk`** and **`gamma`** - Allows sampling from a random walk.
+#### `random-walk` and `gamma`
+Allows sampling from a random walk.
 
 The `random-walk` sample samples steps from a normal distribution and accumulates those steps into a current position.  
 The returned value is the sum of those steps.  
@@ -446,7 +470,8 @@ measurement every 100 microseconds with 2 microseconds of jitter this way:
 }
 ```
     
-**`vin`** - Samples from sort of realistic VIN numbers.
+#### `vin`
+Samples from sort of realistic VIN numbers.
 
 Here is are three different ways to use the VIN sampler.  The first one `v1`, uses a seed to force the generated sequence to be identical every time. 
 
@@ -499,9 +524,11 @@ The third example shows how the country and year fields can have more complex co
 Currently all sampling for constructing a VIN is done by uniformly sampling all of the possible options.  This could easily be changed if desired.
     
 
-**`word`** - Samples words at random.  A seed file is given, but if more words are needed than seeded, they will be invented.
+#### `word`
+Samples words at random.  A seed file is given, but if more words are needed than seeded, they will be invented.
 
-**`common-point-of-compromise`** - Produces a user history that emulates a common point of compromise fraud scenario.  Contact tdunning@maprtech.com for more info.
+#### `common-point-of-compromise`
+Produces a user history that emulates a common point of compromise fraud scenario.  Contact tdunning@maprtech.com for more info.
 
 ```json
 [
@@ -521,7 +548,8 @@ Currently all sampling for constructing a VIN is done by uniformly sampling all 
    }
 ]
 ```    
-**`zip`** - Samples from a table of US Zip Codes.  This gives you latitude, longitude and other common parameters for zip codes.  This can be used to generate random ish locations for various purposes that have nothing to do with the postal system.
+#### `zip`
+Samples from a table of US Zip Codes.  This gives you latitude, longitude and other common parameters for zip codes.  This can be used to generate random ish locations for various purposes that have nothing to do with the postal system.
 
 All parameters for this sampler are optional.
 
