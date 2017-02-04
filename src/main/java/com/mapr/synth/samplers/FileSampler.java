@@ -30,9 +30,11 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.io.*;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 
@@ -52,7 +54,7 @@ public class FileSampler extends FieldSampler {
     @SuppressWarnings("unused")
     public void setFile(String lookup) throws IOException {
         if (lookup.matches(".*\\.json")) {
-            readJsonData(Files.newInputStreamSupplier(new File(lookup)));
+            readJsonData(Files.newReader(new File(lookup), Charsets.UTF_8));
         } else {
             List<String> lines = Files.readLines(new File(lookup), Charsets.UTF_8);
             readDelimitedData(lookup, lines);
@@ -73,7 +75,7 @@ public class FileSampler extends FieldSampler {
     @SuppressWarnings({"UnusedDeclaration"})
     public void setResource(String lookup) throws IOException {
         if (lookup.matches(".*\\.json")) {
-            readJsonData(Resources.newInputStreamSupplier(Resources.getResource(lookup)));
+            readJsonData(Files.newReader(new File(Resources.getResource(lookup).getFile()), Charsets.UTF_8));
         } else {
             List<String> lines = Resources.readLines(Resources.getResource(lookup), Charsets.UTF_8);
             readDelimitedData(lookup, lines);
@@ -108,11 +110,9 @@ public class FileSampler extends FieldSampler {
         data = localData;
     }
 
-    private void readJsonData(InputSupplier<? extends InputStream> input) throws IOException {
+    private void readJsonData(BufferedReader input) throws IOException {
         ObjectMapper om = new ObjectMapper();
-        try (InputStream in = input.getInput()) {
-            data = om.readTree(in);
-        }
+        data = om.readTree(input);
     }
 
     /**
