@@ -23,12 +23,14 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
 import com.google.common.io.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -82,7 +84,7 @@ public class WordGenerator {
         }
 
         try {
-          wordReader = new BufferedReader(Resources.newReaderSupplier(Resources.getResource(others), Charsets.UTF_8).getInput());
+          wordReader = Files.newReader(new File(Resources.getResource(others).getFile()), Charsets.UTF_8);
         } catch (IOException e) {
             log.error("Can't read resource \"{}\", will continue without realistic words", others);
             wordReader = null;
