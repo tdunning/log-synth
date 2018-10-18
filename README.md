@@ -249,7 +249,11 @@ Samples from ISO language codes according to prevalence on the web.
 {"name":"la", "class":"language"},
 ```        
 #### `lookup`
-Samples from lines of a file.
+Samples from lines of a file located in the resources folder. The filename must have .csv, .tsv, or .json suffix and the first line is expected to be a header row containing names for each field.
+
+```
+{"name":"bmw-models", "class":"lookup", "resource":"bmw-models.tsv"}
+```
 
 #### `map`
 Samples from complex objects, fields of which are sampled according to a recursive schema you specify.

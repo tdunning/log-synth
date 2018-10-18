@@ -107,7 +107,7 @@ public class Synth {
             final Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
             cfg.setDefaultEncoding("UTF-8");
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-            cfg.setDirectoryForTemplateLoading(opts.template.getAbsoluteFile().getParentFile());
+            cfg.setDirectoryForTemplateLoading(opts.template.getCanonicalFile().getParentFile());
 
             template = cfg.getTemplate(opts.template.getName());
         }
