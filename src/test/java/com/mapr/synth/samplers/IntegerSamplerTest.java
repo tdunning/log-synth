@@ -20,6 +20,7 @@
 package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.junit.Test;
@@ -29,6 +30,15 @@ import java.io.IOException;
 import static org.junit.Assert.*;
 
 public class IntegerSamplerTest {
+    @Test
+    public void testStringSetter() throws Exception {
+        IntegerSampler s = new IntegerSampler();
+        s.setMinAsInt(10);
+        s.setMax(new TextNode("1K"));
+        assertEquals(10, s.getMin());
+        assertEquals(1000, s.getMax());
+    }
+
     @Test
     public void testFormatAndUniform() throws IOException {
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema030.json"), Charsets.UTF_8).read());

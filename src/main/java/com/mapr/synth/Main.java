@@ -102,23 +102,7 @@ public class Main {
 
             @Override
             protected Integer parse(String argument) throws NumberFormatException {
-                int n = Integer.parseInt(argument.replaceAll("[KMG]?$", ""));
-
-                switch (argument.charAt(argument.length() - 1)) {
-                    case 'G':
-                        n *= 1e9;
-                        break;
-                    case 'M':
-                        n *= 1e6;
-                        break;
-                    case 'K':
-                        n *= 1e3;
-                        break;
-                    default:
-                        // no suffix leads here
-                        break;
-                }
-                return n;
+                return Util.parseInteger(argument);
             }
         }
     }

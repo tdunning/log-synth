@@ -22,13 +22,14 @@ package com.mapr.synth.samplers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.mapr.synth.Util;
 import org.apache.mahout.common.RandomUtils;
 
 import java.util.Random;
 
 /**
  * Samples from a "foreign key" which is really just an integer.
- *
+ * <p>
  * Thread safe
  */
 
@@ -39,16 +40,30 @@ public class IntegerSampler extends FieldSampler {
     private Random base;
     private String format = null;
 
+    @SuppressWarnings("WeakerAccess")
     public IntegerSampler() {
         base = RandomUtils.getRandom();
     }
 
-    public void setMax(int max) {
-        this.max = max;
+    public void setMax(String max) {
+        this.max = Util.parseInteger(max);
     }
 
-    public void setMin(int min) {
+    public void setMax(JsonNode max) {
+        this.max = Util.parseInteger(max);
+    }
+
+    public void setMin(JsonNode min) {
+        this.min = Util.parseInteger(min);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    void setMinAsInt(int min) {
         this.min = min;
+    }
+
+    void setMaxasInt(int max) {
+        this.max = max;
     }
 
     /**
@@ -72,24 +87,32 @@ public class IntegerSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
-      synchronized (this) {
-        int r = power >= 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-        if (power >= 0) {
-            for (int i = 0; i <= power; i++) {
-                r = Math.min(r, min + base.nextInt(max - min));
+        synchronized (this) {
+            int r = power >= 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            if (power >= 0) {
+                for (int i = 0; i <= power; i++) {
+                    r = Math.min(r, min + base.nextInt(max - min));
+                }
+            } else {
+                int n = -power;
+                for (int i = 0; i <= n; i++) {
+                    r = Math.max(r, min + base.nextInt(max - min));
+                }
             }
-        } else {
-            int n = -power;
-            for (int i = 0; i <= n; i++) {
-                r = Math.max(r, min + base.nextInt(max - min));
+            if (format == null) {
+                return new IntNode(r);
+            } else {
+                return new TextNode(String.format(format, r));
             }
         }
-        if (format == null) {
-            return new IntNode(r);
-        }else {
-            return new TextNode(String.format(format, r));
-        }
-      }
+    }
+
+    public int getMin() {
+        return min;
+    }
+
+    public int getMax() {
+        return max;
     }
 
 }

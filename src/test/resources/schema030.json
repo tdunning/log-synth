@@ -1,4 +1,4 @@
 [
   {"name":"formatted", "class":"int", "min":0, "max":1000, "format":"%08x"},
-  {"name":"raw", "class":"int", "min":0, "max":1000}
+  {"name":"raw", "class":"int", "min":0, "max":"1K"}
 ]

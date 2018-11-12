@@ -22,19 +22,19 @@ package com.mapr.synth.samplers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.google.common.io.*;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,8 +65,8 @@ public class FileSampler extends FieldSampler {
 
     private void setupIndex() {
         index = new IntegerSampler();
-        index.setMin(0);
-        index.setMax(data.size());
+        index.setMinAsInt(0);
+        index.setMaxasInt(data.size());
         if (skew != Integer.MAX_VALUE) {
             index.setSkew(skew);
         }
