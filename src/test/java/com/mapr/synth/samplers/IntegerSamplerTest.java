@@ -26,6 +26,7 @@ import com.google.common.io.Resources;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.function.Function;
 
 import static org.junit.Assert.*;
 
@@ -60,6 +61,46 @@ public class IntegerSamplerTest {
             assertEquals(1000, count1[i], 5 * 30);
             total1 += count1[i];
             assertEquals(1000, count2[i], 5 * 30);
+            total2 += count2[i];
+        }
+        assertEquals(1000000, total1);
+        assertEquals(1000000, total2);
+    }
+
+    @Test
+    public void testExplicitDistribution() throws Exception {
+        Function<Double, Double> sd = p -> Math.sqrt(p * (1 - p) * 1000000);
+
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema031.json"), Charsets.UTF_8).read());
+        int[] count1 = new int[5], count2 = new int[5];
+        for (int i = 0; i < 1000000; i++) {
+            JsonNode f = s.sample();
+
+            JsonNode x1 = f.get("a");
+            assertTrue(x1.isInt());
+            count1[x1.asInt()]++;
+
+            JsonNode x2 = f.get("b");
+            assertTrue(x2.isInt());
+            count2[x2.asInt()]++;
+        }
+
+        assertEquals(count1[0], 0);
+        assertEquals(count1[1], 500000, 7 * sd.apply(0.5));
+        assertEquals(count1[2], 250000, 7 * sd.apply(0.25));
+        assertEquals(count1[3], 150000, 7 * sd.apply(0.15));
+        assertEquals(count1[4], 100000, 7 * sd.apply(0.1));
+
+        assertEquals(count2[0], 0);
+        assertEquals(count2[1], 100000, 7 * sd.apply(0.1));
+        assertEquals(count2[2], 150000, 7 * sd.apply(0.15));
+        assertEquals(count2[3], 250000, 7 * sd.apply(0.25));
+        assertEquals(count2[4], 500000, 7 * sd.apply(0.5));
+
+        int total1 = 0;
+        int total2 = 0;
+        for (int i = 0; i < 5; i++) {
+            total1 += count1[i];
             total2 += count2[i];
         }
         assertEquals(1000000, total1);

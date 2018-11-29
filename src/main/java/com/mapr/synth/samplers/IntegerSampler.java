@@ -20,11 +20,14 @@
 package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.mapr.synth.Util;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.math.random.Multinomial;
 
+import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -39,6 +42,7 @@ public class IntegerSampler extends FieldSampler {
     private int power = 0;
     private Random base;
     private String format = null;
+    Multinomial<Integer> dist = null;
 
     @SuppressWarnings("WeakerAccess")
     public IntegerSampler() {
@@ -60,6 +64,33 @@ public class IntegerSampler extends FieldSampler {
     @SuppressWarnings("SameParameterValue")
     void setMinAsInt(int min) {
         this.min = min;
+    }
+
+    /**
+     * Sets the distribution to be used. The format is a list of number pairs.
+     * The first value in each pair is the value to return, the second is the
+     * (unnormalized) probability for that number. For instance [1, 50, 2, 30, 3, 1]
+     * will cause the sampler to return 1 a bit less than 60% of the time, 2 a bit
+     * less than 40% of the time and 3 just a bit over 1% of the time.
+     *
+     * @param dist A JSON list describing the distribution of numbers.
+     */
+    public void setDist(JsonNode dist) {
+        if (dist.isArray()) {
+            if (dist.size() % 2 != 0) {
+                throw new IllegalArgumentException("Need distribution to be an even sized list of numbers");
+            }
+            this.dist = new Multinomial<>();
+            Iterator<JsonNode> i = dist.iterator();
+            while (i.hasNext()) {
+                JsonNode v = i.next();
+                JsonNode p = i.next();
+                if (!v.isInt() || !v.isNumber()) {
+                    throw new IllegalArgumentException("Need distribution to be a list of value, probability pairs");
+                }
+                this.dist.add(v.asInt(), p.asDouble());
+            }
+        }
     }
 
     void setMaxasInt(int max) {
@@ -88,21 +119,25 @@ public class IntegerSampler extends FieldSampler {
     @Override
     public JsonNode sample() {
         synchronized (this) {
-            int r = power >= 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-            if (power >= 0) {
-                for (int i = 0; i <= power; i++) {
-                    r = Math.min(r, min + base.nextInt(max - min));
+            if (dist == null) {
+                int r = power >= 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+                if (power >= 0) {
+                    for (int i = 0; i <= power; i++) {
+                        r = Math.min(r, min + base.nextInt(max - min));
+                    }
+                } else {
+                    int n = -power;
+                    for (int i = 0; i <= n; i++) {
+                        r = Math.max(r, min + base.nextInt(max - min));
+                    }
+                }
+                if (format == null) {
+                    return new IntNode(r);
+                } else {
+                    return new TextNode(String.format(format, r));
                 }
             } else {
-                int n = -power;
-                for (int i = 0; i <= n; i++) {
-                    r = Math.max(r, min + base.nextInt(max - min));
-                }
-            }
-            if (format == null) {
-                return new IntNode(r);
-            } else {
-                return new TextNode(String.format(format, r));
+                return new IntNode(dist.sample());
             }
         }
     }

@@ -266,6 +266,14 @@ Samples values from min (inclusive) to max (exclusive) with an adjustable skew t
 {"name": "z", "class": "int", "min": 10, "max": 20, "skew": -1},
 {"name":"x", "class":"lookup", "resource":"data.json", "skew":1},
 ```
+
+You can also specify an explicit distribution for the values returned from this sampler by using the `dist` parameter. For instance, this gives you two values, `a` and `b`. The `a` value will have values 1, 2, 3, 4 distributed 50%, 25%, 15%, 10% while `b` will have values distributed 10%, 15%, 25%, 50%.
+```json
+[
+  {"name":"a", "class":"int", "dist":[1, 50, 2, 25, 3, 15, 4, 10]},
+  {"name":"b", "class":"int", "dist":[4, 50, 3, 25, 2, 15, 1, 10]}
+]
+```
 #### `join`
 Glues together an array of strings.  You can specify a separator that goes between the joined strings with the `separator` parameter.  The `value` parameter specifies how to generate the arrays of strings.
 
