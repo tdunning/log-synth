@@ -113,7 +113,9 @@ public class Commuter extends FieldSampler {
     @Override
     public JsonNode sample() {
         final Car car = new Car();
-        extrasSampler = new SchemaSampler(extraSchema);
+        if (extraSchema != null) {
+            extrasSampler = new SchemaSampler(extraSchema);
+        }
         car.setSampleTime(sampleTime);
         car.getEngine().setTime(start);
 

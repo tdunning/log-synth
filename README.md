@@ -139,8 +139,53 @@ Here is a sample schema for the `commuter` model:
     }
 ]
 ```
+The commuter model also allows you to add some extra fields to every sample in the generated trips. The way that this works is that you define a field called `extras` that contains a complete `log-synth` schema. 
 
-Note that the commuter model produce a lot of data per record due to the frequent sampling of engine data. 
+In this next example, our basic commuter schema is augmented so that three extra fields are generated for each sample point.
+
+```json
+[
+    {
+        "name": "vehicle",
+        "class": "vin",
+        "verbose": "true"
+    },
+    {
+        "name": "trip",
+        "class": "commuter",
+        "home": {
+            "class":"zip"  ,
+            "fields":"latitude, longitude, zip"
+        },
+        "work": 20,
+        "start": "2015-09-03 0:00:00",
+        "end": "2015-09-04 0:00:00",
+        "extras": [
+            {
+                "name": "door-open",
+                "class": "int",
+                "min": 0,
+                "max": 0
+            },
+            {
+                "name": "warning-light",
+                "class": "string",
+                "dist": {
+                    "on": 1,
+                    "off": 100
+                }
+            },
+            {
+                "name": "temperature",
+                "class": "random-walk",
+                "mean":100,
+                "sd":1
+            }
+        ]
+    }
+]
+```
+Note that the commuter model produces a lot of data per record due to the frequent sampling of engine data. 
 This means that you won't get very many output records per second of simulator run-time, especially if 
 you ask for long histories. This also means that some tools may choke on the output due to the size of 
 each input records. To deal with this, you can produce flattened data, you can generate just a single day 
