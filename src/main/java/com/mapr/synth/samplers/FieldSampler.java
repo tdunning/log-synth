@@ -31,6 +31,7 @@ import com.mapr.synth.drive.Commuter;
 import org.apache.mahout.math.random.Sampler;
 
 import java.io.IOException;
+import java.util.List;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "class")
 @JsonSubTypes({
@@ -73,7 +74,7 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
     private String name;
     private boolean flattener = false;
 
-    public static FieldSampler newSampler(String def) throws IOException {
+    protected static FieldSampler newSampler(String def) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
@@ -83,7 +84,17 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
         });
     }
 
-    public static FieldSampler constant(final double v) {
+    protected static FieldSampler newSampler(JsonNode def) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+
+        return mapper.convertValue(def, new TypeReference<FieldSampler>() {
+        });
+    }
+
+    protected static FieldSampler constant(final double v) {
         return new FieldSampler() {
             private DoubleNode sd = new DoubleNode(v);
 
@@ -102,6 +113,7 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
         this.name = name;
     }
 
+    @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
     public void setFlattener(boolean flattener) {
         this.flattener = flattener;
     }

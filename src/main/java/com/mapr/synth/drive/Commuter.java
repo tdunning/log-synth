@@ -24,17 +24,15 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Lists;
 import com.mapr.synth.samplers.FieldSampler;
+import com.mapr.synth.samplers.SchemaSampler;
 
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -65,11 +63,11 @@ public class Commuter extends FieldSampler {
     private static final double ERRAND_SIZE_KM = 20;
 
     private static final double WEEKEND_COMMUTE_RATE = 0.1;
-    public static final double WEEKEND_ERRAND_RATE = 0.9;
+    private static final double WEEKEND_ERRAND_RATE = 0.9;
 
     private static final double WEEKDAY_COMMUTE_RATE = 2;
     private static final double WEEKDAY_PEAK_COMMUTE_RATE = 10;
-    public static final double WEEKDAY_ERRAND_RATE = 0.5;
+    private static final double WEEKDAY_ERRAND_RATE = 0.5;
 
     private static final double DAY_IN_S = 24 * 3600.0;
     private static final JsonNodeFactory FACTORY = JsonNodeFactory.withExactBigDecimals(false);
@@ -81,34 +79,31 @@ public class Commuter extends FieldSampler {
     private double end;
 
     // internal mechanics
-    Random rand = new Random();
-    DateFormat df;
-    final static private ThreadLocal<GregorianCalendar> cal = new ThreadLocal<GregorianCalendar>() {
-        @Override
-        protected GregorianCalendar initialValue() {
-            return new GregorianCalendar();
-        }
-    };
+    private Random rand = new Random();
+    private DateFormat df;
+    final static private ThreadLocal<GregorianCalendar> cal = ThreadLocal.withInitial(GregorianCalendar::new);
 
     // is the commuter at home?
-    boolean atHome;
+    private boolean atHome;
 
-    double sampleTime = 1;
+    private double sampleTime = 1;
     private FieldSampler homeSampler;
     private FieldSampler workSampler;
+    private List<FieldSampler> extraSchema = null;
+    private SchemaSampler extrasSampler = null;
 
     @SuppressWarnings("unused")
     private BlockingQueue<JsonNode> resultBuffer = new LinkedBlockingQueue<>();
 
     private boolean isFlat;
 
-    public Commuter() throws ParseException {
+    Commuter() throws ParseException {
         setFormat("yyyy-MM-dd HH:mm:ss");
         start = df.parse("2014-01-01 00:00:00").getTime() / 1000.0;
         end = df.parse("2014-01-05 00:00:00").getTime() / 1000.0;
     }
 
-    public static boolean isWeekend(double t) {
+    static boolean isWeekend(double t) {
         GregorianCalendar c = cal.get();
         c.setTimeInMillis((long) (t * 1000));
         int d = c.get(GregorianCalendar.DAY_OF_WEEK);
@@ -118,6 +113,7 @@ public class Commuter extends FieldSampler {
     @Override
     public JsonNode sample() {
         final Car car = new Car();
+        extrasSampler = new SchemaSampler(extraSchema);
         car.setSampleTime(sampleTime);
         car.getEngine().setTime(start);
 
@@ -207,14 +203,14 @@ public class Commuter extends FieldSampler {
         trip.put("duration", duration);
     }
 
-    public int hourOfDay(double t) {
+    int hourOfDay(double t) {
         GregorianCalendar c = cal.get();
         c.setTimeInMillis((long) (t * 1000.0));
         c.setTimeZone(TimeZone.getTimeZone("US/Central"));
         return c.get(GregorianCalendar.HOUR_OF_DAY);
     }
 
-    public double search(boolean toWork, double t, double bound) {
+    double search(boolean toWork, double t, double bound) {
         while (true) {
             double nextHour = Util.evenHour(t + 3600);
             int hour = hourOfDay(t);
@@ -231,7 +227,7 @@ public class Commuter extends FieldSampler {
         }
     }
 
-    public static double lookupRate(boolean isWeekend, boolean toWork, int hour) {
+    private static double lookupRate(boolean isWeekend, boolean toWork, int hour) {
         if (isWeekend) {
             return WEEKEND_COMMUTE_RATE / DAY_IN_S;
         } else {
@@ -266,6 +262,9 @@ public class Commuter extends FieldSampler {
                 sample.put("mph", car.getSpeed() * Constants.MPH);
                 sample.put("rpm", car.getRpm());
                 sample.put("throttle", car.getThrottle());
+                if (extraSchema != null) {
+                    sample.setAll((ObjectNode) extrasSampler.sample());
+                }
             }
         });
     }
@@ -312,6 +311,20 @@ public class Commuter extends FieldSampler {
             };
         } else if (value.isNumber()) {
             workSampler = constant(value.asDouble());
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void setExtras(JsonNode value) throws IOException {
+        if (value.isArray()) {
+            extraSchema = Lists.newArrayList();
+            for (JsonNode jsonNode : value) {
+                extraSchema.add(FieldSampler.newSampler(jsonNode));
+            }
+        } else if (value.isObject()) {
+            extraSchema = Collections.singletonList(FieldSampler.newSampler(value));
+        } else {
+            throw new IllegalArgumentException("Must have JSON object or list as definition of extra fields");
         }
     }
 
