@@ -86,7 +86,7 @@ This sampler converts a nested list of lists into a flat list.  This can be usef
 Samples from browser types with kind of plausible frequency distribution.
 
 ```json
-{"name":"br", "class":"browser"},
+{"name":"br", "class":"browser"}
 ```
 #### `commuter`
 Samples simulated automotive data from commuters.
@@ -97,7 +97,7 @@ commute at other times. While at home, these simulated commuters may decide to r
 
 Underneath this life-style model is a traffic model that has each driver pick a route either on local roads or
 on a highway. Speeds on local roads are lower and more variable than on highways. Highways also go nearly directly to
-the destination while local roads are bound to north-sout or east-west directions. The choice of which kind of 
+the destination while local roads are bound to north-south or east-west directions. The choice of which kind of 
 segment to pick depends mostly on the distance to the destination. Note that there is no pre-defined set of roads,
 the model just makes it up as segments are chosen. This means that there really isn't any sort of congestion modeling
 happening here, just variable speeds.
@@ -150,7 +150,7 @@ feedback would be helpful here if you need this model.
 #### `country`
 Samples from ISO country codes.
 ```json
-{"name":"co", "class":"country"},
+{"name":"co", "class":"country"}
 ```
 #### `date`
 This distribution generates dates which are some time before an epoch date.  Dates shortly before the epoch are more common than those long before.  On average, the dates generated are 100 days before the epoch.  A format field is allowed which takes a format for the data in the style of Java's SimpleDateFormatter.  Note that the order of options is significant in that the format will apply to the start and end options if it comes before them.  By default, these are formatted like yyyy-MM-dd, but you can specify a different format using the format option.  Dates are selected by default to be before July 1, 2013.  The amount before is selected exponentially with mean of 100 days.  If you specify start or end dates, the dates will be sampled uniformly between your dates. The default start is January 1, 1970.  The default end is July 1, 2013.
