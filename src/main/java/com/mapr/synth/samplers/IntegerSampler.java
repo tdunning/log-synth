@@ -20,8 +20,8 @@
 package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.LongNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.mapr.synth.Util;
 import org.apache.mahout.common.RandomUtils;
@@ -42,7 +42,7 @@ public class IntegerSampler extends FieldSampler {
     private int power = 0;
     private Random base;
     private String format = null;
-    Multinomial<Integer> dist = null;
+    private Multinomial<Long> dist = null;
 
     @SuppressWarnings("WeakerAccess")
     public IntegerSampler() {
@@ -85,10 +85,10 @@ public class IntegerSampler extends FieldSampler {
             while (i.hasNext()) {
                 JsonNode v = i.next();
                 JsonNode p = i.next();
-                if (!v.isInt() || !v.isNumber()) {
-                    throw new IllegalArgumentException("Need distribution to be a list of value, probability pairs");
+                if (!v.canConvertToLong() || !p.isNumber()) {
+                    throw new IllegalArgumentException(String.format("Need distribution to be a list of value, probability pairs, got %s (%s,%s)", dist, v.getClass(), p.getClass()));
                 }
-                this.dist.add(v.asInt(), p.asDouble());
+                this.dist.add(v.asLong(), p.asDouble());
             }
         }
     }
@@ -137,7 +137,7 @@ public class IntegerSampler extends FieldSampler {
                     return new TextNode(String.format(format, r));
                 }
             } else {
-                return new IntNode(dist.sample());
+                return new LongNode(dist.sample());
             }
         }
     }
