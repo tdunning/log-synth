@@ -68,4 +68,34 @@ public class NormalSamplerTest {
         s[2] += (x - m) * (x - s[1]);
         s[1] = m;
     }
+
+    @Test
+    public void trim() throws Exception {
+        SchemaSampler s = new SchemaSampler(
+                "[{\"name\":\"x\", \"class\": \"normal\", \"mean\": 1, \"sd\": 3.1, \"seed\": 1, \"min\":0, \"max\": 2}]");
+        for (int i = 0; i < 10000; i++) {
+            JsonNode record = s.sample();
+            double x = record.get("x").asDouble();
+            assertTrue(x >= 0);
+            assertTrue(x <= 2);
+        }
+    }
+
+    @Test
+    public void illegalParams() throws Exception {
+        try {
+            new SchemaSampler(
+                    "[{\"name\":\"x\", \"class\": \"normal\", \"mean\": 1, \"sd\": 3.1, \"seed\": 1, \"min\":0, \"max\": -2}]");
+            fail();
+        } catch (JsonMappingException e) {
+            assertTrue(e.getMessage().startsWith("Parameter max must be greater than min"));
+        }
+        try {
+            SchemaSampler s = new SchemaSampler(
+                    "[{\"name\":\"x\", \"class\": \"normal\", \"mean\": 1, \"sd\": 3.1, \"seed\": 1, \"min\":0, \"max\": 0.3}]");
+            fail();
+        } catch (JsonMappingException e) {
+            assertTrue(e.getMessage().startsWith("Value of max-min is too small"));
+        }
+    }
 }

@@ -32,6 +32,8 @@ public class NormalSampler extends FieldSampler {
     private double sd = 1;
     private double precision = Double.NaN;
     private double mean = 0;
+    private double min = -Double.MAX_VALUE;
+    private double max = Double.MAX_VALUE;
 
     private int seed = Integer.MAX_VALUE;
     private Normal rand = null;
@@ -66,7 +68,23 @@ public class NormalSampler extends FieldSampler {
         init();
     }
 
+    public void setMin(double min) {
+        this.min = min;
+        init();
+    }
+
+    public void setMax(double max) {
+        this.max = max;
+        init();
+    }
+
     private void init() {
+        if (max <= min) {
+            throw new IllegalArgumentException("Parameter max must be greater than min");
+        }
+        if (max - min < 0.1 * sd) {
+            throw new IllegalArgumentException("Value of max-min is too small, should be > 0.1 * sd");
+        }
         if (Double.isNaN(sd)) {
             sd = 1 / precision;
         }
@@ -79,6 +97,10 @@ public class NormalSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
-        return new DoubleNode(rand.nextDouble());
+        double x;
+        do {
+            x = rand.nextDouble();
+        } while (x < min || x > max);
+        return new DoubleNode(x);
     }
 }

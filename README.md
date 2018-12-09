@@ -331,10 +331,10 @@ Samples from (slightly) plausible names.  The allowable types are
 
 #### `normal`
 Samples from a normal distribution. You can set `mean` and either `sd` or `precision`. 
-If you want a predictable sequence set the `seed`.
+If you want a predictable sequence set the `seed`. You can also trim the distribution by setting `min` and/or `max`.
 
 ```json
-{"name":"name", "class":"normal", "mean":31, "sd": 2},
+{"name":"name", "class":"normal", "mean":3, "sd": 2, "min":0},
 ```
 
 #### `sequence`
