@@ -328,6 +328,15 @@ Samples from (slightly) plausible names.  The allowable types are
 ```json
 {"name":"name", "class":"name", "type":"first_last"},
 ```
+
+#### `normal`
+Samples from a normal distribution. You can set `mean` and either `sd` or `precision`. 
+If you want a predictable sequence set the `seed`.
+
+```json
+{"name":"name", "class":"normal", "mean":31, "sd": 2},
+```
+
 #### `sequence`
 Repeatedly samples from a single distribution and returns an array of the results.
 

@@ -56,6 +56,7 @@ import java.util.List;
         @JsonSubTypes.Type(value = LongTailSampler.class, name = "pitman_yor"),
         @JsonSubTypes.Type(value = MapSampler.class, name = "map"),
         @JsonSubTypes.Type(value = NameSampler.class, name = "name"),
+        @JsonSubTypes.Type(value = NormalSampler.class, name = "normal"),
         @JsonSubTypes.Type(value = OperatingSystemSampler.class, name = "os"),
         @JsonSubTypes.Type(value = RandomWalkSampler.class, name = "random-walk"),
         @JsonSubTypes.Type(value = SequenceSampler.class, name = "sequence"),
