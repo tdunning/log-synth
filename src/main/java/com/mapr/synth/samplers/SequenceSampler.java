@@ -40,6 +40,7 @@ public class SequenceSampler extends FieldSampler {
     private Random gen = new Random();
     private List<FieldSampler> array = null;
     private FieldSampler length = exponential(5);
+    private boolean isFlat;
 
     @JsonCreator
     public SequenceSampler() {
@@ -72,6 +73,16 @@ public class SequenceSampler extends FieldSampler {
                 }
             };
         }
+    }
+
+    @SuppressWarnings("unused")
+    public void setFlat(boolean isFlat) {
+        this.isFlat = isFlat;
+    }
+
+    @Override
+    public boolean isFlat() {
+        return isFlat;
     }
 
     @SuppressWarnings("unused")

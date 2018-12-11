@@ -397,6 +397,26 @@ time.  Here are some examples:
       "base": ...
     }
 ```
+A `sequence` sampler also normally returns all values as a list that is assigned to a field in the resulting records. You can
+opt to flatten the results by adding `"flat":true` as an option specification of the sequence. Thus, this schema:
+```json
+[
+  {"name":"a", "class":"vin"},
+  {"name":"c", "class":"sequence", "base":{"class":"os"}}
+]
+```
+will generate records with a VIN number in field `"a"` and lists of variable length in field `"c"`. 
+
+This schema, in contrast:
+```json
+[
+  {"name":"a", "class":"vin"},
+  {"name":"c", "class":"sequence", "base":{"class":"os"}, "flat":true}
+]
+```
+will produce records with a field `"a"` containing a VIN and a field `"c"` containing a string from the `os` sampler. Each
+list that the `sequence` sample produces will result in the VIN being repeated once for each of the samples in the list.
+
 #### `ssn`
 Samples somewhat realistic SSN's
 
