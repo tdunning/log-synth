@@ -30,8 +30,10 @@ import org.apache.commons.math3.distribution.TDistribution;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class RandomWalkSamplerTest {
 
@@ -96,6 +98,47 @@ public class RandomWalkSamplerTest {
 
             double u3 = tDistribution.cumulativeProbability(td3.quantile(q));
             assertEquals(q, u3, (1 - q) * q * 10e-2);
+        }
+    }
+
+    @Test
+    public void stepDistribution() throws Exception {
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema032.json"), Charsets.UTF_8).read());
+        double[] step1 = new double[100000];
+        double[] step2 = new double[100000];
+        double old1 = 0, old2 = 0;
+        for (int i = 0; i < 100000; i++) {
+            JsonNode r = s.sample();
+            step1[i] = r.get("a").asDouble() - old1;
+            step2[i] = r.get("b").asDouble() - old2;
+            old1 = r.get("a").asDouble();
+            old2 = r.get("b").asDouble();
+        }
+
+        // verify normal distribution of steps
+        NormalDistribution normal = new NormalDistribution(5, 2);
+        Arrays.sort(step1);
+        double dPlus = 0;
+        double dMinus = 0;
+        for (int i = 0; i < step1.length; i++) {
+            double q = (i + 0.5) / step1.length;
+            double diff = q - normal.cumulativeProbability(step1[i]);
+            dPlus = Math.max(dPlus, diff);
+            dMinus = Math.min(dMinus, diff);
+        }
+        assertTrue(Math.max(dPlus, -dMinus) < 0.007);
+
+        // verify discrete distribution
+        int[] counts = new int[10];
+        for (int i = 0;i < 100000; i++) {
+            counts[(int) step2[i]]++;
+        }
+        assertEquals(0, counts[0] + counts[1]);
+        for (int i = 2; i < 6; i++) {
+            assertEquals(25000.0, counts[i], 4 * Math.sqrt(0.25 * 0.75 * 100000));
+        }
+        for (int i = 6; i < 10; i++) {
+            assertEquals(0, counts[i]);
         }
     }
 }

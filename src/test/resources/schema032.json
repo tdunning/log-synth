@@ -1,0 +1,12 @@
+[
+  {
+    "name":"a",
+    "class":"random-walk",
+    "step-distribution": {"class": "normal", "mean": 5, "sd": 2}
+  },
+  {
+    "name":"b",
+    "class":"random-walk",
+    "step-distribution": {"class": "int", "min": 2, "max": 6}
+  }
+]

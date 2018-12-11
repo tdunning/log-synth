@@ -487,8 +487,8 @@ Samples from operating system codes.  My own bias will show here.
 #### `random-walk` and `gamma`
 Allows sampling from a random walk.
 
-The `random-walk` sample samples steps from a normal distribution and accumulates those steps into a current position.  
-The returned value is the sum of those steps.  
+The `random-walk` sample by default samples steps from a normal distribution and accumulates those steps into a current position.  
+The returned value is the sum of those steps. Optionally, the actual distribution of the steps can be specified explicitly.  
 
 The defaults for the `random-walk` sampler are sensible so that this
 
@@ -556,6 +556,24 @@ measurement every 100 microseconds with 2 microseconds of jitter this way:
    "mean":100,
    "sd":5
 }
+```
+
+In special cases, none of the methods above are satisfactory and it is desirable to set the step distribution 
+explicitly. For instance, it might be desirable to have steps that have a trimmed normal distribution or even 
+a gamma distribution if you want particularly long-tailed walks. This can be done by setting the ```step-distribution```
+parameter as in the following
+```json
+{
+   "name": "v3",
+   "class": "random-walk",
+   "step-distribution": {
+       "class": "normal",
+       "mean": 2,
+       "sd": 2,
+       "min": 0
+   }
+}
+
 ```
     
 #### `vin`

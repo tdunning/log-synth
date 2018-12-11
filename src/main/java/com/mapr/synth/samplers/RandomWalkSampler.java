@@ -19,6 +19,7 @@
 
 package com.mapr.synth.samplers;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -52,6 +53,7 @@ public class RandomWalkSampler extends FieldSampler {
         }
     };
 
+    private FieldSampler stepDistribution = null;
     private Random rand = new Random();
     private boolean verbose = false;
 
@@ -59,7 +61,12 @@ public class RandomWalkSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
-        double step = rand.nextGaussian() * sd.sample().asDouble() + mean.sample().asDouble();
+        double step;
+        if (stepDistribution == null) {
+            step = rand.nextGaussian() * sd.sample().asDouble() + mean.sample().asDouble();
+        } else {
+            step = stepDistribution.sample().asDouble();
+        }
         double newState = state.addAndGet(step);
 
         if (verbose) {
@@ -155,6 +162,16 @@ public class RandomWalkSampler extends FieldSampler {
             mean = constant(value.asDouble());
         }
         init();
+    }
+
+    @SuppressWarnings("unused")
+    @JsonProperty("step-distribution")
+    public void setStepDistribution(final JsonNode dist) throws IOException {
+        if (dist.isObject()) {
+            stepDistribution = FieldSampler.newSampler(dist);
+        } else {
+            throw new IllegalArgumentException("Wanted definition for step distribution");
+        }
     }
 
     private void init() {
