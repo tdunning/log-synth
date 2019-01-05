@@ -77,11 +77,11 @@ public class IntegerSamplerTest {
             JsonNode f = s.sample();
 
             JsonNode x1 = f.get("a");
-            assertTrue(x1.isInt());
+            assertTrue(x1.isIntegralNumber());
             count1[x1.asInt()]++;
 
             JsonNode x2 = f.get("b");
-            assertTrue(x2.isInt());
+            assertTrue(x2.isIntegralNumber());
             count2[x2.asInt()]++;
         }
 
