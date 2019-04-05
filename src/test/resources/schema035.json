@@ -1,0 +1,41 @@
+[
+  {
+    "class": "sequence",
+    "lengthDistribution": 3,
+    "base": {
+      "class": "map",
+      "value": [
+        {
+          "name": "a",
+          "class": "id"
+        },
+        {
+          "name": "b",
+          "class": "id",
+          "start": 100
+        }
+      ]
+    },
+    "flat": true
+  },
+  {
+    "name": "foo",
+    "class": "sequence",
+    "lengthDistribution": 2,
+    "base": {
+      "class": "map",
+      "value": [
+        {
+          "name": "a",
+          "class": "id"
+        },
+        {
+          "name": "b",
+          "class": "id",
+          "start": 100
+        }
+      ]
+    },
+    "flat": true
+  }
+]

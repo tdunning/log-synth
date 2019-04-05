@@ -29,6 +29,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class EngineTest {
+    @SuppressWarnings("WeakerAccess")
     public static final double MPH_TO_M_S = (5280.0 * 12 * 2.54 / 100 / 3600);
 
     @Test

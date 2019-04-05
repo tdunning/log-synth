@@ -46,6 +46,18 @@ public class SequenceSampler extends FieldSampler {
     public SequenceSampler() {
     }
 
+    @Override
+    public void restart() {
+        if (base != null) {
+            base.restart();
+        }
+        if (array != null) {
+            for (FieldSampler sampler : array) {
+                sampler.restart();
+            }
+        }
+    }
+
     @SuppressWarnings("unused")
     public void setLength(double length) {
         this.length = exponential(length);
@@ -100,6 +112,7 @@ public class SequenceSampler extends FieldSampler {
         Preconditions.checkState(array != null || base != null, "Need to specify either base or array");
         ArrayNode r = nodeFactory.arrayNode();
         if (base != null) {
+            base.restart();
             int n = (int) length.sample().asDouble();
             for (int i = 0; i < n; i++) {
                 r.add(base.sample());

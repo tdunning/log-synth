@@ -113,6 +113,6 @@ public class HeaderSamplerTest {
         for (int i = 0; i < 1000; i++) {
             headers.add(s.sample().asText());
         }
-        System.out.printf("foo\n");
+        System.out.print("foo\n");
     }
 }

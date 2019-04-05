@@ -59,13 +59,13 @@ public class SsnSampler extends FieldSampler {
         Splitter onComma = Splitter.on(",").trimResults();
         try {
             names = null;
+            //noinspection UnstableApiUsage
             for (String line : Resources.readLines(Resources.getResource("ssn-seeds"), Charsets.UTF_8)) {
                 if (line.startsWith("#")) {
                     // last comment line contains actual field names
                     names = Lists.newArrayList(onComma.split(line.substring(1)));
                 } else {
                     Preconditions.checkState(names != null);
-                    assert names != null;
 
                     List<String> fields = Lists.newArrayList(onComma.split(line));
                     for (int i = Integer.parseInt(fields.get(1)); i <= Integer.parseInt(fields.get(1)); i++) {

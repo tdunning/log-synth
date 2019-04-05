@@ -44,6 +44,9 @@ import java.util.Queue;
 public class SchemaSampler implements Sampler<JsonNode> {
     private final JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals(false);
 
+    // this string is used as a unique sentinel to mark generators whose fields should be flattened
+    public static final String FLAT_SEQUENCE_MARKER = ">>flatten-me<<";
+
     private List<FieldSampler> schema;
     private List<String> fields;
     private Queue<JsonNode> buffer = new ArrayDeque<>();
@@ -58,7 +61,7 @@ public class SchemaSampler implements Sampler<JsonNode> {
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
-        init(mapper.<List<FieldSampler>>readValue(schemaDefinition, new TypeReference<List<FieldSampler>>() {
+        init(mapper.readValue(schemaDefinition, new TypeReference<List<FieldSampler>>() {
         }));
     }
 
@@ -67,7 +70,7 @@ public class SchemaSampler implements Sampler<JsonNode> {
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        init(mapper.<List<FieldSampler>>readValue(input, new TypeReference<List<FieldSampler>>() {
+        init(mapper.readValue(input, new TypeReference<List<FieldSampler>>() {
         }));
     }
 
@@ -77,12 +80,7 @@ public class SchemaSampler implements Sampler<JsonNode> {
 
     private void init(List<FieldSampler> s) {
         schema = s;
-        fields = Lists.transform(schema, new Function<FieldSampler, String>() {
-            @Override
-            public String apply(FieldSampler input) {
-                return input.getName();
-            }
-        });
+        fields = Lists.transform(schema, FieldSampler::getName);
     }
 
     @Override
@@ -97,14 +95,14 @@ public class SchemaSampler implements Sampler<JsonNode> {
             for (FieldSampler s : schema) {
                 String fieldName = fx.next();
                 if (s.isFlat()) {
+                    if (fieldName == null) {
+                        fieldName = FLAT_SEQUENCE_MARKER;
+                    }
                     // this sampler either generates an object or an array
                     JsonNode v = s.sample();
                     if (v.isObject()) {
                         // an object just produces multiple fields in a single record
-                        for (Iterator<String> it = v.fieldNames(); it.hasNext(); ) {
-                            String key = it.next();
-                            r.set(key, v.get(key));
-                        }
+                        r.setAll((ObjectNode) v);
                     } else if (v.isArray()) {
                         // an array causes records to be buffered
                         generators.put(fieldName, v);
@@ -131,21 +129,36 @@ public class SchemaSampler implements Sampler<JsonNode> {
         return x;
     }
 
-    private void crossProduct(Queue<JsonNode> buffer, ObjectNode r, List<String> fields, Map<String, JsonNode> generators, int currentFieldIndex) {
+    // exposed for testing
+    public static void crossProduct(Queue<JsonNode> buffer, ObjectNode r, List<String> fields, Map<String, JsonNode> generators, int currentFieldIndex) {
         if (currentFieldIndex < fields.size()) {
             // get this generator
             JsonNode values = generators.get(fields.get(currentFieldIndex));
             int n = values.size();
             // and for each value it has
             for (int j = 0; j < n; j++) {
-                // set that field ...
-                r.set(fields.get(currentFieldIndex), values.get(j));
+                // set that field or fields ...
+                String key = fields.get(currentFieldIndex);
+                // yes, we mean to check for pointer equality here
+                //noinspection StringEquality
+                if (key == FLAT_SEQUENCE_MARKER) {
+                    assert values.get(j).isObject();
+                    r.setAll(((ObjectNode) values.get(j)));
+                }else {
+                    r.set(key, values.get(j));
+                }
                 // and recurse
                 crossProduct(buffer, r, fields, generators, currentFieldIndex + 1);
             }
         } else {
             // when we bottom out we add a copied record to the buffer
             buffer.add(r.deepCopy());
+        }
+    }
+
+    public void restart() {
+        for (FieldSampler sampler : schema) {
+            sampler.restart();
         }
     }
 }

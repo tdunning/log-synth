@@ -106,6 +106,14 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
         };
     }
 
+    /**
+     * Restart should back up any variables to the minimum values, but should not reseed any
+     * random number generators.
+     */
+    public void restart() {
+        // do nothing
+    }
+
     public String getName() {
         return name;
     }

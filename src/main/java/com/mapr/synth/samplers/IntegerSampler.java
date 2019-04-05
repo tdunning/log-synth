@@ -116,6 +116,10 @@ public class IntegerSampler extends FieldSampler {
         this.format = format;
     }
 
+    public void setSeed(long seed) {
+        base = RandomUtils.getRandom(seed);
+    }
+
     @Override
     public JsonNode sample() {
         synchronized (this) {

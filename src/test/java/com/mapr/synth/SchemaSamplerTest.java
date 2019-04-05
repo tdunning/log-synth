@@ -59,6 +59,40 @@ import static org.junit.Assert.fail;
 
 public class SchemaSamplerTest {
     @Test
+    public void testCross() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+
+        // the cross product should generate a list of records as long as the product of the
+        // options given to it.
+        TreeMap<String, JsonNode> generators = new TreeMap<>();
+        generators.put(SchemaSampler.FLAT_SEQUENCE_MARKER, mapper.readTree("[{a: 1, b: 2}, {a: 2, b: 3}]"));
+        generators.put("foo", mapper.readTree("[{foo_a: 1, foo_b: 2}, {foo_a: 2, foo_b: 3}, {foo_a: 3, foo_b: 4}]"));
+
+        Queue<JsonNode> r = new ArrayDeque<>();
+        SchemaSampler.crossProduct(r, (ObjectNode) mapper.readTree("{base_a: 23}"),
+                Lists.newArrayList(generators.keySet()), generators, 0);
+        assertEquals(6, r.size());
+        Multiset<String> counts = HashMultiset.create();
+        for (JsonNode node : r) {
+            assertEquals(23, node.get("base_a").asInt());
+            assertEquals(2, node.get("foo").size());
+            counts.add(String.format("a=%d", node.get("a").asInt()));
+            counts.add(String.format("nest_a=%d", node.get("foo").get("foo_a").asInt()));
+            counts.add(String.format("a=%d, nest_a=%d", node.get("a").asInt(), node.get("foo").get("foo_a").asInt()));
+        }
+        assertEquals(3, counts.count("a=1"));
+        assertEquals(2, counts.count("nest_a=1"));
+        assertEquals(1, counts.count("a=1, nest_a=1"));
+
+        assertEquals(3, counts.count("a=2"));
+        assertEquals(2, counts.count("nest_a=2"));
+        assertEquals(1, counts.count("a=1, nest_a=2"));
+    }
+
+    @Test
     public void testFieldNames() throws IOException {
         SchemaSampler s = new SchemaSampler("[{\"name\":\"id\", \"class\":\"id\"}, {\"name\":\"foo\", \"class\":\"address\"}, {\"name\":\"bar\", \"class\":\"date\", \"format\":\"yy-MM-dd\"}, {\"name\":\"baz\", \"class\":\"foreign-key\", \"size\":1000, \"skew\":1}]");
         assertEquals("[id, foo, bar, baz]", Iterables.toString(s.getFieldNames()));
@@ -71,6 +105,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testInt() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema001.json"), Charsets.UTF_8).read());
         Multiset<String> counts = HashMultiset.create();
         for (int i = 0; i < 10000; i++) {
@@ -84,6 +119,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testString() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema002.json"), Charsets.UTF_8).read());
         Multiset<String> counts = HashMultiset.create();
         double n = 10000;
@@ -102,6 +138,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testSeveral() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema003.json"), Charsets.UTF_8).read());
         Multiset<String> gender = HashMultiset.create();
         Pattern namePattern = Pattern.compile("[A-Z][a-z]+ [A-Z][a-z]+");
@@ -126,6 +163,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testMisc() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema004.json"), Charsets.UTF_8).read());
         Multiset<String> country = HashMultiset.create();
         Multiset<String> language = HashMultiset.create();
@@ -150,6 +188,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testSequence() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema005.json"), Charsets.UTF_8).read());
         OnlineSummarizer s0 = new OnlineSummarizer();
         OnlineSummarizer s1 = new OnlineSummarizer();
@@ -171,6 +210,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testSequenceArray() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema006.json"), Charsets.UTF_8).read());
         for (int i = 0; i < 10; i++) {
             JsonNode x = s.sample();
@@ -185,6 +225,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testMap() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema011.json"), Charsets.UTF_8).read());
         for (int i = 0; i < 100; i++) {
             JsonNode x = s.sample();
@@ -199,6 +240,7 @@ public class SchemaSamplerTest {
     @Test
     public void testSkewedInteger() throws IOException {
         // will give fields x, y, z, q with different skewness
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema007.json"), Charsets.UTF_8).read());
 
         SortedMultiset<Integer> x = TreeMultiset.create();
@@ -236,6 +278,7 @@ public class SchemaSamplerTest {
         }
         out.close();
 
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema008.json"), Charsets.UTF_8).read());
 
         for (int k = 0; k < 1000; k++) {
@@ -248,6 +291,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testJoin() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema009.json"), Charsets.UTF_8).read());
 
         for (int k = 0; k < 10; k++) {
@@ -260,6 +304,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testEvents() throws IOException, ParseException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema012.json"), Charsets.UTF_8).read());
         long t = System.currentTimeMillis();
 

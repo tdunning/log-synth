@@ -31,8 +31,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class IdSampler extends FieldSampler {
   private AtomicInteger current = new AtomicInteger(0);
+  private int start;
 
   public IdSampler() {
+  }
+
+  @Override
+  public void restart() {
+    current.set(this.start);
   }
 
   @Override
@@ -42,6 +48,7 @@ public class IdSampler extends FieldSampler {
 
   @SuppressWarnings("UnusedDeclaration")
   public void setStart(int start) {
+    this.start = start;
     this.current.set(start);
   }
 }

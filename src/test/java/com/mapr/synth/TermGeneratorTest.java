@@ -36,6 +36,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Random;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -54,11 +55,10 @@ public class TermGeneratorTest {
 
         assertEquals(10000, counts.size());
         assertTrue("Should have some common words", counts.elementSet().size() < 10000);
-        List<Integer> k = Lists.newArrayList(Iterables.transform(counts.elementSet(), new Function<String, Integer>() {
-            public Integer apply(String s) {
-                return counts.count(s);
-            }
-        }));
+        List<Integer> k = Lists.newArrayList(
+                counts.elementSet().stream()
+                        .map(counts::count)
+                        .collect(Collectors.toList()));
 //        System.out.printf("%s\n", Ordering.natural().reverse().sortedCopy(k).subList(0, 30));
 //        System.out.printf("%s\n", Iterables.transform(Iterables.filter(counts.elementSet(), new Predicate<String>() {
 //            public boolean apply(String s) {
@@ -89,12 +89,13 @@ public class TermGeneratorTest {
         }
 
         final NormalDistribution normal = new NormalDistribution();
-        List<Double> scores = Ordering.natural().sortedCopy(Iterables.transform(k1.elementSet(),
-                new Function<String, Double>() {
-                    public Double apply(String s) {
-                        return normal.cumulativeProbability(LogLikelihood.rootLogLikelihoodRatio(k1.count(s), 50000 - k1.count(s), k2.count(s), 50000 - k2.count(s)));
-                    }
-                }));
+        List<Double> scores = Ordering.natural().sortedCopy(
+                k1.elementSet().stream()
+                        .map(s -> normal.cumulativeProbability(
+                                LogLikelihood.rootLogLikelihoodRatio(
+                                        k1.count(s), 50000 - k1.count(s),
+                                        k2.count(s), 50000 - k2.count(s))))
+                        .collect(Collectors.toList()));
         int n = scores.size();
 //        System.out.printf("%.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f", scores.get(0), scores.get((int) (0.05*n)), scores.get(n / 4), scores.get(n / 2), scores.get(3 * n / 4), scores.get((int) (0.95 * n)), scores.get(n - 1));
         int i = 0;
@@ -149,7 +150,7 @@ public class TermGeneratorTest {
                     System.out.printf("%s%s", sep, day.count(s));
                     sep = "\t";
                 }
-                System.out.printf("\n");
+                System.out.print("\n");
             }
         } else {
             System.out.printf("%d\n", vocabulary.size());
@@ -162,7 +163,7 @@ public class TermGeneratorTest {
                     System.out.printf("%s%s", sep, day.count(s));
                     sep = "\t";
                 }
-                System.out.printf("\n");
+                System.out.print("\n");
             }
 
             Multiset<Integer> total = HashMultiset.create();
@@ -178,7 +179,7 @@ public class TermGeneratorTest {
                 System.out.printf("%s%s", sep, total.count(s));
                 sep = "\t";
             }
-            System.out.printf("\n");
+            System.out.print("\n");
         }
     }
 }

@@ -124,6 +124,7 @@ public class DriveTest {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     static Vector3D project(Vector3D east, Vector3D north, Vector3D step) {
         return new Vector3D(step.dotProduct(east) * Constants.EARTH_RADIUS_KM, step.dotProduct(north) * Constants.EARTH_RADIUS_KM, 0);
     }

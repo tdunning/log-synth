@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 
 public class IntegerSamplerTest {
     @Test
-    public void testStringSetter() throws Exception {
+    public void testStringSetter() {
         IntegerSampler s = new IntegerSampler();
         s.setMinAsInt(10);
         s.setMax(new TextNode("1K"));
@@ -43,6 +43,7 @@ public class IntegerSamplerTest {
 
     @Test
     public void testFormatAndUniform() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema030.json"), Charsets.UTF_8).read());
         int[] count1 = new int[1000], count2 = new int[1000];
         for (int i = 0; i < 1000000; i++) {
@@ -72,6 +73,7 @@ public class IntegerSamplerTest {
     public void testExplicitDistribution() throws Exception {
         Function<Double, Double> sd = p -> Math.sqrt(p * (1 - p) * 1000000);
 
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema031.json"), Charsets.UTF_8).read());
         int[] count1 = new int[5], count2 = new int[5];
         for (int i = 0; i < 1000000; i++) {

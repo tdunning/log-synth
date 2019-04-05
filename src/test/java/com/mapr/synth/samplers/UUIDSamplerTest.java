@@ -35,10 +35,12 @@ import static org.junit.Assert.assertTrue;
 
 public class UUIDSamplerTest {
     private static final int N = 100000;
-    static Pattern uuidFormat = Pattern.compile("\\p{XDigit}{8}-\\p{XDigit}{4}-(\\p{XDigit}{4})-(\\p{XDigit}{4})-\\p{XDigit}{12}");
+    @SuppressWarnings("WeakerAccess")
+    public static Pattern uuidFormat = Pattern.compile("\\p{XDigit}{8}-\\p{XDigit}{4}-(\\p{XDigit}{4})-(\\p{XDigit}{4})-\\p{XDigit}{12}");
 
     @Test
     public void testBasics() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema017.json"), Charsets.UTF_8).read());
         Multiset<String> counts = HashMultiset.create();
         for (int i = 0; i < N; i++) {

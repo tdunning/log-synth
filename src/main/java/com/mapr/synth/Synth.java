@@ -140,7 +140,7 @@ public class Synth {
 
         final PrintStream sideLog = new PrintStream(new FileOutputStream("side-log"));
         Runnable blink = new Runnable() {
-            public double oldT;
+            double oldT;
             private long oldN;
 
 
@@ -292,7 +292,7 @@ public class Synth {
         }
 
 
-        public static int generateFile(Options opts, SchemaSampler s, Template template, PrintStream out, int count) throws IOException, TemplateException {
+        static int generateFile(Options opts, SchemaSampler s, Template template, PrintStream out, int count) throws IOException, TemplateException {
             if (template != null) {
                 PrintWriter writer = new PrintWriter(out);
 
@@ -349,21 +349,21 @@ public class Synth {
                 }
                 x = separator;
             }
-            out.printf("\n");
+            out.print("\n");
         }
 
-        public ThreadReport report() {
+        ThreadReport report() {
             return new ThreadReport();
         }
 
-        public class ThreadReport {
+        class ThreadReport {
             long rows;
             int fileNumber = ReportingWorker.this.fileNumber;
             double wallTime;
             double threadTime;
             double userTime;
 
-            public ThreadReport() {
+            ThreadReport() {
                 while (true) {
                     long oldWall = lastWall.get();
                     long oldThread = lastThreadTime.get();
@@ -390,8 +390,8 @@ public class Synth {
         }
     }
 
-    static Joiner withCommas = Joiner.on(",");
-    static Joiner withTabs = Joiner.on("\t");
+    private static Joiner withCommas = Joiner.on(",");
+    private static Joiner withTabs = Joiner.on("\t");
 
     private static void format(Format format, Quote quoteConvention, List<String> names, JsonNode fields, PrintStream out) {
         switch (format) {
@@ -423,7 +423,7 @@ public class Synth {
             }
             x = separator;
         }
-        out.printf("\n");
+        out.print("\n");
     }
 
     public enum Format {

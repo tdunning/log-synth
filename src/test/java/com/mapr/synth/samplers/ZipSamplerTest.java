@@ -44,11 +44,12 @@ public class ZipSamplerTest {
 
     @Test
     public void testZips() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema016.json"), Charsets.UTF_8).read());
 
         JsonNode v = s.sample();
         // regression test given that we specify the seed
-        assertEquals("65529", v.get("z").get("zip").asText());
+        assertEquals("04655", v.get("z").get("zip").asText());
 
         Multiset<String> laCounts = HashMultiset.create();
 
@@ -111,14 +112,16 @@ public class ZipSamplerTest {
 
     @Test
     public void testNPE() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema021.json"), Charsets.UTF_8).read());
         JsonNode r = s.sample();
-        assertEquals(34.44, r.get("lat").get("latitude").asDouble(), 0.001);
+        assertEquals(40.7, r.get("lat").get("latitude").asDouble(), 0.001);
     }
 
     @Test
     public void testBogusFieldLimit() throws IOException {
         try {
+            //noinspection UnstableApiUsage
             new SchemaSampler(Resources.asCharSource(Resources.getResource("schema018.json"), Charsets.UTF_8).read());
             fail("Should have failed due to invalid fields");
         } catch (JsonMappingException e) {

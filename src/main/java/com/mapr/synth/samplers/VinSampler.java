@@ -104,8 +104,8 @@ public class VinSampler extends FieldSampler {
     private boolean verbose = false;
     private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals(false);
 
-    @SuppressWarnings("UnusedDeclaration")
-    public VinSampler() throws FileNotFoundException {
+    @SuppressWarnings("WeakerAccess")
+    public VinSampler() {
         legalCodes = Lists.newArrayList(makes.keySet());
         setYears("1990-2014");
     }
@@ -232,7 +232,7 @@ public class VinSampler extends FieldSampler {
         this.verbose = verbose;
     }
 
-    @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings({"UnusedDeclaration", "WeakerAccess"})
     public void setMakes(String makes) {
 
         Set<String> s = Sets.newHashSet();
@@ -251,7 +251,7 @@ public class VinSampler extends FieldSampler {
         setMakes(makes);
     }
 
-    @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings({"UnusedDeclaration", "WeakerAccess"})
     public void setYears(String years) {
         legalYears = yearCodes(years);
     }
@@ -303,11 +303,12 @@ public class VinSampler extends FieldSampler {
     private static Map<String, String> mapResource(String name) throws IOException {
         final Splitter onTab = Splitter.on("\t");
 
+        //noinspection UnstableApiUsage
         return Resources.readLines(Resources.getResource(name), Charsets.UTF_8, new LineProcessor<Map<String, String>>() {
             final Map<String, String> r = Maps.newHashMap();
 
             @Override
-            public boolean processLine(String line) throws IOException {
+            public boolean processLine(String line) {
                 Iterator<String> pieces = onTab.split(line).iterator();
                 String key = pieces.next();
                 r.put(key, pieces.next());
@@ -324,11 +325,12 @@ public class VinSampler extends FieldSampler {
     private static SetMultimap<String, String> multiMapResource(String name) throws IOException {
         final Splitter onTab = Splitter.on("\t");
 
+        //noinspection UnstableApiUsage
         return Resources.readLines(Resources.getResource(name), Charsets.UTF_8, new LineProcessor<SetMultimap<String, String>>() {
             final SetMultimap<String, String> r = HashMultimap.create();
 
             @Override
-            public boolean processLine(String line) throws IOException {
+            public boolean processLine(String line) {
                 Iterator<String> pieces = onTab.split(line).iterator();
                 String key = pieces.next();
                 r.put(key, pieces.next());

@@ -35,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 public class VectorSamplerTest {
     @Test
     public void testVector() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema029.json"), Charsets.UTF_8).read());
         for (int i = 0; i < 10; i++) {
             JsonNode data = s.sample();

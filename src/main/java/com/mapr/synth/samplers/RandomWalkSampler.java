@@ -60,6 +60,11 @@ public class RandomWalkSampler extends FieldSampler {
     private AtomicDouble state = new AtomicDouble();
 
     @Override
+    public void restart() {
+        state.set(0);
+    }
+
+    @Override
     public JsonNode sample() {
         double step;
         if (stepDistribution == null) {
@@ -166,7 +171,7 @@ public class RandomWalkSampler extends FieldSampler {
 
     @SuppressWarnings("unused")
     @JsonProperty("step-distribution")
-    public void setStepDistribution(final JsonNode dist) throws IOException {
+    public void setStepDistribution(final JsonNode dist) {
         if (dist.isObject()) {
             stepDistribution = FieldSampler.newSampler(dist);
         } else {

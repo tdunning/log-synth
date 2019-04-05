@@ -39,16 +39,16 @@ import java.util.regex.Pattern;
  * You can set the
  * <p>
  * <il>
- * <li><em>rate</em> - use something like 5/m to indicate 5 events per minute.  The unit is optional, seconds are the default.</li>
+ * <li><em>rate</em> - use something like 5/m to indicate 5 events per minute.  The unit is optional, seconds are the
+ * default.</li>
  * <li><em>offset</em> - the minimum time between events, default is 0</li>
  * <li><em>format </em>- the format to use when outputting the times</li>
  * <li><em>start </em>- the time of the first event</li>
  * </il>
- *
+ * <p>
  * Thread safe
  */
 public class ArrivalSampler extends FieldSampler {
-    private final Random base;
     private final Pattern ratePattern = Pattern.compile("([0-9.e\\-]+)(/[smhd])?");
 
     private final Map<String, TimeUnit> unitMap = ImmutableMap.of(
@@ -57,14 +57,22 @@ public class ArrivalSampler extends FieldSampler {
             "h", TimeUnit.HOURS,
             "d", TimeUnit.DAYS);
 
+    private Random base;
+
     private double meanInterval = 1000;  // interval - offset will have this mean
     private double minInterval = 0;      // no interval can be less than this
     private FancyTimeFormatter df = new FancyTimeFormatter("yyyy-MM-dd");
 
     private double start = System.currentTimeMillis();
+    private double now = start;
 
     public ArrivalSampler() {
         base = RandomUtils.getRandom();
+    }
+
+    @Override
+    public void restart() {
+        now = start;
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -93,14 +101,20 @@ public class ArrivalSampler extends FieldSampler {
     @SuppressWarnings("UnusedDeclaration")
     public void setStart(String start) throws ParseException {
         this.start = df.parse(start).getTime();
+        this.now = this.start;
+    }
+
+    public void setSeed(long seed) {
+        base = RandomUtils.getRandom(seed);
     }
 
     @Override
     public JsonNode sample() {
-      synchronized (this) {
-        TextNode r = new TextNode(df.format(new Date((long) start)));
-        start += minInterval - meanInterval * Math.log(1 - base.nextDouble());
-        return r;
-      }
+        synchronized (this) {
+            TextNode r = new TextNode(df.format(new Date((long) now)));
+            double interval = -meanInterval * Math.log(1.0 - base.nextDouble());
+            now += (minInterval + interval);
+            return r;
+        }
     }
 }

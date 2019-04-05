@@ -64,14 +64,14 @@ import java.util.concurrent.TimeUnit;
  * </ul>
  */
 public class CommonPointOfCompromise extends FieldSampler {
-    Random gen = new Random();
+    private Random gen = new Random();
 
     // how many average transactions per day?
-    Gamma transactionsPerDay = new Gamma(2, 1, gen);
+    private Gamma transactionsPerDay = new Gamma(2, 1, gen);
 
-    ChineseRestaurant merchant = new ChineseRestaurant(100, 0.3);
+    private ChineseRestaurant merchant = new ChineseRestaurant(100, 0.3);
 
-    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
     private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals(false);

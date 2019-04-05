@@ -57,6 +57,7 @@ public class Main {
 
 
         LogGenerator lg = new LogGenerator(opts.users);
+        //noinspection UnstableApiUsage
         BufferedWriter log = Files.newWriter(new File(opts.files.get(0)), Charsets.UTF_8);
         LogLineFormatter out = LogLineFormatter.create(log, opts.format, opts.withResponseTimes);
         long t0 = System.nanoTime();
@@ -67,10 +68,12 @@ public class Main {
                 t0 = t1;
             }
             LogLine sample = lg.sample();
+            assert out != null;
             out.write(sample);
         }
         log.close();
 
+        //noinspection UnstableApiUsage
         BufferedWriter profile = Files.newWriter(new File(opts.files.get(1)), Charsets.UTF_8);
         for (User user : lg.getUsers()) {
             profile.write(user.toString());

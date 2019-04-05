@@ -57,6 +57,7 @@ public class Changer extends FieldSampler {
     public static abstract class MilliConverter {
         public abstract double toMillis(double x);
 
+        @SuppressWarnings("WeakerAccess")
         public static double toMillis(String unit, double x) {
             if (unit == null) {
                 unit = "s";
@@ -202,7 +203,6 @@ public class Changer extends FieldSampler {
      * this attribute.
      *
      * @param start The start time for the sequence
-     * @throws ParseException
      */
     @SuppressWarnings("UnusedDeclaration")
     public void setStart(String start) throws ParseException {
@@ -213,7 +213,6 @@ public class Changer extends FieldSampler {
      * Sets the ending time for events. This will be after the time of any event we generate.
      *
      * @param end   The upper bound for event time
-     * @throws ParseException
      */
     @SuppressWarnings("UnusedDeclaration")
     public void setEnd(String end) throws ParseException {

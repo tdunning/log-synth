@@ -36,6 +36,7 @@ import static org.junit.Assert.fail;
 public class VinSamplerTest {
     @Test
     public void testSchema() throws IOException {
+        //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema014.json"), Charsets.UTF_8).read());
 
         Multiset<String> prefixCounts = TreeMultiset.create();
@@ -52,7 +53,7 @@ public class VinSamplerTest {
     }
 
     @Test
-    public void testDump() throws FileNotFoundException {
+    public void testDump() {
         VinSampler vs = new VinSampler();
         vs.setMakes("ford");
         vs.setYears("2007-2011");
@@ -90,7 +91,7 @@ public class VinSamplerTest {
 
 
     @Test
-    public void testCheckDigit() throws FileNotFoundException {
+    public void testCheckDigit() {
         // test cases from http://introcs.cs.princeton.edu/java/31datatype/VIN.java.html
         // % java VIN 1B4YEM9P4KP186543
         //         Invalid

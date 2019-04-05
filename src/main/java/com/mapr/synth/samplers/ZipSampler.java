@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Returns data structures containing various aspects of zip codes including location, population and such.
@@ -60,6 +61,7 @@ public class ZipSampler extends FieldSampler {
     public ZipSampler() {
         try {
             List<String> names = null;
+            //noinspection UnstableApiUsage
             for (String line : Resources.readLines(Resources.getResource("zip.csv"), Charsets.UTF_8)) {
                 CsvSplitter onComma = new CsvSplitter();
                 if (line.startsWith("#")) {
@@ -67,17 +69,12 @@ public class ZipSampler extends FieldSampler {
                     names = Lists.newArrayList(onComma.split(line.substring(1)));
                 } else {
                     Preconditions.checkState(names != null);
-                    assert names != null;
                     Iterable<String> fields = onComma.split(line);
                     Iterator<String> nx = names.iterator();
                     for (String value : fields) {
                         Preconditions.checkState(nx.hasNext());
                         String fieldName = nx.next();
-                        List<String> dataList = values.get(fieldName);
-                        if (dataList == null) {
-                            dataList = Lists.newArrayList();
-                            values.put(fieldName, dataList);
-                        }
+                        List<String> dataList = values.computeIfAbsent(fieldName, k -> Lists.newArrayList());
                         dataList.add(value);
                     }
                     if (!names.iterator().next().equals("V1")) {
@@ -93,7 +90,7 @@ public class ZipSampler extends FieldSampler {
 
     @SuppressWarnings("unused")
     public void setSeed(long seed) {
-        rand = new Random(seed);
+        rand = RandomUtils.getRandom(seed);
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -114,21 +111,16 @@ public class ZipSampler extends FieldSampler {
     }
 
     /**
-     * Sets the longitude bounds for the returned points.  The format should be two comma separated
-     * decimal numbers representing the minimum and maximum longitude for all returned points.
+     * Sets the longitude bounds for the returned points.  The format should be two comma separated decimal numbers
+     * representing the minimum and maximum longitude for all returned points.
      *
      * @param bounds A comma separated list of min and max longitude for the returned points.
      */
     @SuppressWarnings("UnusedDeclaration")
     public void setLongitude(String bounds) {
-        List<Double> boundList = Lists.transform(
-                Lists.newArrayList(Splitter.on(", ").split(bounds)),
-                new Function<String, Double>() {
-                    @Override
-                    public Double apply(String input) {
-                        return Double.parseDouble(input);
-                    }
-                });
+        List<Double> boundList = Lists.newArrayList(
+                Splitter.on(", ").split(bounds)).stream()
+                .map(Double::parseDouble).collect(Collectors.toList());
         Preconditions.checkArgument(boundList.size() == 2);
         double minLongitude = Math.min(boundList.get(0), boundList.get(1));
         double maxLongitude = Math.max(boundList.get(0), boundList.get(1));
@@ -141,21 +133,16 @@ public class ZipSampler extends FieldSampler {
     }
 
     /**
-     * Sets the latitude bounds for the returned points.  The format should be two comma separated
-     * decimal numbers representing the minimum and maximum latitude for all returned points.
+     * Sets the latitude bounds for the returned points.  The format should be two comma separated decimal numbers
+     * representing the minimum and maximum latitude for all returned points.
      *
      * @param bounds A comma separated list of min and max latitude for the returned points.
      */
     @SuppressWarnings("UnusedDeclaration")
     public void setLatitude(String bounds) {
-        List<Double> boundList = Lists.transform(
-                Lists.newArrayList(Splitter.on(", ").split(bounds)),
-                new Function<String, Double>() {
-                    @Override
-                    public Double apply(String input) {
-                        return Double.parseDouble(input);
-                    }
-                });
+        List<Double> boundList = Lists.newArrayList(
+                Splitter.on(", ").split(bounds)).stream()
+                .map(Double::parseDouble).collect(Collectors.toList());
         Preconditions.checkArgument(boundList.size() == 2);
         double minLatitude = Math.min(boundList.get(0), boundList.get(1));
         double maxLatitude = Math.max(boundList.get(0), boundList.get(1));
@@ -168,22 +155,17 @@ public class ZipSampler extends FieldSampler {
     }
 
     /**
-     * Sets the center of a radial bound for the returned points.  The format should be two
-     * comma separated decimal numbers representing the longitude and latitude of the center
-     * of the region.
+     * Sets the center of a radial bound for the returned points.  The format should be two comma separated decimal
+     * numbers representing the longitude and latitude of the center of the region.
      *
      * @param bounds A comma separated list of min and max latitude for the returned points.
      */
     @SuppressWarnings("UnusedDeclaration")
     public void setNear(String bounds) {
-        List<Double> center = Lists.transform(
-                Lists.newArrayList(Splitter.on(CharMatcher.anyOf(", ")).trimResults().split(bounds)),
-                new Function<String, Double>() {
-                    @Override
-                    public Double apply(String input) {
-                        return Double.parseDouble(input);
-                    }
-                });
+        List<Double> center = Lists.newArrayList(
+                Splitter.on(CharMatcher.anyOf(", "))
+                        .trimResults().split(bounds)).stream()
+                .map(Double::parseDouble).collect(Collectors.toList());
         limits = new RadialBound(center.get(0), center.get(1), 10);
     }
 
@@ -286,11 +268,13 @@ public class ZipSampler extends FieldSampler {
             return longitude >= minLongitude && longitude <= maxLongitude && latitude >= minLatitude && latitude <= maxLatitude;
         }
 
+        @SuppressWarnings("WeakerAccess")
         public void setLongitude(double minLongitude, double maxLongitude) {
             this.minLongitude = minLongitude;
             this.maxLongitude = maxLongitude;
         }
 
+        @SuppressWarnings("WeakerAccess")
         public void setLatitude(double minLatitude, double maxLatitude) {
             this.minLatitude = minLatitude;
             this.maxLatitude = maxLatitude;
@@ -331,55 +315,50 @@ public class ZipSampler extends FieldSampler {
 
     private class CsvSplitter {
         public Iterable<String> split(final String string) {
-            return new Iterable<String>() {
+            return () -> new Iterator<String>() {
+                int max = string.length();
+                int position = 0;
+
                 @Override
-                public Iterator<String> iterator() {
-                    return new Iterator<String>() {
-                        int max = string.length();
-                        int position = 0;
+                public boolean hasNext() {
+                    return position <= max;
+                }
 
-                        @Override
-                        public boolean hasNext() {
-                            return position <= max;
-                        }
+                private char currentChar() {
+                    return string.charAt(position);
+                }
 
-                        private char currentChar() {
-                            return string.charAt(position);
+                @Override
+                public String next() {
+                    if (position == max) {
+                        position++;
+                        return "";
+                    } else if (currentChar() == '\"') {
+                        position++;
+                        int start = position;
+                        while (position < max && currentChar() != '\"') {
+                            position++;
                         }
+                        if (position >= max) {
+                            throw new IllegalStateException("Unclosed quoted string");
+                        }
+                        String r = string.substring(start, position);
+                        position += 2;
+                        return r;
+                    } else {
+                        int start = position;
+                        while (position < max && currentChar() != ',') {
+                            position++;
+                        }
+                        String r = string.substring(start, position);
+                        position++;
+                        return r;
+                    }
+                }
 
-                        @Override
-                        public String next() {
-                            if (position == max) {
-                                position++;
-                                return "";
-                            } else if (currentChar() == '\"') {
-                                position++;
-                                int start = position;
-                                while (position < max && currentChar() != '\"') {
-                                    position++;
-                                }
-                                if (position >= max) {
-                                    throw new IllegalStateException("Unclosed quoted string");
-                                }
-                                String r = string.substring(start, position);
-                                position += 2;
-                                return r;
-                            } else {
-                                int start = position;
-                                while (position < max && currentChar() != ',') {
-                                    position++;
-                                }
-                                String r = string.substring(start, position);
-                                position++;
-                                return r;
-                            }
-                        }
-
-                        @Override
-                        public void remove() {
-                            throw new UnsupportedOperationException("Can't remove from CsvSplitter");
-                        }
-                    };
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException("Can't remove from CsvSplitter");
                 }
             };
         }

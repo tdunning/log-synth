@@ -37,6 +37,13 @@ public class MapSampler extends FieldSampler {
     public MapSampler() {
     }
 
+    @Override
+    public void restart() {
+        if (base != null) {
+            base.restart();
+        }
+    }
+
     @SuppressWarnings("UnusedDeclaration")
     public void setValue(List<FieldSampler> base) {
         this.base = new SchemaSampler(base);
