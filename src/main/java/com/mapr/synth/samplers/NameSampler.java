@@ -53,7 +53,7 @@ public class NameSampler extends FieldSampler {
             if (first.compareAndSet(null, new Multinomial<>())) {
                 Preconditions.checkState(last.getAndSet(new Multinomial<>()) == null);
 
-                Splitter onTab = Splitter.on(CharMatcher.WHITESPACE).omitEmptyStrings().trimResults();
+                Splitter onTab = Splitter.on(CharMatcher.whitespace()).omitEmptyStrings().trimResults();
                 for (String resourceName : ImmutableList.of("dist.male.first", "dist.female.first")) {
                     for (String line : Resources.readLines(Resources.getResource(resourceName), Charsets.UTF_8)) {
                         if (!line.startsWith("#")) {
