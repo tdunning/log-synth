@@ -200,9 +200,11 @@ Samples from ISO country codes.
 #### `date`
 This distribution generates dates which are some time before an epoch date.  Dates shortly before the epoch are more common than those long before.  On average, the dates generated are 100 days before the epoch.  A format field is allowed which takes a format for the data in the style of Java's SimpleDateFormatter.  Note that the order of options is significant in that the format will apply to the start and end options if it comes before them.  By default, these are formatted like yyyy-MM-dd, but you can specify a different format using the format option.  Dates are selected by default to be before July 1, 2013.  The amount before is selected exponentially with mean of 100 days.  If you specify start or end dates, the dates will be sampled uniformly between your dates. The default start is January 1, 1970.  The default end is July 1, 2013.
 ```json
-{"name":"first_visit", "class":"date", "format":"MM/dd/yyyy"},
-{"name":"second_date", "class":"date", "start":"2014-01-31", "end":"2014-02-07"},
-{"name":"third_date", "class":"date", "format":"MM/dd/yyyy", "start":"01/31/1995", "end":"02/07/1999"}
+[
+  {"name":"first_visit", "class":"date", "format":"MM/dd/yyyy"},
+  {"name":"second_date", "class":"date", "start":"2014-01-31", "end":"2014-02-07"},
+  {"name":"third_date", "class":"date", "format":"MM/dd/yyyy", "start":"01/31/1995", "end":"02/07/1999"}]
+
 ```    
 #### `event`
 Samples Poisson distributed event times with specified rates.
@@ -235,16 +237,18 @@ it is usually simpler to just name the `flatten` sampler.  This gives you a defa
 flattener with a dash appended.  For instance, this snippet
 
 ```json
-{
+[
+ {
    "name": "x",
    "class": "flatten",
-   "value": { "class": "zip", "fields": "latitude, longitude" },
-},
-{
+   "value": { "class": "zip", "fields": "latitude, longitude" }
+ },
+ {
    "name": "y",
    "class": "flatten",
    "value": { "class": "zip", "fields": "latitude, longitude" },
-}
+ }
+]
 ```
 would give samples with fields named `x-latitude`, `x-longitude`, `y-latitude` and `y-longitude` which makes it
 easy to keep track of which fields are associated with each other.
@@ -256,15 +260,17 @@ This distribution generates randomized references to an integer key from another
 This distribution returns consecutive integers starting at the value of the start parameter.
 
 ```json
-{"name":"id", "class":"id"},
+{"name":"id", "class":"id"}
 ```
 #### `int`
 Samples values from min (inclusive) to max (exclusive) with an adjustable skew toward small values.  If you set skew to a negative number, larger values will be preferred.
 
 ```json
-{"name":"size", "class":"int", "min":10, "max":99}
-{"name": "z", "class": "int", "min": 10, "max": 20, "skew": -1},
-{"name":"x", "class":"lookup", "resource":"data.json", "skew":1},
+[
+  {"name":"size", "class":"int", "min":10, "max":99}
+  {"name": "z", "class": "int", "min": 10, "max": 20, "skew": -1},
+  {"name":"x", "class":"lookup", "resource":"data.json", "skew":1}
+]
 ```
 
 You can also specify an explicit distribution for the values returned from this sampler by using the `dist` parameter. For instance, this gives you two values, `a` and `b`. The `a` value will have values 1, 2, 3, 4 distributed 50%, 25%, 15%, 10% while `b` will have values distributed 10%, 15%, 25%, 50%.
@@ -299,7 +305,7 @@ This snippet will generate silly file names nested three deep:
 Samples from ISO language codes according to prevalence on the web.
 
 ```json
-{"name":"la", "class":"language"},
+{"name":"la", "class":"language"}
 ```        
 #### `lookup`
 Samples from lines of a file located in the resources folder. The filename must have .csv, .tsv, or .json suffix and the first line is expected to be a header row containing names for each field.
@@ -326,7 +332,7 @@ Samples from (slightly) plausible names.  The allowable types are
 `first`, `last`, `first_last` and `last_first`.  The default type is `first_last`.
 
 ```json
-{"name":"name", "class":"name", "type":"first_last"},
+{"name":"name", "class":"name", "type":"first_last"}
 ```
 
 #### `normal`
@@ -334,7 +340,7 @@ Samples from a normal distribution. You can set `mean` and either `sd` or `preci
 If you want a predictable sequence set the `seed`. You can also trim the distribution by setting `min` and/or `max`.
 
 ```json
-{"name":"name", "class":"normal", "mean":3, "sd": 2, "min":0},
+{"name":"name", "class":"normal", "mean":3, "sd": 2, "min":0}
 ```
 
 #### `sequence`
@@ -343,7 +349,7 @@ Repeatedly samples from a single distribution and returns an array of the result
 This example produces variable length results with exponentially distributed lengths.  Some of the results have length 0.
 
 ```json
-{"name":"c", "class":"sequence", "base":{"class":"os"}},
+{"name":"c", "class":"sequence", "base":{"class":"os"}}
 ```
 This example produces values with lengths that are exponentially distributed with mean length of 10.
 
@@ -384,7 +390,7 @@ time.  Here are some examples:
       // generates lists with exactly 5 samples each
       "name": "fixed-length",
       "class":"sequence",
-      "lengthDistribution":5
+      "lengthDistribution":5,
       "base": ...
     }
 ```
@@ -417,6 +423,51 @@ This schema, in contrast:
 will produce records with a field `"a"` containing a VIN and a field `"c"` containing a string from the `os` sampler. Each
 list that the `sequence` sample produces will result in the VIN being repeated once for each of the samples in the list.
 
+Sometimes you want to not only flatten the results of a sequence so that multiple records are produced, but you may want to 
+promote the fields of the samples in the sequence to be top-level fields in the resulting records. This is 
+particularly true if you want to return the data in CSV or other formats that don't handle nested data well. To do this,
+simply omit the name of the sequence variable. For instance, this schema
+```json
+[
+    {
+	"name":"id", "class":"uuid"
+    },
+    {
+	"class":"sequence", 
+	"length": 3,
+	"base":{
+	    "class":"map",
+	    "value": [
+		{
+		    "name": "sample-time",
+		    "class": "event",
+		    "rate": "3/h",
+		    "format":"yyyy-MM-dd HH:mm:ss",
+		    "start": "2019-04-01 17:43:00"
+		},
+		{
+		    "name": "temperature",
+		    "class": "random-walk",
+		    "mean":0,
+		    "sd":1,
+		    "start":30
+		}
+	    ]
+	}, 
+	"flat":true
+    }
+]
+```
+will produce multiple records for each device that look like this:
+```json
+{"id":"dace817b-f0c6-47a8-90a6-a21bb6d7a1d2","sample-time":"2019-04-01 17:43:00","temperature":30.146672000677313}
+{"id":"21925927-55c7-40e9-bec6-3aa14ca4ba80","sample-time":"2019-04-01 17:43:00","temperature":31.337189250191063}
+{"id":"21925927-55c7-40e9-bec6-3aa14ca4ba80","sample-time":"2019-04-01 18:15:20","temperature":31.903948039663167}
+{"id":"21925927-55c7-40e9-bec6-3aa14ca4ba80","sample-time":"2019-04-01 18:17:51","temperature":32.00336665938387}
+{"id":"08c90cac-d841-4f34-9fb3-359a299d027b","sample-time":"2019-04-01 17:43:00","temperature":31.145485476447}
+{"id":"08c90cac-d841-4f34-9fb3-359a299d027b","sample-time":"2019-04-01 18:13:39","temperature":34.18391712370743}
+```
+
 #### `ssn`
 Samples somewhat realistic SSN's
 
@@ -433,7 +484,7 @@ For example:
 {
  "name": "z",
  "class": "ssn"
-},
+}
 ```
 or
 
@@ -455,14 +506,14 @@ If you only want a string with the SSN in it, you can set the `verbose` flag to 
  "name": "z",
  "class": "ssn",
  "verbose": false
-},
+}
 ```
 
 #### `state`
 Samples from any of the 58 USPS state abbreviations.  Yes, there are 58 possible values.
 
 ```json
-{"name":"st", "class":"state"},
+{"name":"st", "class":"state"}
 ```
 #### `street-name`
 This distribution generates fanciful three word street names.
@@ -495,7 +546,7 @@ The defaults for the `random-walk` sampler are sensible so that this
 ```json
 {
    "name": "v1",
-   "class": "random-walk",
+   "class": "random-walk"
 }
 ```    
 samples steps from a unit normal distribution.  The scale of the steps can be changed by setting the `s` (standard deviation),
@@ -506,8 +557,8 @@ scale of the step distribution:
 {
    "name": "v2",
    "class": "random-walk",
-   "s": 2,
-},
+   "s": 2
+}
 ```    
 If you are setting the scale to
 a constant, the `s` parameter would normally be used.  You can also set these parameters to have values that are themselves

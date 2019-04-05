@@ -58,10 +58,11 @@ public class RandomWalkSampler extends FieldSampler {
     private boolean verbose = false;
 
     private AtomicDouble state = new AtomicDouble();
+    private double start = 0;
 
     @Override
     public void restart() {
-        state.set(0);
+        state.set(start);
     }
 
     @Override
@@ -82,6 +83,11 @@ public class RandomWalkSampler extends FieldSampler {
         } else {
             return new DoubleNode(newState);
         }
+    }
+
+    public void setStart(double start) {
+        this.start = start;
+        state.set(start);
     }
 
     @SuppressWarnings("UnusedDeclaration")
