@@ -32,7 +32,11 @@ import org.apache.mahout.math.random.Sampler;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * Samples from a specified schema to generate reasonably interesting data.

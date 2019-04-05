@@ -22,7 +22,7 @@ package com.mapr.synth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mapr.synth.samplers.ForeignKeySampler;
 import org.apache.mahout.math.function.DoubleFunction;
-import org.apache.mahout.math.random.*;
+import org.apache.mahout.math.random.Sampler;
 import org.junit.Test;
 
 public class ForeignKeySamplerTest {

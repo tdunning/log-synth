@@ -34,7 +34,11 @@ import com.google.common.io.Resources;
 import org.apache.mahout.common.RandomUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**

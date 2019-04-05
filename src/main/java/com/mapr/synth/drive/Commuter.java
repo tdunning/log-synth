@@ -32,7 +32,13 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.TimeZone;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -317,7 +323,7 @@ public class Commuter extends FieldSampler {
     }
 
     @SuppressWarnings("unused")
-    public void setExtras(JsonNode value) throws IOException {
+    public void setExtras(JsonNode value) {
         if (value.isArray()) {
             extraSchema = Lists.newArrayList();
             for (JsonNode jsonNode : value) {
