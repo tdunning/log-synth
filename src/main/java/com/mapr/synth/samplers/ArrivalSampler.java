@@ -21,17 +21,13 @@ package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.google.common.collect.ImmutableMap;
 import com.mapr.synth.FancyTimeFormatter;
+import com.mapr.synth.Util;
 import org.apache.mahout.common.RandomUtils;
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Samples progressive times that look like event arrival times.
@@ -49,13 +45,6 @@ import java.util.regex.Pattern;
  * Thread safe
  */
 public class ArrivalSampler extends FieldSampler {
-    private final Pattern ratePattern = Pattern.compile("([0-9.e\\-]+)(/[smhd])?");
-
-    private final Map<String, TimeUnit> unitMap = ImmutableMap.of(
-            "s", TimeUnit.SECONDS,
-            "m", TimeUnit.MINUTES,
-            "h", TimeUnit.HOURS,
-            "d", TimeUnit.DAYS);
 
     private Random base;
 
@@ -77,15 +66,7 @@ public class ArrivalSampler extends FieldSampler {
 
     @SuppressWarnings("UnusedDeclaration")
     public void setRate(String rate) {
-        Matcher m = ratePattern.matcher(rate);
-        if (m.matches()) {
-            // group(1) is the number, group(2) is either empty (default to /s) or /d or some such.
-            TimeUnit sourceUnit = (m.groupCount() > 1) ? unitMap.get(m.group(2).substring(1)) : TimeUnit.SECONDS;
-            double count = Double.parseDouble(m.group(1));
-            this.meanInterval = TimeUnit.MILLISECONDS.convert(1, sourceUnit) / count;
-        } else {
-            throw new IllegalArgumentException(String.format("Invalid rate argument: %s", rate));
-        }
+        meanInterval = Util.parseRateAsInterval(rate);
     }
 
     @SuppressWarnings("UnusedDeclaration")

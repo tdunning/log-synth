@@ -20,11 +20,24 @@
 package com.mapr.synth;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Handy static routines
  */
 public class Util {
+    private static final Pattern ratePattern = Pattern.compile("([0-9.e\\-]+)(/[smhd])?");
+    private static final Map<String, TimeUnit> unitMap = ImmutableMap.of(
+            "s", TimeUnit.SECONDS,
+            "m", TimeUnit.MINUTES,
+            "h", TimeUnit.HOURS,
+            "d", TimeUnit.DAYS);
+
     public static Integer parseInteger(String argument) {
         int n = Integer.parseInt(argument.replaceAll("[KMG]?$", ""));
 
@@ -52,6 +65,18 @@ public class Util {
             return max.asInt();
         } else {
             throw new IllegalArgumentException("Needed an integer or a string defining an integer");
+        }
+    }
+
+    public static double parseRateAsInterval(String rate) {
+        Matcher m = ratePattern.matcher(rate);
+        if (m.matches()) {
+            // group(1) is the number, group(2) is either empty (default to /s) or /d or some such.
+            TimeUnit sourceUnit = (m.groupCount() > 1) ? unitMap.get(m.group(2).substring(1)) : TimeUnit.SECONDS;
+            double count = Double.parseDouble(m.group(1));
+            return TimeUnit.MILLISECONDS.convert(1, sourceUnit) / count;
+        } else {
+            throw new IllegalArgumentException(String.format("Invalid rate argument: %s", rate));
         }
     }
 }
