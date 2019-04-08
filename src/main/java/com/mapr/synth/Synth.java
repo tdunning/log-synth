@@ -280,7 +280,7 @@ public class Synth {
             }
         }
 
-        public static void header(Format format, List<String> names, PrintStream out) {
+        public static void header(Format format, Iterable<String> names, PrintStream out) {
             switch (format) {
                 case TSV:
                     out.printf("%s\n", withTabs.join(names));
@@ -308,7 +308,7 @@ public class Synth {
             return count;
         }
 
-        private static void format(Format format, Quote quoteConvention, List<String> names, JsonNode fields, PrintStream out) throws IOException {
+        private static void format(Format format, Quote quoteConvention, Iterable<String> names, JsonNode fields, PrintStream out) throws IOException {
             switch (format) {
                 case JSON:
                     out.printf("%s\n", fields.toString());
@@ -333,7 +333,7 @@ public class Synth {
             }
         }
 
-        private static void printDelimited(Quote quoteConvention, List<String> names, JsonNode fields, String separator, PrintStream out) {
+        private static void printDelimited(Quote quoteConvention, Iterable<String> names, JsonNode fields, String separator, PrintStream out) {
             String x = "";
             for (String name : names) {
                 switch (quoteConvention) {

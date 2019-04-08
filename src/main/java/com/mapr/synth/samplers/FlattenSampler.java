@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Delegate to another sampler which generates an object.  The fields of this object inserted into the
@@ -47,7 +48,7 @@ import java.util.Iterator;
 public class FlattenSampler extends FieldSampler {
     private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals(false);
     private FieldSampler delegate;
-    private String prefix = "";
+    private String prefix;
 
     @JsonCreator
     public FlattenSampler(@JsonProperty("name") String name, @JsonProperty("value") FieldSampler delegate) {
@@ -55,11 +56,17 @@ public class FlattenSampler extends FieldSampler {
         prefix = name + "-";
         setName(name);
         setFlattener(true);
+        delegate.setFlattener(true);
     }
 
     @SuppressWarnings("unused")
     public void setPrefix(String prefix) {
         this.prefix = prefix;
+    }
+
+    @Override
+    public void getNames(Set<String> fields) {
+        delegate.getNames(fields);
     }
 
     @Override

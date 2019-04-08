@@ -235,6 +235,19 @@ public class ZipSampler extends FieldSampler {
         }
     }
 
+    @Override
+    public void getNames(Set<String> fields) {
+        if (isFlat()) {
+            if (retainedFields != null) {
+                fields.addAll(retainedFields);
+            } else {
+                fields.addAll(values.keySet());
+            }
+        } else {
+            fields.add(getName());
+        }
+    }
+
     private abstract class LocationBound {
         abstract boolean accept(double latitude, double longitude);
 

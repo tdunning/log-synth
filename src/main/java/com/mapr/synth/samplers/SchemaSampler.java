@@ -25,9 +25,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.mahout.math.random.Sampler;
 
 import java.io.File;
@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * Samples from a specified schema to generate reasonably interesting data.
@@ -48,7 +49,7 @@ public class SchemaSampler implements Sampler<JsonNode> {
     public static final String FLAT_SEQUENCE_MARKER = ">>flatten-me<<";
 
     private List<FieldSampler> schema;
-    private List<String> fields;
+    private Set<String> fields;
     private Queue<JsonNode> buffer = new ArrayDeque<>();
 
     public SchemaSampler(List<FieldSampler> s) {
@@ -74,13 +75,16 @@ public class SchemaSampler implements Sampler<JsonNode> {
         }));
     }
 
-    public List<String> getFieldNames() {
+    public Iterable<String> getFieldNames() {
         return fields;
     }
 
     private void init(List<FieldSampler> s) {
         schema = s;
-        fields = Lists.transform(schema, FieldSampler::getName);
+        fields = Sets.newLinkedHashSet();
+        for (FieldSampler sampler : s) {
+            sampler.getNames(fields);
+        }
     }
 
     @Override
@@ -93,7 +97,7 @@ public class SchemaSampler implements Sampler<JsonNode> {
             ObjectNode r = nodeFactory.objectNode();
             Iterator<String> fx = fields.iterator();
             for (FieldSampler s : schema) {
-                String fieldName = fx.next();
+                String fieldName = s.getName();
                 if (s.isFlat()) {
                     if (fieldName == null) {
                         fieldName = FLAT_SEQUENCE_MARKER;

@@ -47,15 +47,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class SchemaSamplerTest {
     @Test
@@ -366,6 +364,21 @@ public class SchemaSamplerTest {
 
         assertEquals(10.0, sum4 / N, 10 * 0.03);
         assertEquals(100.0, sum5 / N, 100 * 0.03);
+    }
+
+    @Test
+    public void testFlattenedFieldNames() throws IOException {
+        // field names for flattened sequences are kind of tricky
+        //noinspection UnstableApiUsage
+        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema036.json"), Charsets.UTF_8).read());
+        List<String> names = Lists.newArrayList(s.getFieldNames());
+        assertTrue(names.contains("a"));
+        assertTrue(names.contains("b"));
+        assertTrue(names.contains("foo"));
+        assertTrue(names.contains("latitude"));
+        assertTrue(names.contains("longitude"));
+        assertTrue(names.contains("zipx"));
+        assertEquals(6, names.size());
     }
 
     public static class StringSamplerTest {

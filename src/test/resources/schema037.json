@@ -1,0 +1,33 @@
+[
+  {
+    "class": "sequence",
+    "lengthDistribution": 3,
+    "base": {
+      "name": "xzip",
+      "class": "zip"
+    },
+    "flat": true
+  },
+  {
+    "name": "foo",
+    "class": "sequence",
+    "lengthDistribution": 2,
+    "base": {
+      "class": "map",
+      "value": [
+        {
+          "class": "zip",
+          "name": "zipx",
+          "fields": "latitude,longitude",
+          "seed": 1
+        },
+        {
+          "name": "b",
+          "class": "id",
+          "start": 100
+        }
+      ]
+    },
+    "flat": true
+  }
+]

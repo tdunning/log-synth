@@ -22,8 +22,11 @@ package com.mapr.synth.samplers;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Create a JSON map with values sampled from specified distributions.
@@ -32,6 +35,7 @@ import java.util.List;
  */
 public class MapSampler extends FieldSampler {
     private SchemaSampler base = null;
+    private List<FieldSampler> children = null;
 
     @JsonCreator
     public MapSampler() {
@@ -41,12 +45,21 @@ public class MapSampler extends FieldSampler {
     public void restart() {
         if (base != null) {
             base.restart();
+            for (FieldSampler child : children) {
+                child.setFlattener(isFlat());
+            }
         }
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    public void setValue(List<FieldSampler> base) {
-        this.base = new SchemaSampler(base);
+    public void setValue(List<FieldSampler> children) {
+        this.base = new SchemaSampler(children);
+        this.children = Lists.newArrayList(children);
+    }
+
+    @Override
+    public void getNames(Set<String> fields) {
+        Iterables.addAll(fields, base.getFieldNames());
     }
 
     @Override

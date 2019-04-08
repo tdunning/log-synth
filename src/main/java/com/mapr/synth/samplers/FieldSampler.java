@@ -31,7 +31,7 @@ import com.mapr.synth.drive.Commuter;
 import org.apache.mahout.math.random.Sampler;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "class")
 @JsonSubTypes({
@@ -129,5 +129,9 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
 
     public boolean isFlat() {
         return flattener;
+    }
+
+    public void getNames(Set<String> fields) {
+        fields.add(name);
     }
 }

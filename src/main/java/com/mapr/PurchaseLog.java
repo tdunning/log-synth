@@ -24,6 +24,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.mapr.synth.samplers.SchemaSampler;
@@ -44,9 +45,8 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * The tab delimited output fields include:
  * <p>
- * hit_time, hit_id
- * product_category, campaign_list, search_keywords, event_list
- * user_id, user_category, state, browser, country, language, os,
+ * hit_time, hit_id product_category, campaign_list, search_keywords, event_list user_id, user_category, state, browser,
+ * country, language, os,
  */
 public class PurchaseLog {
     public static void main(String[] args) throws IOException {
@@ -62,6 +62,7 @@ public class PurchaseLog {
         Joiner withTab = Joiner.on("\t");
 
         // first generate lots of user definitions
+        //noinspection UnstableApiUsage
         SchemaSampler users = new SchemaSampler(Resources.asCharSource(Resources.getResource("user-schema.txt"), Charsets.UTF_8).read());
         File userFile = File.createTempFile("user", "tsv");
         BufferedWriter out = Files.newBufferedWriter(userFile.toPath(), Charsets.UTF_8);
@@ -76,11 +77,12 @@ public class PurchaseLog {
         Splitter onComma = Splitter.on(",");
 
         Random gen = new Random();
+        //noinspection UnstableApiUsage
         SchemaSampler intermediate = new SchemaSampler(Resources.asCharSource(Resources.getResource("hit_step.txt"), Charsets.UTF_8).read());
 
-        final int COUNTRY = users.getFieldNames().indexOf("country");
-        final int CAMPAIGN = intermediate.getFieldNames().indexOf("campaign_list");
-        final int SEARCH_TERMS = intermediate.getFieldNames().indexOf("search_keywords");
+        final int COUNTRY = Iterables.indexOf(users.getFieldNames(), "country"::equals);
+        final int CAMPAIGN = Iterables.indexOf(intermediate.getFieldNames(), "campaign_list"::equals);
+        final int SEARCH_TERMS = Iterables.indexOf(intermediate.getFieldNames(),"search_keywords"::equals);
         Preconditions.checkState(COUNTRY >= 0, "Need country field in user schema");
         Preconditions.checkState(CAMPAIGN >= 0, "Need campaign_list field in step schema");
         Preconditions.checkState(SEARCH_TERMS >= 0, "Need search_keywords field in step schema");

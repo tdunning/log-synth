@@ -30,6 +30,7 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Create comma separated samples from another field definition or array of field definitions.
@@ -40,7 +41,6 @@ public class SequenceSampler extends FieldSampler {
     private Random gen = new Random();
     private List<FieldSampler> array = null;
     private FieldSampler length = exponential(5);
-    private boolean isFlat;
 
     @JsonCreator
     public SequenceSampler() {
@@ -49,6 +49,9 @@ public class SequenceSampler extends FieldSampler {
     @Override
     public void restart() {
         if (base != null) {
+            if (base.getName() == null) {
+                base.setFlattener(isFlat());
+            }
             base.restart();
         }
         if (array != null) {
@@ -89,12 +92,12 @@ public class SequenceSampler extends FieldSampler {
 
     @SuppressWarnings("unused")
     public void setFlat(boolean isFlat) {
-        this.isFlat = isFlat;
+        setFlattener(isFlat);
     }
 
     @Override
     public boolean isFlat() {
-        return isFlat;
+        return super.isFlat();
     }
 
     @SuppressWarnings("unused")
@@ -105,6 +108,24 @@ public class SequenceSampler extends FieldSampler {
     @SuppressWarnings("UnusedDeclaration")
     public void setArray(List<FieldSampler> base) {
         this.array = Lists.newArrayList(base);
+    }
+
+    @Override
+    public void getNames(Set<String> fields) {
+        if (isFlat()) {
+            //noinspection StringEquality
+            if (this.getName() == null || this.getName() == SchemaSampler.FLAT_SEQUENCE_MARKER) {
+                if (base != null) {
+                    base.getNames(fields);
+                } else if (array != null) {
+                    for (FieldSampler sampler : array) {
+                        sampler.getNames(fields);
+                    }
+                }
+            } else {
+                fields.add(this.getName());
+            }
+        }
     }
 
     @Override
