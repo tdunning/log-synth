@@ -1,0 +1,59 @@
+[
+  {
+    "name": "name",
+    "class": "map",
+    "value": [
+      {
+        "name": "first",
+        "class": "name",
+        "type": "first"
+      },
+      {
+        "name": "last",
+        "class": "name",
+        "type": "last"
+      }
+    ]
+  },
+  {
+    "name": "student",
+    "class": "map",
+    "value": [
+      {
+        "name": "details",
+        "class": "map",
+        "value": [
+          {
+            "name": "school.id",
+            "class": "int",
+            "min": 1000,
+            "max": 9999
+          },
+          {
+            "name": "school.name",
+            "class": "join",
+            "separator": " ",
+            "value": {
+              "class": "sequence",
+              "length": 2,
+              "array": [
+                {
+                  "class": "name",
+                  "type": "first_last"
+                },
+                {
+                  "class": "string",
+                  "dist": {
+                    "High School": 1,
+                    "Junior High School": 2,
+                    "Elementary School": 5
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

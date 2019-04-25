@@ -1,0 +1,12 @@
+[
+    {
+	"class": "flatten",
+	"prefix": "",
+	"value": {
+	    "class": "zip",
+	    "fields": "longitude, latitude,zip,city,state",
+	    "onlyContinental": true,
+	    "verbose": true
+	}
+    }
+]

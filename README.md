@@ -66,7 +66,7 @@ This last form should work on Linux as well, but I haven't tested it.
  `-threads n`  Indicates how many threads to use for generating data.  Requires `-output`.  Note that the schema is
 shared across all of the threads so a schema with an id sampler will still generate all consecutive values in order, but the values will be distributed pretty much randomly across the output files.
 
-Note also that the number of threads that gives best throughput is somewhat surprisingly larger than you might think.  >100 threads can be useful.
+Note also that the number of threads that gives best throughput is somewhat surprisingly larger than you might think.  >100 threads can be useful. Having lots of threads can, on the other hand, consume a lot of memory.  Trust, but verify.
  
 ## Samplers Allowed in a Schema
 
@@ -210,8 +210,8 @@ This distribution generates dates which are some time before an epoch date.  Dat
 Samples Poisson distributed event times with specified rates.
 
 ```json
-{"name":"foo1", "class":"event", "rate": "0.1/d"},
-{"name":"foo2", "class":"event", "start": "2014-01-01", "format":"yyyy-MM-dd HH:mm:ss", "rate": "10/s"},
+{"name":"foo1", "class":"event", "rate": "0.1/d"}
+{"name":"foo2", "class":"event", "start": "2014-01-01", "format":"yyyy-MM-dd HH:mm:ss", "rate": "10/s"}
 {"name":"foo3", "class":"event", "format": "MM/dd/yyyy HH:mm:ss", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
 ```
 #### `flatten`
@@ -246,7 +246,7 @@ flattener with a dash appended.  For instance, this snippet
  {
    "name": "y",
    "class": "flatten",
-   "value": { "class": "zip", "fields": "latitude, longitude" },
+   "value": { "class": "zip", "fields": "latitude, longitude" }
  }
 ]
 ```
@@ -267,7 +267,7 @@ Samples values from min (inclusive) to max (exclusive) with an adjustable skew t
 
 ```json
 [
-  {"name":"size", "class":"int", "min":10, "max":99}
+  {"name":"size", "class":"int", "min":10, "max":99},
   {"name": "z", "class": "int", "min": 10, "max": 20, "skew": -1},
   {"name":"x", "class":"lookup", "resource":"data.json", "skew":1}
 ]
@@ -391,7 +391,9 @@ time.  Here are some examples:
       "name": "fixed-length",
       "class":"sequence",
       "lengthDistribution":5,
-      "base": ...
+      "base": {
+       // insert distribution here
+      }
     }
 ```
 ```json
@@ -400,7 +402,9 @@ time.  Here are some examples:
       "name": "fixed-length",
       "class":"sequence",
       "lengthDistribution":{"class":"integer", "min":5, "max":10},
-      "base": ...
+      "base": {
+        // insert sampler definition here
+      }
     }
 ```
 A `sequence` sampler also normally returns all values as a list that is assigned to a field in the resulting records. You can
@@ -793,53 +797,109 @@ Items are simpler and are generated using this schema
 ```
 Each item has an id and a size which is just a random integer from 10 to 99.
 
-### Users and queries
+### Users and queries (`examples/users-and-queries.json`)
 You can use the sequence type to generate variable or fixed-length arrays of values which can themselves be complex.  If you use the JSON output format, this structure will be preserved.  If you want to flatten an array produced by sequence, you can use the flatten sampler.
 
 For example, this produces users with names and variable length query strings
 
 ```json
 [
-   {"name":"user_name", "class":"name", "type": "last_first"},
-   {"name":"query", "class":"array-flatten", "value": {
-       "class": "sequence", "length":4, "base": {
-           "class": "word"
-       }
-   }}
+    {"name":"user_name", "class":"name", "type": "last_first"},
+    {"name":"query", "class":"array-flatten", "value": {
+	"class": "sequence", "length":4, "base": {
+            "class": "word"
+	}
+    }}
 ]
 ```
 If you use the TSV format with this schema, the queries will be comma delimited unquoted strings.  If you omit the `array-flatten` step, you will get a list of strings surrounded by square brackets and each string will be quoted (i.e. an array in JSON format).
 
-### Nested data
+### IoT data (`examples/iot-data.json`)
+This example shows how you can generate measurement data that appears to come from multiple devices, each with a fixed location.
+
+Here is the schema, followed by some explanations
+```json
+[
+    {
+        "name": "device-id",
+        "class": "uuid",
+        "seed": 1
+    },
+    {
+        "class": "flatten",
+        "prefix": "",
+        "value": {
+            "class":"zip"  ,
+            "onlyContinental": true,
+            "fields":"latitude, longitude"
+        }
+    },
+    {
+        "class": "sequence",
+        "lengthDistribution": 100,
+        "base": {
+            "class": "map",
+            "value": [
+                {
+                    "name": "time",
+                    "class": "event",
+                    "format":"yyyy-MM-dd HH:mm:ss",
+                    "rate": "1/m"
+                },
+                {
+                    "name": "temp",
+                    "class": "random-walk",
+                    "start": 30,
+                    "mean": 0,
+                    "sd":1
+                },
+                {
+                    "name": "case-open",
+                    "class": "int",
+                    "dist": [0, 999, 1, 1]
+                }
+            ]
+        },
+        "flat": true
+    }
+]       
+``` 
+This schema consists of three clauses. The first generates device IDs and is pretty simple. Internally, the UUID sampler generates some integers and formats them in very techy looking hexadecimal with dashes. The result looks like real UUIDs.
+
+The second clause generates locations. In fact, however, it really generates zip codes. Lots of other fields are generated in addition to the actual zip code (city name, state and such) but we only retain the longitude and latitude. In order to avoid generating any Zip codes that don't have an actual location (such as military overseas codes), we use the `onlyContinental` flag. Furthermore, we use a `flattener` to unnest the location fields so that they appear at the top level of resulting records.
+
+The last clause generates many values for each sample, each of which is a structure with three fields. These fields include `time`, `temp` and `case-open`. The `time` field in these structures is generated using the `event` sampler with an average rate of one event per minute. The `case-open` field is generated by sampling either a 1 or a 0 but with a much higher probability of picking a 0.
+
+The interesting field among these three is the `temp` field. This is generated by a process that keeps the running total of normally distributed values. This gives reasonably varying real values that look different from device to device. 
+
+This last clause generates a variable number of values for each device with 100 samples on average. Overall, this means that each *sample* from this schema consists of one UUID, one location and one sequence of 100, more or less, time/temp/case-op flags. This single sample is flattened into multiple records because of the `flat:true` flag on the `sequence` clause in the schema. Moreover, since there is no name for the `sequence` clause, the structures in the sequence of samples are each unnested so that the records that are produced have five fields, none of which contains nested data. This makes it possible to generate normally looking CSV formatted data using this schema. 
+### Nested data (`examples/nested-data.json`)
 You can also generate arbitrarily nested data by using the map sampler.  For example, this schema will produce records with an id and a map named stuff that has two integers ("a" and "b") in it.
 
 ```json
 [
-   {"name": "id", "class": "id"},
-   {
-       "name": "stuff", "class": "map",
-       "value": [
-           {"name": "a", "class": "int", "min": 3, "max": 4},
-           {"name": "b", "class": "int", "min": 4, "max": 5}
-       ]
-   }
+    {"name": "id", "class": "id"},
+    {
+	"name": "stuff", "class": "map",
+	"value": [
+            {"name": "a", "class": "int", "min": 3, "max": 4},
+            {"name": "b", "class": "int", "min": 4, "max": 5}
+	]
+    }
 ]
 ```
-### Complex names
+### Complex names (`examples/complex-names.json`)
 Suppose that we want to generate this kind of data:
 ```json
-{
-  "name":{"first":"Marcelene","last":"Gillette"},
-  "student":{
-    "details":{"school.id":7608,"school.name":"Lloyd Burton Junior High School"}}}
-{
-  "name":{"first":"Samuel","last":"Colston"},
-  "student":{
-    "details":{"school.id":3555,"school.name":"Kenneth Smith Junior High School"}}}
-{
-  "name":{"first":"Jan","last":"Acton"},
-  "student":{
-    "details":{"school.id":4295,"school.name":"Jeanette Harden Elementary School"}}}
+{"name":{"first":"Marcelene","last":"Gillette"},
+	"student":{
+	    "details":{"school.id":7608,"school.name":"Lloyd Burton Junior High School"}}}
+{"name":{"first":"Samuel","last":"Colston"},
+	"student":{
+	    "details":{"school.id":3555,"school.name":"Kenneth Smith Junior High School"}}}
+{"name":{"first":"Jan","last":"Acton"},
+	"student":{
+	    "details":{"school.id":4295,"school.name":"Jeanette Harden Elementary School"}}}
 ```
 This is harder than it looks because there are some surprises:
 - The name is a structure, not a string
@@ -857,49 +917,49 @@ randomly selected string.
 Here is the schema (it looks fancier than it is):
 ```json
 [{
-	"name": "name",
-	"class": "map",
-	"value": [{
-		"name": "first",
-		"class": "name",
-		"type": "first"
-	}, {
-		"name": "last",
-		"class": "name",
-		"type": "last"
-	}]
+    "name": "name",
+    "class": "map",
+    "value": [{
+	"name": "first",
+	"class": "name",
+	"type": "first"
+    }, {
+	"name": "last",
+	"class": "name",
+	"type": "last"
+    }]
 }, {
-	"name": "student",
+    "name": "student",
+    "class": "map",
+    "value": [{
+	"name": "details",
 	"class": "map",
 	"value": [{
-		"name": "details",
-		"class": "map",
-		"value": [{
-			"name": "school.id",
-			"class": "int",
-			"min": 1000,
-			"max": 9999
+	    "name": "school.id",
+	    "class": "int",
+	    "min": 1000,
+	    "max": 9999
+	}, {
+	    "name": "school.name",
+	    "class": "join",
+	    "separator": " ",
+	    "value": {
+		"class": "sequence",
+		"length": 2,
+		"array": [{
+		    "class": "name",
+		    "type": "first_last"
 		}, {
-			"name": "school.name",
-			"class": "join",
-			"separator": " ",
-			"value": {
-				"class": "sequence",
-				"length": 2,
-				"array": [{
-					"class": "name",
-					"type": "first_last"
-				}, {
-					"class": "string",
-					"dist": {
-						"High School": 1,
-						"Junior High School": 2,
-						"Elementary School": 5
-					}
-				}]
-			}
+		    "class": "string",
+		    "dist": {
+			"High School": 1,
+			"Junior High School": 2,
+			"Elementary School": 5
+		    }
 		}]
+	    }
 	}]
+    }]
 }]
 ```
 ## Quoting of Strings

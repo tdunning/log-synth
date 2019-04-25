@@ -1,0 +1,8 @@
+[
+    {"name":"user_name", "class":"name", "type": "last_first"},
+    {"name":"query", "class":"array-flatten", "value": {
+	"class": "sequence", "length":4, "base": {
+            "class": "word"
+	}
+    }}
+]

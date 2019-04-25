@@ -1,0 +1,25 @@
+[
+  {
+    "name": "_id",
+    "class": "id"
+  },
+  {
+    "name": "age",
+    "class": "int",
+    "min": 10,
+    "max": 99
+  },
+  {
+    "class": "flatten",
+    "value": {
+      "class": "zip",
+      "fields": "city,state"
+    },
+    "prefix": ""
+  },
+  {
+    "name": "name",
+    "class": "name",
+    "type": "first_last"
+  }
+]

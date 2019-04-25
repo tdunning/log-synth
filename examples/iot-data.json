@@ -1,0 +1,44 @@
+[
+    {
+        "name": "device-id",
+        "class": "uuid",
+        "seed": 1
+    },
+    {
+        "class": "flatten",
+        "prefix": "",
+        "value": {
+            "class":"zip"  ,
+            "onlyContinental": true,
+            "fields":"latitude, longitude"
+        }
+    },
+    {
+        "class": "sequence",
+        "lengthDistribution": 100,
+        "base": {
+            "class": "map",
+            "value": [
+                {
+                    "name": "time",
+                    "class": "event",
+                    "format":"yyyy-MM-dd HH:mm:ss",
+                    "rate": "1/m"
+                },
+                {
+                    "name": "temp",
+                    "class": "random-walk",
+                    "start": 30,
+                    "mean": 0,
+                    "sd":1
+                },
+                {
+                    "name": "case-open",
+                    "class": "int",
+                    "dist": [0, 999, 1, 1]
+                }
+            ]
+        },
+        "flat": true
+    }
+]       
