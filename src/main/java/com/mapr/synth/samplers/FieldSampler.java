@@ -44,6 +44,7 @@ import java.util.Set;
         @JsonSubTypes.Type(value = Commuter.class, name = "commuter"),
         @JsonSubTypes.Type(value = CountrySampler.class, name = "country"),
         @JsonSubTypes.Type(value = DateSampler.class, name = "date"),
+        @JsonSubTypes.Type(value = DnsSampler.class, name = "dns"),
         @JsonSubTypes.Type(value = FileSampler.class, name = "lookup"),
         @JsonSubTypes.Type(value = FlattenSampler.class, name = "flatten"),
         @JsonSubTypes.Type(value = ForeignKeySampler.class, name = "foreign-key"),

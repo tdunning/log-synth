@@ -61,6 +61,10 @@ public abstract class LongTail<T> implements Sampler<T> {
         things.set(i, thing);
     }
 
+    public void add(T thing) {
+        things.add(thing);
+    }
+
     public void setSeed(long seed) {
         base.setSeed(seed);
     }

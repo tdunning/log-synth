@@ -34,9 +34,9 @@ import java.util.Random;
  * increase as O(alpha * log T) if discount = 0 or O(alpha * T^discount) for discount > 0.
  */
 public final class ChineseRestaurant implements Sampler<Integer> {
-    private final double alpha;
+    private double alpha;
     private double weight = 0;
-    private double discount = 0;
+    private double discount;
     private final DoubleArrayList weights = new DoubleArrayList();
     private final Random rand = RandomUtils.getRandom();
 
@@ -125,5 +125,15 @@ public final class ChineseRestaurant implements Sampler<Integer> {
 
     public void setSeed(long seed) {
         rand.setSeed(seed);
+    }
+
+    public void setAlpha(double alpha) {
+        Preconditions.checkArgument(alpha > 0);
+        this.alpha = alpha;
+    }
+
+    public void setDiscount(double discount) {
+        Preconditions.checkArgument(discount >= 0 && discount <= 1);
+        this.discount = discount;
     }
 }

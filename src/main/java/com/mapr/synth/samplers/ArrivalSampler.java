@@ -45,7 +45,6 @@ import java.util.Random;
  * Thread safe
  */
 public class ArrivalSampler extends FieldSampler {
-
     private Random base;
 
     private double meanInterval = 1000;  // interval - offset will have this mean

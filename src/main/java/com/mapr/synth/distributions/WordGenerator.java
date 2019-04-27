@@ -37,10 +37,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Emulates an infinite list of words, a prefix of which are taken from lists of plausible words.  The first words
- * are taken from a resource that has frequencies in it.  These frequencies can be used to initialize term
- * generators to a common language.  The next batch of words are taken from a long list of words with no frequencies.
- * After that, words are coined by using an integer count.
+ * Emulates an infinite list of words, a prefix of which are taken from lists of plausible words.  The first words are
+ * taken from a resource that has frequencies in it.  These frequencies can be used to initialize term generators to a
+ * common language.  The next batch of words are taken from a long list of words with no frequencies. After that, words
+ * are coined by using an integer count.
  */
 public class WordGenerator {
     private final Logger log = LoggerFactory.getLogger(WordGenerator.class);
@@ -53,12 +53,13 @@ public class WordGenerator {
         // read the common words
         if (seed != null) {
             try {
+                //noinspection UnstableApiUsage
                 Resources.readLines(Resources.getResource(seed), Charsets.UTF_8,
                         new LineProcessor<Object>() {
                             private boolean header = true;
                             private final Splitter onTabs = Splitter.on("\t");
 
-                            public boolean processLine(String s) throws IOException {
+                            public boolean processLine(String s) {
                                 if (!s.startsWith("#")) {
                                     if (!header) {
                                         Iterator<String> fields = onTabs.split(s).iterator();
@@ -84,7 +85,8 @@ public class WordGenerator {
         }
 
         try {
-          wordReader = Files.newReader(new File(Resources.getResource(others).getFile()), Charsets.UTF_8);
+            //noinspection UnstableApiUsage
+            wordReader = Files.newReader(new File(Resources.getResource(others).getFile()), Charsets.UTF_8);
         } catch (IOException e) {
             log.error("Can't read resource \"{}\", will continue without realistic words", others);
             wordReader = null;

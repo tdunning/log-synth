@@ -206,6 +206,55 @@ This distribution generates dates which are some time before an epoch date.  Dat
   {"name":"third_date", "class":"date", "format":"MM/dd/yyyy", "start":"01/31/1995", "end":"02/07/1999"}]
 
 ```    
+#### `dns`
+Samples DNS queries with some details about domain and source of the query. The basic idea is
+that each sample is a history of a particular source of DNS queries. The domains queried
+are sampled from a shared Pitman-Yor sampler that generates very long tails. The most commonly queried
+domains are taken from the actual domains of Fortune 500 companies, but others are generated
+as they are needed.
+
+Each query source is sampled for the time period of interest, but the rates for different sources can
+be very different. Each source is modeled as either 'active' or 'inactive'. During active times, DNS queries
+are generated at a higher rate than during inactive times. Different query sources can have active rates that
+differ by a factor of 1000 or more. Transition from inactive to active and back by picking an interval until 
+the next transition and then finding the time that corresponds to assuming that time passes more quickly during
+'daytime' for that query source. The overall model thus has parameters for night time dilation, average 
+active and inactive times and query rates during active and inactive periods. Each of these parameters are sampled for each
+query source and the distributions for these parameters are controlled by the following hyper-parameters:
+```
+Name        Controls                         Default      Description
+dilation    Night-time interval dilation     6            Night dilation is distributed as exp(rgamma(shape=dilation))
+active      Average active time (seconds)   10 minutes    Activity duration is distributed as rexp(rate=1/t_active) 
+                                                          where t_active ~ rexp(rate=1/active)
+inactive    Average inactive time (seconds)  4 hours      Duration of inactivity is distributed as 
+                                                          rexp(rate=1/t_inactive) where t_inactive ~ rexp(rate=1/inactive) |
+rate        Average query rate per second    10 queries/h Queries are Poisson distributed with rate 
+                                                          while active distributed as rexp(rate=1/rate)
+idle        How much does query rate slow    6            Query rate is decreased by ratio distributed 
+            when inactive                                 as exp(rgamma(shape=idle))
+alpha       Growth scale of unique domains   10000        Pitman-Yor cale factor for number of unique domains.                                                          
+discount    Growth rate of unique domains    0.5          Number of unique domains grows with alpha * N^discount
+                                                          if discount > 0 and alpha * log(N) if discount = 0
+```
+In addition to these parameters, you can add `json 'flat'=true` to force the output to consist of individual DNS
+queries. If `json 'flat'=false`, the output consists of one row per source IP with a list of JSON objects containing
+all requested fields.
+
+The `start`, and `end` required parameters can be used to set the beginning and ending time for the simulation. 
+The `format` parameter determines the  format for the `start` and `end` as well as the format for the `time`
+field in the output. The `format` parameter can be used after `start` and `end` are set to produce output
+in a different format than that used to specify the `start` and `end` parameters. By default all time expressions 
+parsed as "yyyy-MM-dd", or, if that fails, as "yyyy-MM-dd HH:mm:ss". By default, output is produced as 
+"yyyy-MM-dd HH:mm:ss." 
+
+You can also set `fields` to a comma-separated list of fields that should be included in the output of the sampler. 
+Available fields include `domain`, `source_ip`, `reverse_domain`, `time`.
+ 
+The following examples show how this sampler can be used
+```json
+{"class": "dns", "start": "2014-01-01", "end": "2014-03-01", "format": "MM/dd/yyyy HH:mm:ss",
+ "fields": "domain, reverse_domain, source_ip"} 
+```
 #### `event`
 Samples Poisson distributed event times with specified rates.
 

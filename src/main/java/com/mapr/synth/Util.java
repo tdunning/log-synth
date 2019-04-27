@@ -20,10 +20,18 @@
 package com.mapr.synth;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.LineProcessor;
+import com.google.common.io.Resources;
+import org.apache.mahout.math.random.Multinomial;
 
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +39,7 @@ import java.util.regex.Pattern;
  * Handy static routines
  */
 public class Util {
+    public static final long ONE_DAY = TimeUnit.DAYS.toMillis(1);
     private static final Pattern ratePattern = Pattern.compile("([0-9.e\\-]+)(/[smhd])?");
     private static final Map<String, TimeUnit> unitMap = ImmutableMap.of(
             "s", TimeUnit.SECONDS,
@@ -78,5 +87,54 @@ public class Util {
         } else {
             throw new IllegalArgumentException(String.format("Invalid rate argument: %s", rate));
         }
+    }
+
+    public static Multinomial<String> readTable(Splitter fielder, String... resources) throws IOException {
+        Multinomial<String> r = new Multinomial<>();
+        for (String resource : resources) {
+            readData(resource, (String line) -> {
+                Iterator<String> fields = fielder.split(line).iterator();
+                String key = fields.next();
+                double weight = Double.parseDouble(fields.next());
+                if (r.getProbability(key) > 0) {
+                    r.set(key, weight);
+                } else {
+                    r.add(key, weight);
+                }
+                return null;
+            });
+        }
+
+        return r;
+    }
+
+    public static void readData(String resource, Function<String, Void> callback) throws IOException {
+        //noinspection UnstableApiUsage
+        Resources.readLines(Resources.getResource(resource), Charsets.UTF_8, new LineProcessor<Void>() {
+            @Override
+            public boolean processLine(String line) {
+                if (!line.startsWith("# ")) {
+                    callback.apply(line);
+                }
+                return true;
+            }
+
+            @Override
+            public Void getResult() {
+                return null;
+            }
+        });
+    }
+
+    public static boolean isDaytime(double timeOfDay, double sunriseTime, double sunsetTime) {
+        return (timeOfDay >= sunriseTime) ^ (timeOfDay < sunsetTime) ^ (sunriseTime < sunsetTime);
+    }
+
+    public static double dayOrigin(double now) {
+        return Math.floor(now / ONE_DAY) * ONE_DAY;
+    }
+
+    public static double timeOfDay(double now) {
+        return now - dayOrigin(now);
     }
 }

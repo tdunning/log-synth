@@ -19,64 +19,95 @@
 
 package com.mapr.synth;
 
+import com.google.common.collect.Lists;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
- * Much like SimpleDateFormat, but only for output. The fancy bit is that
+ * Much like SimpleDateFormat, but fancier. The fancy bit is that
  * we support single character formats Q and s for time since epoch in
- * milli-seconds and seconds respectively.
+ * milli-seconds and seconds respectively. Also, multiple formats
+ * can be specified to allow alternative parsing formats.
  */
 public class FancyTimeFormatter {
-    private String format = null;
-    private SimpleDateFormat formatter = null;
+    private static String[] defaultFormats = {"yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"};
+
+    private List<String> formats = Lists.newArrayList();
+    private List<SimpleDateFormat> formatter = Lists.newArrayList();
+
+    public FancyTimeFormatter() {
+        this(defaultFormats);
+    }
 
     public FancyTimeFormatter(String format) {
+        addFormatter(format);
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public FancyTimeFormatter(String... formats) {
+        for (String format : formats) {
+            addFormatter(format);
+        }
+    }
+
+    private void addFormatter(String format) {
         switch (format) {
             case "Q":
             case "s":
-                this.format = "%t" + format;
+                this.formats.add("%t" + format);
+                formatter.add(null);
                 break;
             default:
-                this.format = format;
-                formatter = new SimpleDateFormat(format);
+                this.formats.add(format);
+                formatter.add(new SimpleDateFormat(format));
         }
     }
 
     @SuppressWarnings("unused")
     public String format(long t) {
-        if (formatter != null) {
-            return formatter.format(new Date(t));
-        } else if (format != null) {
-            return String.format(format, t);
+        if (formatter.get(0) != null) {
+            return formatter.get(0).format(new Date(t));
         } else {
-            throw new IllegalArgumentException("No default format for FancyTimeFormatter");
+            return String.format(formats.get(0), t);
         }
     }
 
     public String format(Date t) {
-        if (formatter != null) {
-            return formatter.format(t);
-        } else if (format != null) {
-            return String.format(format, t);
+        if (formatter.get(0) != null) {
+            return formatter.get(0).format(t);
         } else {
-            throw new IllegalArgumentException("No default format for FancyTimeFormatter");
+            return String.format(formats.get(0), t);
         }
     }
 
-    public Date parse(String start) throws ParseException {
-        if (formatter == null) {
-            switch (format) {
-                case "%ts":
-                    return new Date(Long.parseLong(start) * 1000);
-                case "%tQ":
-                    return new Date(Long.parseLong(start));
-                default:
-                    throw new IllegalArgumentException("Can't parse date string if format is undefined");
+    public Date parse(String t) throws ParseException {
+        int i = 0;
+        for (SimpleDateFormat format : formatter) {
+            if (format == null) {
+                String f = formats.get(i);
+                assert f != null;
+                try {
+                    if ("%tQ".equals(f)) {
+                        return new Date(Long.parseLong(t));
+                    } else if ("%ts".equals(f)) {
+                        return new Date(Long.parseLong(t) * 1000);
+                    } else {
+                        throw new ParseException(String.format("Invalid internal format %s", f), i);
+                    }
+                } catch (NumberFormatException e) {
+                    throw new ParseException(String.format("Invalid number: %s", t), 0);
+                }
+            } else {
+                try {
+                    return format.parse(t);
+                } catch (ParseException e) {
+                    // ignore parse exceptions
+                }
             }
-        } else {
-            return formatter.parse(start);
         }
+        throw new ParseException(String.format("Cannot parse %s as any of %s", t, formats), 0);
     }
 }
