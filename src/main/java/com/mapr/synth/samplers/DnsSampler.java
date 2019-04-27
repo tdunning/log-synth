@@ -44,6 +44,7 @@ import java.util.Formatter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -123,6 +124,7 @@ public class DnsSampler extends FieldSampler {
             domainDistribution.add(fields.next());
             return null;
         });
+        restart();
     }
 
     enum Event {
@@ -264,11 +266,18 @@ public class DnsSampler extends FieldSampler {
 
     @Override
     public void restart() {
+        now = start;
         dilation = Math.exp(dilationDistribution.nextDouble());
         active = new Exponential(1 / activeDistribution.nextDouble(), base);
         inActive = new Exponential(1 / inActiveDistribution.nextDouble(), base);
         interval = new Exponential(1.0 / meanIntervalDistribution.nextDouble(), base);
         idle = Math.exp(idleDistribution.nextDouble());
+
+        // we start inactive
+        isDaytime = Util.isDaytime(Util.timeOfDay(now), sunriseTime, sunsetTime);
+        isActive = false;
+        nextTransition = getNextTransition();
+        nextQuery = getNextQueryTime();
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -315,14 +324,26 @@ public class DnsSampler extends FieldSampler {
     }
 
     @Override
+    public void getNames(Set<String> fields) {
+        if (isFlat()) {
+            //noinspection StringEquality
+            if (this.getName() == null || this.getName() == SchemaSampler.FLAT_SEQUENCE_MARKER) {
+                fields.add("ip");
+                fields.add("ipx");
+                fields.add("ipV4");
+                fields.add("domain");
+                fields.add("revDomain");
+                fields.add("time");
+            } else {
+                fields.add(this.getName());
+            }
+        }
+    }
+
+    @Override
     public JsonNode sample() {
         synchronized (this) {
-            now = start;
-            // we start inactive
-            isDaytime = Util.isDaytime(Util.timeOfDay(now), sunriseTime, sunsetTime);
-            isActive = false;
-            nextTransition = getNextTransition();
-            nextQuery = getNextQueryTime();
+            restart();
 
             InetAddress address = ip.sample();
 
@@ -350,8 +371,7 @@ public class DnsSampler extends FieldSampler {
                     Collections.reverse(parts);
                     String reversed = String.join(".", parts);
                     q.set("revDomain", new TextNode(reversed));
-                    q.set("time", new TextNode
-                            (df.format((long) now)));
+                    q.set("time", new TextNode(df.format((long) now)));
                     queries.add(q);
                 }
             } while (step != Event.END);
