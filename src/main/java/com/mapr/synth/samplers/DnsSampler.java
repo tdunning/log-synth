@@ -23,11 +23,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.LongNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.mapr.synth.FancyTimeFormatter;
 import com.mapr.synth.Util;
 import com.mapr.synth.distributions.IpAddressDistribution;
@@ -55,9 +58,8 @@ public class DnsSampler extends FieldSampler {
     private JsonNodeFactory factory = JsonNodeFactory.withExactBigDecimals(false);
     private Random base = new Random();
 
-    private int seed = -1;
-
     private LongTail<String> domainDistribution;
+    private Set<String> retainedFields = null;
 
     // most internal parameters will be resampled on each restart
     // in some cases, these are actually a distribution that is reparametrized on each restart and sampled each transaction
@@ -105,6 +107,8 @@ public class DnsSampler extends FieldSampler {
     private double sunsetTime = sunriseTime < NIGHT_DURATION ? sunriseTime - NIGHT_DURATION + Util.ONE_DAY : sunriseTime - NIGHT_DURATION;
 
     private boolean isDaytime = sunriseTime > NIGHT_DURATION;
+    private Set<String> legalFields = ImmutableSet.of(
+            "ip", "ipx", "ipV4", "domain", "revDomain", "time", "timestamp_ms", "timestamp_s");
 
     public DnsSampler() throws IOException {
         List<String> topNames = Lists.newArrayList();
@@ -157,36 +161,9 @@ public class DnsSampler extends FieldSampler {
                 sunset += Util.ONE_DAY;
             }
             if (sunset < nextTransition) {
-                if (sunset < nextQuery) {
-                    now = sunset + 1;
-                    if (!isActive) {
-                        // start dilating time for query and state transition
-                        double remainder = nextQuery - now;
-                        nextQuery = now + dilation * remainder;
-
-                        remainder = nextTransition - now;
-                        nextTransition = now + dilation * remainder;
-                    }
-                    isDaytime = false;
-                    return Event.SUNSET;
-                } else {
-                    now = nextQuery;
-                    nextQuery = getNextQueryTime();
-                    return Event.QUERY;
-                }
+                return handleSunEvent(sunset, Event.SUNSET, dilation);
             } else {
-                if (nextTransition < nextQuery) {
-                    // state transition
-                    now = nextTransition;
-
-                    // change of state gives us an entirely new next query time
-                    return flipActivation();
-                } else {
-                    // query comes first
-                    now = nextQuery;
-                    nextQuery = getNextQueryTime();
-                    return Event.QUERY;
-                }
+                return getNextEvent();
             }
         } else {
             double sunrise = Util.dayOrigin(now) + sunriseTime;
@@ -196,38 +173,45 @@ public class DnsSampler extends FieldSampler {
 
             // if inactive at night, time is dilated
             if (sunrise < nextTransition) {
-                if (sunrise < nextQuery) {
-                    // sunrise is next event
-                    now = sunrise + 1;
-                    if (!isActive) {
-                        // undo remaining dilation
-                        double remainder = nextQuery - now;
-                        nextQuery = now + remainder / dilation;
-
-                        remainder = nextTransition - now;
-                        nextTransition = now + remainder / dilation;
-                    }
-                    isDaytime = true;
-                    return Event.SUNRISE;
-                } else {
-                    now = nextQuery;
-                    nextQuery = getNextQueryTime();
-                    return Event.QUERY;
-                }
+                return handleSunEvent(sunrise, Event.SUNRISE, 1.0 / dilation);
             } else {
-                if (nextTransition < nextQuery) {
-                    // state transition
-                    now = nextTransition;
-
-                    // change of state gives us an entirely new next query time
-                    return flipActivation();
-                } else {
-                    // query comes first
-                    now = nextQuery;
-                    nextQuery = getNextQueryTime();
-                    return Event.QUERY;
-                }
+                return getNextEvent();
             }
+        }
+    }
+
+    private Event handleSunEvent(double t, Event event, double scale) {
+        if (t < nextQuery) {
+            now = t + 1;
+            if (!isActive) {
+                // start dilating time for query and state transition
+                double remainder = nextQuery - now;
+                nextQuery = now + scale * remainder;
+
+                remainder = nextTransition - now;
+                nextTransition = now + scale * remainder;
+            }
+            isDaytime = !isDaytime;
+            return event;
+        } else {
+            now = nextQuery;
+            nextQuery = getNextQueryTime();
+            return Event.QUERY;
+        }
+    }
+
+    private Event getNextEvent() {
+        if (nextTransition < nextQuery) {
+            // state transition
+            now = nextTransition;
+
+            // change of state gives us an entirely new next query time
+            return flipActivation();
+        } else {
+            // query comes first
+            now = nextQuery;
+            nextQuery = getNextQueryTime();
+            return Event.QUERY;
         }
     }
 
@@ -290,6 +274,19 @@ public class DnsSampler extends FieldSampler {
         meanIntervalDistribution = new Exponential(Util.parseRateAsInterval(rate), base);
     }
 
+    /**
+     * Limits the fields that are returned to only those that are specified.
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public void setFields(String fields) {
+        retainedFields = Sets.newHashSet(Splitter.on(Pattern.compile("[\\s,;]+")).split(fields));
+        for (String field : retainedFields) {
+            if (!legalFields.contains(field)) {
+                throw new IllegalArgumentException(String.format("Unknown field name: %s", field));
+            }
+        }
+    }
+
     public void setAlpha(double alpha) {
         this.alpha = alpha;
         domainDistribution.getBaseDistribution().setAlpha(alpha);
@@ -334,12 +331,10 @@ public class DnsSampler extends FieldSampler {
         if (isFlat()) {
             //noinspection StringEquality
             if (this.getName() == null || this.getName() == SchemaSampler.FLAT_SEQUENCE_MARKER) {
-                fields.add("ip");
-                fields.add("ipx");
-                fields.add("ipV4");
-                fields.add("domain");
-                fields.add("revDomain");
-                fields.add("time");
+                fields.addAll(legalFields);
+                if (retainedFields != null) {
+                    fields.retainAll(retainedFields);
+                }
             } else {
                 fields.add(this.getName());
             }
@@ -362,6 +357,10 @@ public class DnsSampler extends FieldSampler {
         }
         r.set("ipx", new TextNode(ip.toString()));
         r.set("ipV4", BooleanNode.valueOf(addressBits.length == 4));
+        if (retainedFields != null) {
+            r.retain(retainedFields);
+        }
+
 
         ArrayNode queries = new ArrayNode(factory);
 
@@ -377,6 +376,11 @@ public class DnsSampler extends FieldSampler {
                 String reversed = String.join(".", parts);
                 q.set("revDomain", new TextNode(reversed));
                 q.set("time", new TextNode(df.format((long) now)));
+                q.set("timestamp_ms", new LongNode((long) now));
+                q.set("timestamp_s", new LongNode((long) (now / 1000)));
+                if (retainedFields != null) {
+                    q.retain(retainedFields);
+                }
                 queries.add(q);
             }
         } while (step != Event.END);

@@ -184,7 +184,6 @@ public class Synth {
                     } catch (CancellationException | ExecutionException | InterruptedException e) {
                         done.add(result);
                         e.printStackTrace();
-                        e.getCause().printStackTrace();
                         liveThreads.addAndGet(-1);
                         break;
                     }
@@ -196,13 +195,13 @@ public class Synth {
             }
             Thread.sleep(500);
         }
-        Preconditions.checkState(total == opts.count,
-                String.format("Expected to generate %d lines of output, but actually generated %d", opts.count, total));
         pool.shutdownNow();
         blinker.shutdownNow();
         finalRun.set(true);
         sideLog.close();
         blink.run();
+        Preconditions.checkState(total == opts.count,
+                String.format("Expected to generate %d lines of output, but actually generated %d", opts.count, total));
     }
 
     private static class ReportingWorker implements Callable<Integer> {

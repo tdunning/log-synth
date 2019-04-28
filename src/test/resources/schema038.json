@@ -2,6 +2,7 @@
   {
     "class": "dns",
     "flat": true,
+    "fields": "ipx,domain,timestamp_s",
     "seed": 1
   }
 ]
