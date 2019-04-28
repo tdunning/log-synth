@@ -36,15 +36,18 @@ public class GeoPoint {
 
     Vector3D r;
 
+    @SuppressWarnings("WeakerAccess")
     public GeoPoint(double latitude, double longitude) {
         double c = Math.cos(latitude);
         r = new Vector3D(Math.cos(longitude) * c, Math.sin(longitude) * c, Math.sin(latitude));
     }
 
+    @SuppressWarnings("WeakerAccess")
     public GeoPoint(Vector3D r) {
         this.r = r.normalize();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public Vector3D as3D() {
         return r;
     }
@@ -55,6 +58,7 @@ public class GeoPoint {
         return Constants.EARTH_RADIUS_KM * 2 * Math.asin(r.subtract(x.r).getNorm() / 2);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public GeoPoint nearby(double distance, Random rand) {
         distance = distance / Constants.EARTH_RADIUS_KM;
         double u = rand.nextGaussian();
@@ -62,7 +66,7 @@ public class GeoPoint {
         return project(distance * u, distance * v);
     }
 
-    public GeoPoint project(double u, double v) {
+    private GeoPoint project(double u, double v) {
         Vector3D ux = east();
         Vector3D vx = north(ux);
 

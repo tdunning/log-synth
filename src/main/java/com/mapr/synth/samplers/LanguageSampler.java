@@ -22,8 +22,8 @@ package com.mapr.synth.samplers;
 /**
  * Sample from kind of plausible distribution of browser languages.
  */
-public class LanguageSampler extends StringSampler {
-    public LanguageSampler() {
+class LanguageSampler extends StringSampler {
+    LanguageSampler() {
         readDistribution("dist.language");
     }
 }

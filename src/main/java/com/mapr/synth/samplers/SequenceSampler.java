@@ -95,11 +95,6 @@ public class SequenceSampler extends FieldSampler {
         setFlattener(isFlat);
     }
 
-    @Override
-    public boolean isFlat() {
-        return super.isFlat();
-    }
-
     @SuppressWarnings("unused")
     public void setBase(FieldSampler base) {
         this.base = base;

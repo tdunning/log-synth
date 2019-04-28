@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
  * <p>
  * The final result is the list of all record states and change flags.
  */
-public class Changer extends FieldSampler {
+class Changer extends FieldSampler {
     private final Pattern ratePattern = Pattern.compile("([0-9.e\\-]+)(?:/([smhdw]))?");
     private final Pattern timePattern = Pattern.compile("([0-9.e\\-]+)([smhdw])?");
 

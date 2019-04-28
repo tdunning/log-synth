@@ -71,7 +71,7 @@ public class Car {
     private Engine engine;
     private double sampleTime = 1;
 
-    public Car(Engine engine) {
+    private Car(Engine engine) {
         this.engine = engine;
     }
 
@@ -121,6 +121,7 @@ public class Car {
      * @param rand  Random number generator to use
      * @return A list of trip segments
      */
+    @SuppressWarnings("WeakerAccess")
     public static List<Segment> plan(GeoPoint start, GeoPoint end, Random rand) {
         GeoPoint here = start;
         List<Segment> plan = Lists.newArrayList();
@@ -159,10 +160,12 @@ public class Car {
         return engine;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setSampleTime(double sampleTime) {
         this.sampleTime = sampleTime;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static abstract class Callback {
         abstract void call(double t, Engine arg, GeoPoint position);
     }
@@ -202,7 +205,7 @@ public class Car {
     }
 
     public static class Highway extends Segment {
-        public Highway(GeoPoint end) {
+        Highway(GeoPoint end) {
             super.end = end;
         }
 
@@ -223,7 +226,7 @@ public class Car {
     }
 
     public static class Local extends Segment {
-        public Local(GeoPoint start, GeoPoint end, Random rand) {
+        Local(GeoPoint start, GeoPoint end, Random rand) {
             Vector3D dr = end.as3D().subtract(start.as3D());
             double distance = dr.getNorm();
 

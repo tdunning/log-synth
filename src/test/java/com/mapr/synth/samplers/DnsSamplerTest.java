@@ -35,7 +35,7 @@ public class DnsSamplerTest {
         //noinspection UnstableApiUsage
         SchemaSampler s = new SchemaSampler(new File(Resources.getResource("schema038.json").getFile()));
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10000; i++) {
             JsonNode x = s.sample();
             System.out.printf("%s\n", x);
         }

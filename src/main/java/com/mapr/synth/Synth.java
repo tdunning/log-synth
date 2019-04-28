@@ -51,8 +51,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.AccessControlException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -60,7 +64,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * Generates plausible database tables in JSON, CSV or TSV format according to the data design
@@ -70,7 +76,7 @@ public class Synth {
 
     private static final int REPORTING_DELTA = 500;
 
-    public static void main(String[] args) throws IOException, CmdLineException, InterruptedException, ExecutionException {
+    public static void main(String[] args) throws IOException, CmdLineException, InterruptedException {
         final Options opts = new Options();
         CmdLineParser parser = new CmdLineParser(opts);
         try {
@@ -109,7 +115,6 @@ public class Synth {
         if (opts.schema == null) {
             throw new IllegalArgumentException("Must specify schema file using [-schema filename] option");
         }
-        final SchemaSampler sampler = new SchemaSampler(opts.schema);
         final AtomicLong rowCount = new AtomicLong();
 
         Template template = null;
@@ -123,13 +128,14 @@ public class Synth {
         }
 
         final List<ReportingWorker> tasks = Lists.newArrayList();
-        int limit = (opts.count + opts.threads - 1) / opts.threads;
+        int limit = (opts.count + opts.threads) / opts.threads;
         int remaining = opts.count;
         for (int i = 0; i < opts.threads; i++) {
 
             final int count = Math.min(limit, remaining);
             remaining -= count;
 
+            final SchemaSampler sampler = new SchemaSampler(opts.schema);
             tasks.add(new ReportingWorker(opts, sampler, template, rowCount, count, i));
         }
 
@@ -137,34 +143,58 @@ public class Synth {
         ExecutorService pool = Executors.newFixedThreadPool(opts.threads);
         ScheduledExecutorService blinker = Executors.newScheduledThreadPool(1);
         final AtomicBoolean finalRun = new AtomicBoolean(false);
+        final AtomicInteger liveThreads = new AtomicInteger(opts.threads);
 
         final PrintStream sideLog = new PrintStream(new FileOutputStream("side-log"));
         Runnable blink = new Runnable() {
             double oldT;
             private long oldN;
 
-
             @Override
             public void run() {
                 double t = System.nanoTime() * 1e-9;
                 long n = rowCount.get();
-                System.err.printf("%s\t%d\t%.1f\t%d\t%.1f\t%.3f\n", finalRun.get() ? "F" : "R", opts.threads, t - t0, n, n / (t - t0), (n - oldN) / (t - oldT));
+                System.err.printf("%s\t%d\t%.1f\t%d\t%.1f\t%.3f\n", finalRun.get() ? "F" : "R", liveThreads.get(), t - t0, n, n / (t - t0), (n - oldN) / (t - oldT));
                 for (ReportingWorker task : tasks) {
                     ReportingWorker.ThreadReport r = task.report();
-                    sideLog.printf("\t%d\t%.2f\t%.2f\t%.2f\t%.1f\t%.1f\n", r.fileNumber, r.threadTime, r.userTime, r.wallTime, r.rows / r.threadTime, r.rows / r.wallTime);
+                    if (r.stillWorking) {
+                        sideLog.printf("\t%d\t%.2f\t%.2f\t%.2f\t%.1f\t%.1f\n", r.fileNumber, r.threadTime, r.userTime, r.wallTime, r.rows / r.threadTime, r.rows / r.wallTime);
+                    }
                 }
                 oldN = n;
                 oldT = t;
             }
         };
         if (!"-".equals(opts.output)) {
-            blinker.scheduleAtFixedRate(blink, 0, 10, TimeUnit.SECONDS);
+            blinker.scheduleAtFixedRate(blink, 0, 5, TimeUnit.SECONDS);
         }
-        List<Future<Integer>> results = pool.invokeAll(tasks);
+        Set<Future<Integer>> results = tasks.stream()
+                .map(pool::submit)
+                .collect(Collectors.toCollection(HashSet::new));
 
         int total = 0;
-        for (Future<Integer> result : results) {
-            total += result.get();
+        while (true) {
+            Set<Future<Integer>> done = new HashSet<>();
+            for (Future<Integer> result : results) {
+                if (result.isDone()) {
+                    try {
+                        total += result.get();
+                        done.add(result);
+                        liveThreads.addAndGet(-1);
+                    } catch (CancellationException | ExecutionException | InterruptedException e) {
+                        done.add(result);
+                        e.printStackTrace();
+                        e.getCause().printStackTrace();
+                        liveThreads.addAndGet(-1);
+                        break;
+                    }
+                }
+            }
+            results.removeAll(done);
+            if (liveThreads.get() <= 0) {
+                break;
+            }
+            Thread.sleep(500);
         }
         Preconditions.checkState(total == opts.count,
                 String.format("Expected to generate %d lines of output, but actually generated %d", opts.count, total));
@@ -192,6 +222,7 @@ public class Synth {
         final AtomicLong lastThreadTime;
         final AtomicLong lastRowCount;
         final Template template;
+        final AtomicBoolean working = new AtomicBoolean(true);
 
         private static XmlMapper xmlMapper;
         private static XMLStreamWriter sw;
@@ -275,6 +306,7 @@ public class Synth {
                     if (opts.format == Format.XML) {
                         sw.close();
                     }
+                    working.set(false);
                     return rows;
                 }
             }
@@ -362,6 +394,7 @@ public class Synth {
             double wallTime;
             double threadTime;
             double userTime;
+            boolean stillWorking;
 
             ThreadReport() {
                 while (true) {
@@ -379,6 +412,7 @@ public class Synth {
                     threadTime = (thread - oldThread) * 1e-9;
                     userTime = (user - oldUser) * 1e-9;
                     rows = rowCount - oldRowCount;
+                    stillWorking = ReportingWorker.this.working.get();
 
                     if (lastWall.compareAndSet(oldWall, wall) && lastThreadTime.compareAndSet(oldThread, thread)
                             && lastRowCount.compareAndSet(oldRowCount, rowCount)) {

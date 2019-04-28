@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
  *
  * Thread safe for sampling
  */
-public class JoinSampler extends FieldSampler {
+class JoinSampler extends FieldSampler {
     private FieldSampler delegate;
     private String separator = ",";
 

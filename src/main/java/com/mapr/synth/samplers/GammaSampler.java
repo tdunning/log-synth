@@ -31,7 +31,7 @@ import java.util.Random;
  * <p>
  * Note that the mean is alpha * scale = alpha / rate
  */
-public class GammaSampler extends FieldSampler {
+class GammaSampler extends FieldSampler {
     private static final int SEED_NOT_SET = new Random(1).nextInt();
 
     // use either alpha, beta (or rate) or dof, scale to parameterize

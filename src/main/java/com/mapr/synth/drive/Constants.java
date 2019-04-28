@@ -19,7 +19,7 @@
 
 package com.mapr.synth.drive;
 
-public class Constants {
+class Constants {
     static final double EARTH_RADIUS_KM = 6371.39;
     // acceleration of gravity in m/s/s
     static final double G = 9.80665;

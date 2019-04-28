@@ -24,8 +24,8 @@ package com.mapr.synth.samplers;
  * <p>
  * See http://en.wikipedia.org/wiki/Usage_share_of_web_browsers
  */
-public class BrowserSampler extends StringSampler {
-    public BrowserSampler() {
+class BrowserSampler extends StringSampler {
+    BrowserSampler() {
         readDistribution("dist.browser");
     }
 }

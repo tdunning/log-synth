@@ -36,7 +36,7 @@ import java.util.Random;
  * Thread safe
  */
 
-public class IntegerSampler extends FieldSampler {
+class IntegerSampler extends FieldSampler {
     private int min = 0;
     private int max = 100;
     private int power = 0;

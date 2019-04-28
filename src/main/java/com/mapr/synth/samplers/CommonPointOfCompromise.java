@@ -63,7 +63,7 @@ import java.util.concurrent.TimeUnit;
  * <li><em>fraud</em>fraud flag, 1 for suspected fraud, 0 otherwise</li>
  * </ul>
  */
-public class CommonPointOfCompromise extends FieldSampler {
+class CommonPointOfCompromise extends FieldSampler {
     private Random gen = new Random();
 
     // how many average transactions per day?

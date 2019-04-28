@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
  * <p>
  * Thread safe for sampling
  */
-public class ArrayFlattener extends FieldSampler {
+class ArrayFlattener extends FieldSampler {
     private JsonNodeFactory nodeFactory = JsonNodeFactory.withExactBigDecimals(false);
     private FieldSampler delegate;
 

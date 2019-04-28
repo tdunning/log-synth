@@ -39,14 +39,17 @@ import static org.junit.Assert.assertEquals;
  */
 public class EventTest {
     @Test
-    public void testRead() throws IOException, ParseException, Event.EventFormatException {
+    public void testRead() throws IOException {
+        //noinspection UnstableApiUsage
         BufferedReader in = new BufferedReader(new InputStreamReader(Resources.getResource("event.txt").openStream(), Charsets.UTF_8));
         Event ev = Event.read(in);
+        assert ev != null;
         assertEquals(444691, ev.getUid());
         assertEquals(1382920806122L, ev.getTime());
         assertEquals("static/image-4", ev.getOp());
         assertEquals(-599092377, ev.getIp());
         ev = Event.read(in);
+        assert ev != null;
         assertEquals(49664, ev.getUid());
         assertEquals(1382926154968L, ev.getTime());
         assertEquals("login", ev.getOp());

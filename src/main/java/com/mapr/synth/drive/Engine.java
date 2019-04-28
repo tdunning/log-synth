@@ -56,7 +56,7 @@ public class Engine implements Serializable {
     private static final double HIGH_SHIFT = 2000;
 
     // The throttle has some turbo delay.
-    public static final double THROTTLE_TIME_CONSTANT = 0.8;
+    private static final double THROTTLE_TIME_CONSTANT = 0.8;
 
     // in kg, not a super light car
     private static final double VEHICLE_MASS = 2000;
@@ -102,6 +102,7 @@ public class Engine implements Serializable {
         currentSpeed = eng.currentSpeed;
         currentThrottle = eng.currentThrottle;
         currentTime = eng.currentTime;
+        shiftTimeOut = eng.shiftTimeOut;
         dt = eng.dt;
     }
 
@@ -113,6 +114,7 @@ public class Engine implements Serializable {
      * @param speedTarget The speed we would like to reach
      * @param maxBrake    The maximum amount of braking in g's. Typically 0.1 for gentle driving, 1 for maniacs.
      */
+    @SuppressWarnings("WeakerAccess")
     public void stepToTime(double sampleTime, double speedTarget, double maxBrake) {
         while (currentTime < sampleTime) {
 

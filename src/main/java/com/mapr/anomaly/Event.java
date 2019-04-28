@@ -35,14 +35,14 @@ import java.util.regex.Pattern;
  */
 public class Event implements Comparable<Event> {
     private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-    private static final Pattern format = Pattern.compile("\\[(.*)] /(.+)[\\?&]user=(.*) (.*)\\.(.*)\\.(.*)\\.(.*)");
+    private static final Pattern format = Pattern.compile("\\[(.*)] /(.+)[?&]user=(.*) (.*)\\.(.*)\\.(.*)\\.(.*)");
 
     private final int uid;
     private final long time;
     private final int ip;
     private final String op;
 
-    public Event(int uid, long time, int ip, String op) {
+    private Event(int uid, long time, int ip, String op) {
         Preconditions.checkNotNull(op);
         this.uid = uid;
         this.time = time;
@@ -73,10 +73,7 @@ public class Event implements Comparable<Event> {
                 in.reset();
                 return null;
             }
-        } catch (ParseException e) {
-            in.reset();
-            return null;
-        } catch (NumberFormatException e) {
+        } catch (ParseException | NumberFormatException e) {
             in.reset();
             return null;
         }
@@ -90,6 +87,7 @@ public class Event implements Comparable<Event> {
         return time;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public int getUid() {
         return uid;
     }
@@ -137,7 +135,7 @@ public class Event implements Comparable<Event> {
         return result;
     }
 
-    public static class EventFormatException extends Throwable {
+    static class EventFormatException extends Throwable {
         @SuppressWarnings("unused")
         public EventFormatException(String line) {
             super(String.format("Invalid event format found: \"%s\"", line));

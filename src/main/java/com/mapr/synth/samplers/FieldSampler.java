@@ -119,7 +119,7 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
         return name;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 

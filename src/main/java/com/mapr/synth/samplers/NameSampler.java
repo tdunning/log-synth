@@ -48,13 +48,16 @@ public class NameSampler extends FieldSampler {
 
     private Type type = Type.FIRST_LAST;
 
+    @SuppressWarnings("WeakerAccess")
     public NameSampler() {
         try {
             if (first.compareAndSet(null, new Multinomial<>())) {
                 Preconditions.checkState(last.getAndSet(new Multinomial<>()) == null);
 
-                Splitter onTab = Splitter.on(CharMatcher.whitespace()).omitEmptyStrings().trimResults();
+                Splitter onTab = Splitter.on(CharMatcher.whitespace())
+                        .omitEmptyStrings().trimResults(CharMatcher.anyOf(" \""));
                 for (String resourceName : ImmutableList.of("dist.male.first", "dist.female.first")) {
+                    //noinspection UnstableApiUsage
                     for (String line : Resources.readLines(Resources.getResource(resourceName), Charsets.UTF_8)) {
                         if (!line.startsWith("#")) {
                             Iterator<String> parts = onTab.split(line).iterator();
@@ -70,6 +73,7 @@ public class NameSampler extends FieldSampler {
                     }
                 }
 
+                //noinspection UnstableApiUsage
                 for (String line : Resources.readLines(Resources.getResource("dist.all.last"), Charsets.UTF_8)) {
                     if (!line.startsWith("#")) {
                         Iterator<String> parts = onTab.split(line).iterator();
@@ -111,6 +115,7 @@ public class NameSampler extends FieldSampler {
         return null;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setTypeRaw(Type type) {
         this.type = type;
     }

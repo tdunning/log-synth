@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.mapr.synth.FancyTimeFormatter;
 import com.mapr.synth.Util;
 import com.mapr.synth.distributions.IpAddressDistribution;
@@ -55,9 +56,6 @@ public class DnsSampler extends FieldSampler {
     private Random base = new Random();
 
     private int seed = -1;
-
-    private Multinomial<String> names;
-    private Multinomial<String> tld;
 
     private LongTail<String> domainDistribution;
 
@@ -109,21 +107,28 @@ public class DnsSampler extends FieldSampler {
     private boolean isDaytime = sunriseTime > NIGHT_DURATION;
 
     public DnsSampler() throws IOException {
-        names = Util.readTable(Splitter.on(Pattern.compile("\\s+")), "dist.male.first", "dist.female.first");
-        tld = Util.readTable(Splitter.on(","), "tld.csv");
-        domainDistribution = new LongTail<String>(alpha, discount) {
-            @Override
-            protected String createThing() {
-                return names.sample() + tld.sample();
-            }
-        };
-        Splitter onComma = Splitter.on(",").trimResults(CharMatcher.is('"'));
-        Util.readData("f500-domains.csv", (String line) -> {
-            Iterator<String> fields = onComma.split(line).iterator();
-            fields.next();
-            domainDistribution.add(fields.next());
+        List<String> topNames = Lists.newArrayList();
+        Splitter onComma = Splitter.on(',').trimResults(CharMatcher.is('"'));
+        Util.readData("f500-domains.csv", line -> {
+            Iterator<String> ix = onComma.split(line).iterator();
+            ix.next();
+            topNames.add(ix.next());
             return null;
         });
+        Multinomial<String> tld = Util.readTable(onComma, "tld.csv");
+        NameSampler names = new NameSampler(NameSampler.Type.LAST);
+        domainDistribution = new LongTail<String>(alpha, discount) {
+            int i = 0;
+
+            @Override
+            protected String createThing() {
+                if (i < topNames.size()) {
+                    return topNames.get(i++);
+                } else {
+                    return names.sample().asText() + tld.sample();
+                }
+            }
+        };
         restart();
     }
 
@@ -254,7 +259,7 @@ public class DnsSampler extends FieldSampler {
 
     private double getNextQueryTime() {
         double delay;
-        delay = interval.nextDouble() ;
+        delay = interval.nextDouble();
         if (!isActive) {
             delay = interval.nextDouble() * idle;
         }
@@ -310,6 +315,7 @@ public class DnsSampler extends FieldSampler {
         this.end = df.parse(end).getTime();
     }
 
+    @SuppressWarnings("unused")
     public void setV4Prob(double ipV4Probability) {
         this.ip.setIpV4Probability(ipV4Probability);
     }
@@ -342,53 +348,51 @@ public class DnsSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
-        synchronized (this) {
-            restart();
+        restart();
 
-            InetAddress address = ip.sample();
+        InetAddress address = ip.sample();
 
-            ObjectNode r = new ObjectNode(factory);
-            // set basics ... source IP and such
-            r.set("ip", new TextNode(address.toString().substring(1)));
-            byte[] addressBits = address.getAddress();
-            Formatter ip = new Formatter();
-            for (byte x : addressBits) {
-                ip.format("%02x", x);
+        ObjectNode r = new ObjectNode(factory);
+        // set basics ... source IP and such
+        r.set("ip", new TextNode(address.toString().substring(1)));
+        byte[] addressBits = address.getAddress();
+        Formatter ip = new Formatter();
+        for (byte x : addressBits) {
+            ip.format("%02x", x);
+        }
+        r.set("ipx", new TextNode(ip.toString()));
+        r.set("ipV4", BooleanNode.valueOf(addressBits.length == 4));
+
+        ArrayNode queries = new ArrayNode(factory);
+
+        Event step;
+        do {
+            step = step();
+            if (step == Event.QUERY) {
+                ObjectNode q = new ObjectNode(factory);
+                String domain = domainDistribution.sample();
+                q.set("domain", new TextNode(domain));
+                List<String> parts = Arrays.asList(domain.split("\\."));
+                Collections.reverse(parts);
+                String reversed = String.join(".", parts);
+                q.set("revDomain", new TextNode(reversed));
+                q.set("time", new TextNode(df.format((long) now)));
+                queries.add(q);
             }
-            r.set("ipx", new TextNode(ip.toString()));
-            r.set("ipV4", BooleanNode.valueOf(addressBits.length == 4));
+        } while (step != Event.END);
 
-            ArrayNode queries = new ArrayNode(factory);
-
-            Event step;
-            do {
-                step = step();
-                if (step == Event.QUERY) {
-                    ObjectNode q = new ObjectNode(factory);
-                    String domain = domainDistribution.sample();
-                    q.set("domain", new TextNode(domain));
-                    List<String> parts = Arrays.asList(domain.split("\\."));
-                    Collections.reverse(parts);
-                    String reversed = String.join(".", parts);
-                    q.set("revDomain", new TextNode(reversed));
-                    q.set("time", new TextNode(df.format((long) now)));
-                    queries.add(q);
-                }
-            } while (step != Event.END);
-
-            if (!isFlat()) {
-                r.set("queries", queries);
-                return r;
-            } else {
-                ArrayNode flattened = new ArrayNode(factory);
-                for (JsonNode q: queries) {
-                    ObjectNode x = r.deepCopy();
-                    x.setAll((ObjectNode) q);
-                    flattened.add(x);
-                }
-
-                return flattened;
+        if (!isFlat()) {
+            r.set("queries", queries);
+            return r;
+        } else {
+            ArrayNode flattened = new ArrayNode(factory);
+            for (JsonNode q : queries) {
+                ObjectNode x = r.deepCopy();
+                x.setAll((ObjectNode) q);
+                flattened.add(x);
             }
+
+            return flattened;
         }
     }
 }

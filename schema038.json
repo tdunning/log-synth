@@ -2,7 +2,6 @@
   {
     "class": "dns",
     "name": "query",
-    "flat": true,
-    "seed": 1
+    "flat": true
   }
 ]

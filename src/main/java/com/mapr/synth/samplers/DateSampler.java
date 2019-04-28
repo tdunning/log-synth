@@ -28,6 +28,7 @@ import org.apache.mahout.math.jet.random.Exponential;
 import org.apache.mahout.math.jet.random.Uniform;
 
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
 
@@ -42,8 +43,8 @@ import java.util.concurrent.TimeUnit;
  *
  * Thread safe
  */
-public class DateSampler extends FieldSampler {
-    private static final long EPOCH = new GregorianCalendar(2013, 7, 1).getTimeInMillis();
+class DateSampler extends FieldSampler {
+    private static final long EPOCH = new GregorianCalendar(2013, Calendar.AUGUST, 1).getTimeInMillis();
     private long start = 0;
     private long end = EPOCH;
 

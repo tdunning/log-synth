@@ -43,7 +43,7 @@ import java.util.List;
  *
  * Thread safe for sampling
  */
-public class FileSampler extends FieldSampler {
+class FileSampler extends FieldSampler {
     private JsonNode data;
     private IntegerSampler index;
     private int skew = Integer.MAX_VALUE;
@@ -51,7 +51,7 @@ public class FileSampler extends FieldSampler {
     public FileSampler() {
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "UnstableApiUsage"})
     public void setFile(String lookup) throws IOException {
         if (lookup.matches(".*\\.json")) {
             readJsonData(Files.newReader(new File(lookup), Charsets.UTF_8));
@@ -72,7 +72,7 @@ public class FileSampler extends FieldSampler {
         }
     }
 
-    @SuppressWarnings({"UnusedDeclaration"})
+    @SuppressWarnings({"UnusedDeclaration", "UnstableApiUsage"})
     public void setResource(String lookup) throws IOException {
         if (lookup.matches(".*\\.json")) {
             readJsonData(Files.newReader(new File(Resources.getResource(lookup).getFile()), Charsets.UTF_8));

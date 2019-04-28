@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
  *
  * Thread safe
  */
-public class AddressSampler extends FieldSampler {
+class AddressSampler extends FieldSampler {
 
     private final StreetNameSampler street;
     private final ForeignKeySampler number;
