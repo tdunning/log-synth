@@ -39,11 +39,13 @@ import java.util.Set;
         @JsonSubTypes.Type(value = ArrayFlattener.class, name = "array-flatten"),
         @JsonSubTypes.Type(value = ArrivalSampler.class, name = "event"),
         @JsonSubTypes.Type(value = BrowserSampler.class, name = "browser"),
+        @JsonSubTypes.Type(value = BurstyEvents.class, name = "bursts"),
         @JsonSubTypes.Type(value = Changer.class, name = "changer"),
         @JsonSubTypes.Type(value = CommonPointOfCompromise.class, name = "common-point-of-compromise"),
         @JsonSubTypes.Type(value = Commuter.class, name = "commuter"),
         @JsonSubTypes.Type(value = CountrySampler.class, name = "country"),
         @JsonSubTypes.Type(value = DateSampler.class, name = "date"),
+        @JsonSubTypes.Type(value = DomainSampler.class, name = "domain"),
         @JsonSubTypes.Type(value = FileSampler.class, name = "lookup"),
         @JsonSubTypes.Type(value = FlattenSampler.class, name = "flatten"),
         @JsonSubTypes.Type(value = ForeignKeySampler.class, name = "foreign-key"),
@@ -116,6 +118,10 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
 
     public String getName() {
         return name;
+    }
+
+    public void setSeed(long seed) {
+        // do nothing by default
     }
 
     void setName(String name) {

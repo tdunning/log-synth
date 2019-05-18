@@ -34,6 +34,7 @@ import java.util.List;
  */
 public class FancyTimeFormatter {
     private static String[] defaultFormats = {"yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"};
+    private static String isoFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
     private List<String> formats = Lists.newArrayList();
     private List<SimpleDateFormat> formatter = Lists.newArrayList();
@@ -55,6 +56,10 @@ public class FancyTimeFormatter {
 
     private void addFormatter(String format) {
         switch (format) {
+            case "iso":
+                this.formats.add(isoFormat);
+                formatter.add(new SimpleDateFormat(isoFormat));
+                break;
             case "Q":
             case "s":
                 this.formats.add("%t" + format);

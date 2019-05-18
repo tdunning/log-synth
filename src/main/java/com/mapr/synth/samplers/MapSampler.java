@@ -45,9 +45,9 @@ public class MapSampler extends FieldSampler {
     public void restart() {
         if (base != null) {
             base.restart();
-            for (FieldSampler child : children) {
-                child.setFlattener(isFlat());
-            }
+//            for (FieldSampler child : children) {
+//                child.setFlattener(isFlat());
+//            }
         }
     }
 

@@ -116,6 +116,7 @@ class IntegerSampler extends FieldSampler {
         this.format = format;
     }
 
+    @Override
     public void setSeed(long seed) {
         base = RandomUtils.getRandom(seed);
     }

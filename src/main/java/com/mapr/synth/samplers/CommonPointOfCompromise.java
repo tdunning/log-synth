@@ -98,6 +98,7 @@ class CommonPointOfCompromise extends FieldSampler {
         uncompromisedFraudRate = 0.001;
     }
 
+    @Override
     @SuppressWarnings("unused")
     public void setSeed(long seed) {
         gen.setSeed(seed);

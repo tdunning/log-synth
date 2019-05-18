@@ -88,6 +88,7 @@ public class ZipSampler extends FieldSampler {
         }
     }
 
+    @Override
     @SuppressWarnings("unused")
     public void setSeed(long seed) {
         rand = RandomUtils.getRandom(seed);

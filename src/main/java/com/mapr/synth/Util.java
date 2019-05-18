@@ -137,4 +137,8 @@ public class Util {
     public static double timeOfDay(double now) {
         return now - dayOrigin(now);
     }
+
+    public static double fractionalPart(double v) {
+        return v - Math.floor(v);
+    }
 }

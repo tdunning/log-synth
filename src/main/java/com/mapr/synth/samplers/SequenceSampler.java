@@ -120,6 +120,8 @@ public class SequenceSampler extends FieldSampler {
             } else {
                 fields.add(this.getName());
             }
+        } else {
+            fields.add(this.getName());
         }
     }
 

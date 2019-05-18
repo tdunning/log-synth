@@ -84,6 +84,7 @@ public class ArrivalSampler extends FieldSampler {
         this.now = this.start;
     }
 
+    @Override
     public void setSeed(long seed) {
         base = RandomUtils.getRandom(seed);
     }

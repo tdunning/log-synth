@@ -83,6 +83,7 @@ public class SsnSampler extends FieldSampler {
         }
     }
 
+    @Override
     @SuppressWarnings("unused")
     public void setSeed(long seed) {
         rand = new Random(seed);
