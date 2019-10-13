@@ -1,7 +1,0 @@
-[
-  {
-    "class": "dns",
-    "fields": "ipx,ipV4,ip,domain,revDomain,timestamp_s",
-    "flat": true
-  }
-]
