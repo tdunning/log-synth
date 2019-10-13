@@ -8,6 +8,8 @@ system to generate data that looks like a particular kind of web
 server log. See web-log.md in this directory for more information
 about the web log generator.
 
+Please note that contributions are very welcome, but you will need to agree to a contributor license agreement similar to the Apache ICLA before any significant changes are accepted. Ping me (ted.dunning@gmail.com) for details.
+
 Schema-driven Data Generation
 =====================
 
