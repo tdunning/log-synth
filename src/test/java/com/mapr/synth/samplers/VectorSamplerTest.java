@@ -20,8 +20,6 @@
 package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.junit.Test;
 
@@ -35,8 +33,7 @@ import static org.junit.Assert.assertTrue;
 public class VectorSamplerTest {
     @Test
     public void testVector() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema029.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema029.json");
         for (int i = 0; i < 10; i++) {
             JsonNode data = s.sample();
                        /*

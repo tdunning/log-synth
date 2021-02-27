@@ -21,12 +21,10 @@ package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
-import com.google.common.io.Resources;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -44,8 +42,7 @@ public class ZipSamplerTest {
 
     @Test
     public void testZips() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema016.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema016.json");
 
         JsonNode v = s.sample();
         // regression test given that we specify the seed
@@ -112,8 +109,7 @@ public class ZipSamplerTest {
 
     @Test
     public void testNPE() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema021.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema021.json");
         JsonNode r = s.sample();
         assertEquals(40.7, r.get("lat").get("latitude").asDouble(), 0.001);
     }
@@ -121,8 +117,7 @@ public class ZipSamplerTest {
     @Test
     public void testBogusFieldLimit() throws IOException {
         try {
-            //noinspection UnstableApiUsage
-            new SchemaSampler(Resources.asCharSource(Resources.getResource("schema018.json"), Charsets.UTF_8).read());
+            SchemaSampler.fromResource("schema018.json");
             fail("Should have failed due to invalid fields");
         } catch (JsonMappingException e) {
             Preconditions.checkState(e.getCause() instanceof IllegalArgumentException, "Wrong exception");

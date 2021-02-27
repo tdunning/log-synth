@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mapr.synth.Util;
 import org.apache.mahout.math.random.Sampler;
 
 import java.io.File;
@@ -62,6 +63,7 @@ public class SchemaSampler implements Sampler<JsonNode> {
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
+        //noinspection Convert2Diamond
         init(mapper.readValue(schemaDefinition, new TypeReference<List<FieldSampler>>() {
         }));
     }
@@ -71,8 +73,13 @@ public class SchemaSampler implements Sampler<JsonNode> {
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        //noinspection Convert2Diamond
         init(mapper.readValue(input, new TypeReference<List<FieldSampler>>() {
         }));
+    }
+
+    static public SchemaSampler fromResource(String name) throws IOException {
+        return new SchemaSampler(Util.readResource(name));
     }
 
     public Iterable<String> getFieldNames() {

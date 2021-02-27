@@ -20,11 +20,9 @@
 package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.io.Resources;
 import com.mapr.synth.Util;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
@@ -32,9 +30,7 @@ import static org.junit.Assert.assertTrue;
 public class BurstyEventsTest {
     @Test
     public void roughDistribution() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(new File(
-                Resources.getResource("schema038.json").getFile()));
+        SchemaSampler s = SchemaSampler.fromResource("schema038.json");
 
         int[] counts = new int[24];
         for (int i = 0; i < 10000; i++) {
@@ -42,9 +38,6 @@ public class BurstyEventsTest {
             double t = x.get("timestamp_ms").asDouble();
             counts[(int) (24 * Util.fractionalPart(t / Util.ONE_DAY))]++;
         }
-        for (int i = 2; i < 20; i++) {
-        }
-
         for (int i = 0; i < 24; i++) {
             System.out.printf("%5d,%5d ", i, counts[i]);
             if (i >= 1 && i < 19) {

@@ -26,17 +26,9 @@ import org.junit.Test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.ParseException;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * Created with IntelliJ IDEA.
- * User: tdunning
- * Date: 10/27/13
- * Time: 8:10 PM
- * To change this template use File | Settings | File Templates.
- */
 public class EventTest {
     @Test
     public void testRead() throws IOException {

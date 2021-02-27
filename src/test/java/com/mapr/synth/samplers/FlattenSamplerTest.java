@@ -20,11 +20,9 @@
 package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.io.Resources;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -37,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 public class FlattenSamplerTest {
     @Test
     public void testObject() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema022.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema022.json");
 
         JsonNode v = s.sample();
         Set<String> names = Sets.newTreeSet();
@@ -58,7 +56,7 @@ public class FlattenSamplerTest {
 
     @Test
     public void testSequenceFlattening() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema025.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema025.json");
         JsonNode v = s.sample();
         JsonNode x = v.get("s").get("zip");
         assertTrue(x.isTextual());
@@ -67,7 +65,7 @@ public class FlattenSamplerTest {
 
     @Test
     public void testEmptyPrefix() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema023.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema023.json");
         JsonNode v = s.sample();
         Set<String> names = Sets.newTreeSet();
         Iterators.addAll(names, v.fieldNames());
@@ -77,7 +75,7 @@ public class FlattenSamplerTest {
 
     @Test
     public void testFlatten() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema010.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema010.json");
 
         for (int k = 0; k < 10; k++) {
             JsonNode r = s.sample();

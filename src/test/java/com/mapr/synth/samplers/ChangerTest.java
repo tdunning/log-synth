@@ -20,8 +20,6 @@
 package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,7 +27,7 @@ import java.io.IOException;
 public class ChangerTest {
     @Test
     public void testBasicChanges() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.toString(Resources.getResource("schema026.json"), Charsets.UTF_8));
+        SchemaSampler s = SchemaSampler.fromResource("schema026.json");
         for (int i = 0; i < 100; i++) {
             JsonNode r1 = s.sample();
             System.out.printf("%s\n", r1.toString());

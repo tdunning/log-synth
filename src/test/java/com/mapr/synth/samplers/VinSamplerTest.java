@@ -20,13 +20,10 @@
 package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.TreeMultiset;
-import com.google.common.io.Resources;
 import org.junit.Test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -36,8 +33,7 @@ import static org.junit.Assert.fail;
 public class VinSamplerTest {
     @Test
     public void testSchema() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema014.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema014.json");
 
         Multiset<String> prefixCounts = TreeMultiset.create();
         Multiset<String> otherCounts = TreeMultiset.create();

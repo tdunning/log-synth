@@ -20,8 +20,6 @@
 package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import com.tdunning.math.stats.AVLTreeDigest;
 import com.tdunning.math.stats.TDigest;
 import org.apache.commons.math3.distribution.GammaDistribution;
@@ -44,7 +42,7 @@ public class RandomWalkSamplerTest {
         // v1 is unit normal
         // v2 is normal with mean = 0, sd = 2
         // v3 is gamma-normal with dof=2, mean = 0.
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema015.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema015.json");
 
         TDigest tdG1 = new AVLTreeDigest(500);
         TDigest tdG2 = new AVLTreeDigest(500);
@@ -103,7 +101,7 @@ public class RandomWalkSamplerTest {
 
     @Test
     public void stepDistribution() throws Exception {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema032.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema032.json");
         double[] step1 = new double[100000];
         double[] step2 = new double[100000];
         double old1 = 0, old2 = 0;

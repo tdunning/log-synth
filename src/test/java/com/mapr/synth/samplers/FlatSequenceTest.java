@@ -22,10 +22,8 @@ package com.mapr.synth.samplers;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import com.google.common.io.Resources;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -35,10 +33,8 @@ import static org.junit.Assert.assertEquals;
 public class FlatSequenceTest {
     @Test
     public void testFlattenedNames() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s1 = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema033.json"), Charsets.UTF_8).read());
-        //noinspection UnstableApiUsage
-        SchemaSampler s2 = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema034.json"), Charsets.UTF_8).read());
+        SchemaSampler s1 = SchemaSampler.fromResource("schema033.json");
+        SchemaSampler s2 = SchemaSampler.fromResource("schema034.json");
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
@@ -58,8 +54,7 @@ public class FlatSequenceTest {
     @Test
     public void testCrossProduct() throws IOException {
         // here we verify the cross product result when we have multiple flattened sequences in a record
-        //noinspection UnstableApiUsage
-        SchemaSampler s1 = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema035.json"), Charsets.UTF_8).read());
+        SchemaSampler s1 = SchemaSampler.fromResource("schema035.json");
         Multiset<String> count = HashMultiset.create();
 
         for (int i = 0; i < 150; i++) {

@@ -20,11 +20,9 @@
 package com.mapr.synth;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Charsets;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
-import com.google.common.io.Resources;
 import com.mapr.synth.samplers.SchemaSampler;
 import org.apache.mahout.math.stats.LogLikelihood;
 import org.junit.Test;
@@ -47,7 +45,7 @@ public class CommonPointOfCompromiseTest {
     public void testCompromise() throws IOException, ParseException {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long start = df.parse("2014-01-01 00:00:00").getTime();
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema013.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema013.json");
 
         long exploitStart = df.parse("2014-01-20 00:00:00").getTime();
         long exploitEnd = df.parse("2014-02-20 00:00:00").getTime();
@@ -152,7 +150,7 @@ public class CommonPointOfCompromiseTest {
         int k2 = USER_COUNT - k1;
 
         try (PrintStream out = new PrintStream(new FileOutputStream("scores.tsv"))) {
-            out.printf("merchant\tk11\tk12\tk21\tk22\tk.1\tscore\n");
+            out.print("merchant\tk11\tk12\tk21\tk22\tk.1\tscore\n");
             for (Integer merchant : allMerchantCounts.elementSet()) {
                 int k11 = fraudUserCounts.count(merchant);
                 int k12 = k1 - k11;
@@ -164,7 +162,7 @@ public class CommonPointOfCompromiseTest {
         }
 
         try (PrintStream out = new PrintStream(new FileOutputStream("counts.tsv"))) {
-            out.printf("day\tcompromises\tfrauds\ttransactions\n");
+            out.print("day\tcompromises\tfrauds\ttransactions\n");
 
             for (int i = 0; i < compromiseByDay.length; i++) {
                 out.printf("%d\t%d\t%d\t%d\n", i, compromiseByDay[i], fraudByDay[i], transactionsByDay[i]);
@@ -172,7 +170,7 @@ public class CommonPointOfCompromiseTest {
         }
 
         try (PrintStream out = new PrintStream(new FileOutputStream("growth.tsv"))) {
-            out.printf("day\tatm.total\tk11\tk12\tk21\tk22\tscore\n");
+            out.print("day\tatm.total\tk11\tk12\tk21\tk22\tscore\n");
 
             for (int i = 0; i < exploitLength; i++) {
                 int k11 = atmFraud[i];

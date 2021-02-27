@@ -20,13 +20,11 @@
 package com.mapr.synth.drive;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Charsets;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
-import com.google.common.io.Resources;
 import com.mapr.synth.samplers.SchemaSampler;
 import org.junit.Test;
 
@@ -48,7 +46,7 @@ public class CommuterTest {
 
     @Test
     public void testSampleTrips() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.toString(Resources.getResource("schema027.json"), Charsets.UTF_8));
+        SchemaSampler s = SchemaSampler.fromResource("schema027.json");
         for (int i = 0; i < 20; i++) {
             JsonNode r = s.sample();
             verifyFields(r, ImmutableList.of("vehicle", "trip"));
@@ -74,7 +72,7 @@ public class CommuterTest {
 
     @Test
     public void testFlattened() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.toString(Resources.getResource("schema028.json"), Charsets.UTF_8));
+        SchemaSampler s = SchemaSampler.fromResource("schema028.json");
         Multiset<String> counts = HashMultiset.create();
         Multiset<Integer> runs = HashMultiset.create();
 

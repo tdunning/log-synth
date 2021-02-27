@@ -20,10 +20,8 @@
 package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Charsets;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import com.google.common.io.Resources;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -40,8 +38,7 @@ public class UUIDSamplerTest {
 
     @Test
     public void testBasics() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema017.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema017.json");
         Multiset<String> counts = HashMultiset.create();
         for (int i = 0; i < N; i++) {
             JsonNode x = s.sample();

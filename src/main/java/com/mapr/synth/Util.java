@@ -27,6 +27,7 @@ import com.google.common.io.LineProcessor;
 import com.google.common.io.Resources;
 import org.apache.mahout.math.random.Multinomial;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
@@ -112,7 +113,7 @@ public class Util {
         //noinspection UnstableApiUsage
         Resources.readLines(Resources.getResource(resource), Charsets.UTF_8, new LineProcessor<Void>() {
             @Override
-            public boolean processLine(String line) {
+            public boolean processLine(@Nonnull String line) {
                 if (!line.startsWith("# ")) {
                     callback.apply(line);
                 }
@@ -140,5 +141,14 @@ public class Util {
 
     public static double fractionalPart(double v) {
         return v - Math.floor(v);
+    }
+
+    public static String readResource(String name) {
+        try {
+            return new String(Util.class.getResourceAsStream("/" + name).readAllBytes());
+        } catch (IOException e) {
+            // hide the IO exception because we might as well crash
+            throw new RuntimeException("Nested IO Exception", e);
+        }
     }
 }

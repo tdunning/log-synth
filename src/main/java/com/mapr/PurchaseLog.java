@@ -23,10 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.io.Resources;
 import com.mapr.synth.samplers.SchemaSampler;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -36,9 +33,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * Generate a bunch of web purchase log records.  These will be out of order with respect to time and should be sorted.
@@ -62,8 +61,7 @@ public class PurchaseLog {
         Joiner withTab = Joiner.on("\t");
 
         // first generate lots of user definitions
-        //noinspection UnstableApiUsage
-        SchemaSampler users = new SchemaSampler(Resources.asCharSource(Resources.getResource("user-schema.txt"), Charsets.UTF_8).read());
+        SchemaSampler users = SchemaSampler.fromResource("user-schema.txt");
         File userFile = File.createTempFile("user", "tsv");
         BufferedWriter out = Files.newBufferedWriter(userFile.toPath(), Charsets.UTF_8);
         for (int i = 0; i < opts.users; i++) {
@@ -73,12 +71,12 @@ public class PurchaseLog {
         out.close();
 
         // now generate a session for each user
-        Splitter onTabs = Splitter.on("\t");
-        Splitter onComma = Splitter.on(",");
+        Pattern onComma = Pattern.compile(",");
+
+        Pattern onTabs = Pattern.compile("\t");
 
         Random gen = new Random();
-        //noinspection UnstableApiUsage
-        SchemaSampler intermediate = new SchemaSampler(Resources.asCharSource(Resources.getResource("hit_step.txt"), Charsets.UTF_8).read());
+        SchemaSampler intermediate = SchemaSampler.fromResource("hit_step.txt");
 
         final int COUNTRY = Iterables.indexOf(users.getFieldNames(), "country"::equals);
         final int CAMPAIGN = Iterables.indexOf(intermediate.getFieldNames(), "campaign_list"::equals);
@@ -91,7 +89,7 @@ public class PurchaseLog {
 
         for (String line : Files.readAllLines(userFile.toPath(), Charsets.UTF_8)) {
             long t = (long) (TimeUnit.MILLISECONDS.convert(30, TimeUnit.DAYS) * gen.nextDouble());
-            List<String> user = Lists.newArrayList(onTabs.split(line));
+            List<String> user = Arrays.asList(onTabs.split(line));
 
             // pick session length
             int n = (int) Math.floor(-30 * Math.log(gen.nextDouble()));
@@ -106,8 +104,8 @@ public class PurchaseLog {
 
                 // check for purchase
                 double p = 0.01;
-                List<String> campaigns = Lists.newArrayList(onComma.split(step.get("campaign_list").asText()));
-                List<String> keywords = Lists.newArrayList(onComma.split(step.get("search_keywords").asText()));
+                List<String> campaigns = Arrays.asList(onComma.split(step.get("campaign_list").asText()));
+                List<String> keywords = Arrays.asList(onComma.split(step.get("search_keywords").asText()));
                 if ((user.get(COUNTRY).equals("us") && campaigns.contains("5")) ||
                         (user.get(COUNTRY).equals("jp") && campaigns.contains("7")) ||
                         keywords.contains("homer") || keywords.contains("simpson")) {
@@ -130,11 +128,9 @@ public class PurchaseLog {
     }
 
     private static class Options {
-        @SuppressWarnings("unused")
         @Option(name = "-users")
         int users;
 
-        @SuppressWarnings("unused")
         @Option(name = "-log-file")
         String out;
 

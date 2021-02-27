@@ -21,8 +21,6 @@ package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -43,8 +41,7 @@ public class IntegerSamplerTest {
 
     @Test
     public void testFormatAndUniform() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema030.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema030.json");
         int[] count1 = new int[1000], count2 = new int[1000];
         for (int i = 0; i < 1000000; i++) {
             JsonNode f = s.sample();
@@ -73,8 +70,7 @@ public class IntegerSamplerTest {
     public void testExplicitDistribution() throws Exception {
         Function<Double, Double> sd = p -> Math.sqrt(p * (1 - p) * 1000000);
 
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema031.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema031.json");
         int[] count1 = new int[5], count2 = new int[5];
         for (int i = 0; i < 1000000; i++) {
             JsonNode f = s.sample();

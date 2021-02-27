@@ -21,11 +21,9 @@ package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import com.google.common.io.Resources;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -39,7 +37,7 @@ public class SsnSamplerTest {
 
     @Test
     public void testSsns() throws IOException {
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema019.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema019.json");
 
         JsonNode v = s.sample();
         // regression test given that we specify the seed
@@ -74,7 +72,7 @@ public class SsnSamplerTest {
     @Test
     public void testBogusFieldLimit() throws IOException {
         try {
-            new SchemaSampler(Resources.asCharSource(Resources.getResource("schema020.json"), Charsets.UTF_8).read());
+            SchemaSampler.fromResource("schema020.json");
             fail("Should have failed due to invalid fields");
         } catch (JsonMappingException e) {
             Preconditions.checkState(e.getCause() instanceof IllegalArgumentException, "Wrong exception");

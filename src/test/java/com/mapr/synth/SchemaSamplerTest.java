@@ -24,14 +24,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Charsets;
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multiset;
-import com.google.common.collect.SortedMultiset;
-import com.google.common.collect.TreeMultiset;
-import com.google.common.io.Resources;
+import com.google.common.collect.*;
 import com.mapr.synth.samplers.SchemaSampler;
 import com.mapr.synth.samplers.StringSampler;
 import org.apache.mahout.math.stats.OnlineSummarizer;
@@ -95,7 +88,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testFieldNames() throws IOException {
-        SchemaSampler s = new SchemaSampler("[{\"name\":\"id\", \"class\":\"id\"}, {\"name\":\"foo\", \"class\":\"address\"}, {\"name\":\"bar\", \"class\":\"date\", \"format\":\"yy-MM-dd\"}, {\"name\":\"baz\", \"class\":\"foreign-key\", \"size\":1000, \"skew\":1}]");
+        SchemaSampler s = SchemaSampler.fromResource("schema044.json");
         assertEquals("[id, foo, bar, baz]", Iterables.toString(s.getFieldNames()));
         System.out.printf("%s\n", Iterables.toString(s.sample()));
         System.out.printf("%s\n", Iterables.toString(s.sample()));
@@ -106,8 +99,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testInt() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema001.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema001.json");
         Multiset<String> counts = HashMultiset.create();
         for (int i = 0; i < 10000; i++) {
             counts.add(s.sample().get("size").asText());
@@ -120,8 +112,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testString() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema002.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema002.json");
         Multiset<String> counts = HashMultiset.create();
         double n = 10000;
         for (int i = 0; i < n; i++) {
@@ -139,8 +130,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testSeveral() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema003.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema003.json");
         Multiset<String> gender = HashMultiset.create();
         Pattern namePattern = Pattern.compile("[A-Z][a-z]+ [A-Z][a-z]+");
         Pattern addressPattern = Pattern.compile("[0-9]+ [A-Z][a-z]+ [A-Z][a-z]+ [A-Z][a-z]+");
@@ -164,8 +154,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testMisc() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema004.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema004.json");
         Multiset<String> country = HashMultiset.create();
         Multiset<String> language = HashMultiset.create();
         Multiset<String> browser = HashMultiset.create();
@@ -189,8 +178,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testSequence() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema005.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema005.json");
         OnlineSummarizer s0 = new OnlineSummarizer();
         OnlineSummarizer s1 = new OnlineSummarizer();
         for (int i = 0; i < 10000; i++) {
@@ -211,8 +199,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testSequenceArray() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema006.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema006.json");
         for (int i = 0; i < 10; i++) {
             JsonNode x = s.sample();
             Iterator<JsonNode> values = x.get("x").elements();
@@ -226,8 +213,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testMap() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema011.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema011.json");
         for (int i = 0; i < 100; i++) {
             JsonNode x = s.sample();
             assertEquals(i, x.get("id").asInt());
@@ -241,8 +227,7 @@ public class SchemaSamplerTest {
     @Test
     public void testSkewedInteger() throws IOException {
         // will give fields x, y, z, q with different skewness
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema007.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema007.json");
 
         SortedMultiset<Integer> x = TreeMultiset.create();
         SortedMultiset<Integer> y = TreeMultiset.create();
@@ -279,8 +264,7 @@ public class SchemaSamplerTest {
         }
         out.close();
 
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema008.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema008.json");
 
         for (int k = 0; k < 1000; k++) {
             JsonNode r = s.sample();
@@ -292,8 +276,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testJoin() throws IOException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema009.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema009.json");
 
         for (int k = 0; k < 10; k++) {
             JsonNode r = s.sample();
@@ -305,8 +288,7 @@ public class SchemaSamplerTest {
 
     @Test
     public void testEvents() throws IOException, ParseException {
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema012.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema012.json");
         long t = System.currentTimeMillis();
 
         SimpleDateFormat df0 = new SimpleDateFormat("yyyy-MM-dd");
@@ -372,8 +354,7 @@ public class SchemaSamplerTest {
     @Test
     public void testFlattenedFieldNames() throws IOException {
         // field names for flattened sequences are kind of tricky
-        //noinspection UnstableApiUsage
-        SchemaSampler s = new SchemaSampler(Resources.asCharSource(Resources.getResource("schema036.json"), Charsets.UTF_8).read());
+        SchemaSampler s = SchemaSampler.fromResource("schema036.json");
         List<String> names = Lists.newArrayList(s.getFieldNames());
         assertTrue(names.contains("a"));
         assertTrue(names.contains("b"));

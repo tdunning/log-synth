@@ -33,9 +33,7 @@ import static org.junit.Assert.fail;
 public class NormalSamplerTest {
     @Test
     public void meanAndSd() throws IOException {
-        SchemaSampler s = new SchemaSampler("[" +
-                "{\"name\":\"x\", \"class\": \"normal\", \"mean\": 1, \"sd\": 3.1}," +
-                "{\"name\":\"y\", \"class\": \"normal\", \"mean\": 1, \"precision\": 3.1}]");
+        SchemaSampler s = SchemaSampler.fromResource("schema039.json");
 
         double[] s1 = new double[]{0, 0, 0}, s2 = new double[]{0, 0, 0};
         for (int i = 0; i < 10000; i++) {
@@ -54,9 +52,7 @@ public class NormalSamplerTest {
 
     @Test
     public void seed() throws Exception {
-        SchemaSampler s = new SchemaSampler("[" +
-                "{\"name\":\"x\", \"class\": \"normal\", \"mean\": 1, \"sd\": 3.1, \"seed\": 1}," +
-                "{\"name\":\"y\", \"class\": \"normal\", \"mean\": 1, \"sd\": 3.1, \"seed\": 2}]");
+        SchemaSampler s = SchemaSampler.fromResource("schema040.json");
         JsonNode record = s.sample();
         assertEquals(-0.8853660817212665, record.get("x").asDouble(), 1e-9);
         assertEquals(2.484814790861627, record.get("y").asDouble(), 1e-6);
@@ -71,8 +67,7 @@ public class NormalSamplerTest {
 
     @Test
     public void trim() throws Exception {
-        SchemaSampler s = new SchemaSampler(
-                "[{\"name\":\"x\", \"class\": \"normal\", \"mean\": 1, \"sd\": 3.1, \"seed\": 1, \"min\":0, \"max\": 2}]");
+        SchemaSampler s = SchemaSampler.fromResource("schema041.json");
         for (int i = 0; i < 10000; i++) {
             JsonNode record = s.sample();
             double x = record.get("x").asDouble();
@@ -84,15 +79,13 @@ public class NormalSamplerTest {
     @Test
     public void illegalParams() throws Exception {
         try {
-            new SchemaSampler(
-                    "[{\"name\":\"x\", \"class\": \"normal\", \"mean\": 1, \"sd\": 3.1, \"seed\": 1, \"min\":0, \"max\": -2}]");
+            SchemaSampler.fromResource("schema042.json");
             fail();
         } catch (JsonMappingException e) {
             assertTrue(e.getMessage().startsWith("Parameter max must be greater than min"));
         }
         try {
-            SchemaSampler s = new SchemaSampler(
-                    "[{\"name\":\"x\", \"class\": \"normal\", \"mean\": 1, \"sd\": 3.1, \"seed\": 1, \"min\":0, \"max\": 0.3}]");
+            SchemaSampler s = SchemaSampler.fromResource("schema043.json");
             fail();
         } catch (JsonMappingException e) {
             assertTrue(e.getMessage().startsWith("Value of max-min is too small"));

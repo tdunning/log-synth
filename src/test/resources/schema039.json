@@ -1,0 +1,4 @@
+[
+  {"name":"x", "class": "normal", "mean": 1, "sd": 3.1},
+  {"name":"y", "class": "normal", "mean": 1, "precision": 3.1}
+]
