@@ -33,7 +33,7 @@ import org.apache.mahout.math.random.Sampler;
 import java.io.IOException;
 import java.util.Set;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "class")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "class")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = AddressSampler.class, name = "address"),
         @JsonSubTypes.Type(value = ArrayFlattener.class, name = "array-flatten"),
@@ -46,6 +46,7 @@ import java.util.Set;
         @JsonSubTypes.Type(value = CountrySampler.class, name = "country"),
         @JsonSubTypes.Type(value = DateSampler.class, name = "date"),
         @JsonSubTypes.Type(value = DomainSampler.class, name = "domain"),
+        @JsonSubTypes.Type(value = DnsSampler.class, name = "dns"),
         @JsonSubTypes.Type(value = FileSampler.class, name = "lookup"),
         @JsonSubTypes.Type(value = FlattenSampler.class, name = "flatten"),
         @JsonSubTypes.Type(value = ForeignKeySampler.class, name = "foreign-key"),
@@ -83,7 +84,7 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
-        return mapper.readValue(def, new TypeReference<FieldSampler>() {
+        return mapper.readValue(def, new TypeReference<>() {
         });
     }
 
@@ -93,7 +94,7 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
-        return mapper.convertValue(def, new TypeReference<FieldSampler>() {
+        return mapper.convertValue(def, new TypeReference<>() {
         });
     }
 
