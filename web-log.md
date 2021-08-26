@@ -4,7 +4,7 @@ How to Run the Log Generator
 
 To install and run the web-log generator,
 
-1. Install Java 7, maven and get this software using git.
+1. Install Java 8 or higher, maven and get this software using git.
 
 On a mac, this can help get the right version of Java
 
