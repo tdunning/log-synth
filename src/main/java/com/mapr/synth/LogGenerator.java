@@ -41,7 +41,7 @@ public class LogGenerator implements Sampler<LogLine> {
     private PriorityQueue<LogLine> eventBuffer = Queues.newPriorityQueue();
     private PriorityQueue<User> users = Queues.newPriorityQueue();
 
-    private LongTail<InetAddress> ipGenerator = new LongTail<InetAddress>(1, 0.5) {
+    private LongTail<InetAddress> ipGenerator = new LongTail<>(1, 0.5) {
         Random gen = new Random();
 
         @Override
@@ -60,9 +60,9 @@ public class LogGenerator implements Sampler<LogLine> {
         }
     };
 
-    private WordGenerator words = new WordGenerator("word-frequency-seed", "other-words");
+    private WordGenerator words = new WordGenerator("word-frequency-seed", "/other-words");
     private TermGenerator terms = new TermGenerator(words, 1, 0.8);
-    private TermGenerator geo = new TermGenerator(new WordGenerator(null, "geo-codes"), 10, 0);
+    private TermGenerator geo = new TermGenerator(new WordGenerator(null, "/geo-codes"), 10, 0);
 
     // the average user visits once per day, but there is a LOT of variation between users
     private AbstractContinousDistribution sessionRateDistribution = new Uniform(1.0 / 24 / 3600, 1.0 / 24 / 3600, RandomUtils.getRandom());

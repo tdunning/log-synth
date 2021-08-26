@@ -36,7 +36,7 @@ public class TermGenerator implements Sampler<String> {
 
     public TermGenerator(WordGenerator words, final int alpha, final double discount) {
         this.words = words;
-        distribution = new LongTail<String>(alpha, discount) {
+        distribution = new LongTail<>(alpha, discount) {
             private int count = TermGenerator.this.words.size();
 
             @Override

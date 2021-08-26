@@ -30,8 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,7 @@ public class WordGenerator {
             try {
                 //noinspection UnstableApiUsage
                 Resources.readLines(Resources.getResource(seed), Charsets.UTF_8,
-                        new LineProcessor<Object>() {
+                        new LineProcessor<>() {
                             private boolean header = true;
                             private final Splitter onTabs = Splitter.on("\t");
 
@@ -84,14 +85,13 @@ public class WordGenerator {
             }
         }
 
-        try {
-            //noinspection UnstableApiUsage
-            wordReader = Files.newReader(new File(Resources.getResource(others).getFile()), Charsets.UTF_8);
-        } catch (IOException e) {
+        InputStream s = this.getClass().getResourceAsStream(others);
+        if (s == null) {
             log.error("Can't read resource \"{}\", will continue without realistic words", others);
             wordReader = null;
+        } else {
+            wordReader = new BufferedReader(new InputStreamReader(s, Charsets.UTF_8));
         }
-
     }
 
     public String getString(int n) {
@@ -99,7 +99,7 @@ public class WordGenerator {
             synchronized (this) {
                 while (n >= words.size()) {
                     try {
-                        String w = wordReader.readLine();
+                        String w = wordReader != null ? wordReader.readLine() : null;
                         if (w != null) {
                             words.add(w);
                         } else {
