@@ -43,11 +43,12 @@ public class BurstyEventsTest {
             if (i >= 1 && i < 19) {
                 System.out.print("N\n");
                 assertTrue("Too much activity in the night", counts[i] < 100);
-            } else             if (i < 1 || i >= 20) {
+            } else if ((i == 0) || (i == 19)) {
+                System.out.print("E\n");
+                // don't care
+            } else {
                 System.out.print("D\n");
                 assertTrue("Too little activity during the day", counts[i] > 500);
-            } else {
-                System.out.print("\n");
             }
         }
     }

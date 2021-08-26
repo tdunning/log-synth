@@ -83,7 +83,7 @@ public class BurstyEvents extends FieldSampler {
 
     // emulates roughly a US dominated audience with almost a 4:1 peak to valley ratio for the distribution
     // of sunrise times. The actual times of the bursts will be more spread out than this due the length of
-    // days
+    // days. Note that we are talking about GMT here so 1900GMT = 0800 EST = 1100 PST
     private WrappedNormal sunriseGenerator = new WrappedNormal(
             Util.ONE_DAY,
             TimeUnit.HOURS.toMillis(19),
