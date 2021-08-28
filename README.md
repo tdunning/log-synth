@@ -211,33 +211,32 @@ This distribution generates dates which are some time before an epoch date.  Dat
 #### `dns`
 Samples DNS queries with some details about domain and source of the query. The basic idea is
 that each sample is a history of a particular source of DNS queries. The domains queried
-are sampled from a shared Pitman-Yor sampler that generates very long tails. The most commonly queried
-domains are taken from the actual domains of Fortune 500 companies, but others are generated
+are sampled from a very skewed distribution (technically, a shared Pitman-Yor sampler) that generates very long tails. The most commonly queried
+domains are taken from the actual domains of Fortune 500 companies, but others are jibberish generated
 as they are needed.
 
 Each query source is sampled for the time period of interest, but the rates for different sources can
-be very different. Each source is modeled as either 'active' or 'inactive'. During active times, DNS queries
+be very different. Each source is modeled as being either 'active' or 'inactive'. During active times, DNS queries
 are generated at a higher rate than during inactive times. Different query sources can have active rates that
-differ by a factor of 1000 or more. Transition from inactive to active and back by picking an interval until 
-the next transition and then finding the time that corresponds to assuming that time passes more quickly during
-'daytime' for that query source. The overall model thus has parameters for night time dilation, average 
+differ by a factor of 1000 or more to emulate the difference between, say, a lone person using a phone or an office full of people sharing an Internet connection. The transition from inactive to active and back is done by picking an abstract interval until 
+the next transition. This abstract interval represents a warped sort of time that passes more quickly during the local 'daytime' for a source and more slowly during local 'nighttime'. The definition of 'daytime' and 'nighttime' varies by source. The overall model thus has parameters for night time dilation, average 
 active and inactive times and query rates during active and inactive periods. Each of these parameters are sampled for each
 query source and the distributions for these parameters are controlled by the following hyper-parameters:
 ```
 Name        Controls                         Default      Description
-dilation    Night-time interval dilation         6            Night dilation is distributed as exp(rgamma(shape=dilation))
+dilation    Night-time interval dilation         6            Night dilation is distributed as `rexp(rgamma(shape=dilation))`
 active      Average active time (seconds)       10 minutes    Activity duration is distributed as rexp(rate=1/t_active) 
-                                                              where t_active ~ rexp(rate=1/active)
+                                                              where `t_active ~ rexp(rate=1/active)`
 inactive    Average inactive time (seconds)      4 hours      Duration of inactivity is distributed as 
-                                                              rexp(rate=1/t_inactive) where 
-							      t_inactive ~ rexp(rate=1/inactive).
+                                                              `rexp(rate=1/t_inactive)` where 
+							      `t_inactive` is sampled for each source independently according to `t_inactive ~ rexp(rate=1/inactive)`.
 rate        Average query rate per second       10 queries/h  Queries are Poisson distributed with rate 
                                                               while active distributed as rexp(rate=1/rate)
 idle        How much does query rate slow        6            Query rate is decreased by ratio distributed 
             when inactive                                     as exp(rgamma(shape=idle))
 alpha       Growth scale of unique domains   10000            Pitman-Yor cale factor for number of unique domains.                                                          
-discount    Growth rate of unique domains        0.5          Number of unique domains grows with alpha * N^discount
-                                                              if discount > 0 and alpha * log(N) if discount = 0
+discount    Growth rate of unique domains        0.5          Number of unique domains grows with `alpha * N^discount`
+                                                              if `discount > 0` and `alpha * log(N)` if `discount == 0`
 ```
 In addition to these parameters, you can add `json 'flat'=true` to force the output to consist of individual DNS
 queries. If `json 'flat'=false`, the output consists of one row per source IP with a list of JSON objects containing
