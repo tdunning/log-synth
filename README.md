@@ -224,19 +224,25 @@ active and inactive times and query rates during active and inactive periods. Ea
 query source and the distributions for these parameters are controlled by the following hyper-parameters:
 ```
 Name        Controls                         Default      Description
-dilation    Night-time interval dilation         6            Night dilation is distributed as `rexp(rgamma(shape=dilation))`
-active      Average active time (seconds)       10 minutes    Activity duration is distributed as rexp(rate=1/t_active) 
-                                                              where `t_active ~ rexp(rate=1/active)`
+dilation    Night-time interval dilation         6            Night dilation is distributed as
+                                                              `rexp(rgamma(shape=dilation))` 
+active      Average active time (seconds)       10 minutes    Activity duration is distributed as
+                                                              `rexp(rate=1/t_active)` where `t_active ~
+                                                              rexp(rate=1/active)` 
 inactive    Average inactive time (seconds)      4 hours      Duration of inactivity is distributed as 
-                                                              `rexp(rate=1/t_inactive)` where 
-							      `t_inactive` is sampled for each source independently according to `t_inactive ~ rexp(rate=1/inactive)`.
+                                                              `rexp(rate=1/t_inactive)` where `t_inactive`
+                                                              is sampled for each source independently
+                                                              according to `t_inactive ~
+                                                              rexp(rate=1/inactive)`.  
 rate        Average query rate per second       10 queries/h  Queries are Poisson distributed with rate 
                                                               while active distributed as rexp(rate=1/rate)
 idle        How much does query rate slow        6            Query rate is decreased by ratio distributed 
             when inactive                                     as exp(rgamma(shape=idle))
-alpha       Growth scale of unique domains   10000            Pitman-Yor cale factor for number of unique domains.                                                          
-discount    Growth rate of unique domains        0.5          Number of unique domains grows with `alpha * N^discount`
-                                                              if `discount > 0` and `alpha * log(N)` if `discount == 0`
+alpha       Growth scale of unique domains   10000            Pitman-Yor cale factor for number of unique
+                                                              domains. 
+discount    Growth rate of unique domains        0.5          Number of unique domains grows with `alpha *
+                                                              N^discount` if `discount > 0` and `alpha *
+                                                              log(N)` if `discount == 0` 
 ```
 In addition to these parameters, you can add `json 'flat'=true` to force the output to consist of individual DNS
 queries. If `json 'flat'=false`, the output consists of one row per source IP with a list of JSON objects containing
