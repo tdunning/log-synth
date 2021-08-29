@@ -87,6 +87,9 @@ public class WordGenerator {
 
         InputStream s = this.getClass().getResourceAsStream(others);
         if (s == null) {
+            s = this.getClass().getResourceAsStream("/" + others);
+        }
+        if (s == null) {
             log.error("Can't read resource \"{}\", will continue without realistic words", others);
             wordReader = null;
         } else {

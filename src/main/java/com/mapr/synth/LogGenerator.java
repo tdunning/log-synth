@@ -41,7 +41,7 @@ public class LogGenerator implements Sampler<LogLine> {
     private PriorityQueue<LogLine> eventBuffer = Queues.newPriorityQueue();
     private PriorityQueue<User> users = Queues.newPriorityQueue();
 
-    private LongTail<InetAddress> ipGenerator = new LongTail<>(1, 0.5) {
+    private LongTail<InetAddress> ipGenerator = new LongTail<>(100, 0.5) {
         Random gen = new Random();
 
         @Override
@@ -80,21 +80,28 @@ public class LogGenerator implements Sampler<LogLine> {
     public LogLine sample() {
         LogLine firstEvent = eventBuffer.peek();
         double t1 = firstEvent != null ? firstEvent.getT() : Double.POSITIVE_INFINITY;
+        assert users.peek() != null;
         double t2 = users.peek().getNextSession();
 
+        // while some user has activity before the first buffered event generate that
+        // session and fill in the event buffer
         while (t2 < t1) {
             User u = users.poll();
+            assert u != null;
 
-            // generate a session
+            // generate a session into the event buffer
             u.session(eventBuffer);
 
             // user now has new time for next session
             users.add(u);
 
-            // if u.session() schedules an event immediately, then this will never
-            // allow another loop
+            // if u.session() schedules an event at the time the users session start, then this will never
+            // allow another loop. On the other hand, if the first event of a session is sometime after
+            // the session starts or if a session has no events, then another user might have a session
+            // start time before the next event
             firstEvent = eventBuffer.peek();
             t1 = firstEvent != null ? firstEvent.getT() : Double.POSITIVE_INFINITY;
+            assert users.peek() != null;
             t2 = users.peek().getNextSession();
         }
         return eventBuffer.poll();

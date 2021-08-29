@@ -22,26 +22,31 @@ package com.mapr.synth;
 import com.google.common.collect.Lists;
 import com.mapr.synth.distributions.TermGenerator;
 import org.apache.mahout.common.RandomUtils;
+import org.apache.mahout.common.RandomWrapper;
 import org.apache.mahout.math.jet.random.AbstractContinousDistribution;
 import org.apache.mahout.math.jet.random.Exponential;
 
 import java.net.InetAddress;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Samples from a user space.  Each user has a variety of internal characteristics.
+ *
+ * Users are sorted according to the time of their next session and then by id to break ties.
  */
 public class User implements Comparable<User> {
-    private static AtomicInteger idCounter = new AtomicInteger();
-
+    private static final AtomicInteger idCounter = new AtomicInteger();
+    private static final Random cookieGenerator = RandomUtils.getRandom();
     private int id;
 
     private AbstractContinousDistribution queryLengthDistribution = new Exponential(0.4, RandomUtils.getRandom());
     private AbstractContinousDistribution sessionTimeDistribution;
 
-    private long cookie = RandomUtils.getRandom().nextLong();
+    private long cookie;
 
     private TermGenerator terms;
     private InetAddress address;
@@ -57,6 +62,8 @@ public class User implements Comparable<User> {
         this.geoCode = geoCode;
         this.address = address;
         this.rate = period;
+        cookie = cookieGenerator.nextLong();
+
         this.sessionTimeDistribution = new Exponential(period, RandomUtils.getRandom());
 
         id = idCounter.addAndGet(1);

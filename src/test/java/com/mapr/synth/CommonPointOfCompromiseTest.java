@@ -72,12 +72,6 @@ public class CommonPointOfCompromiseTest {
 
         long t0 = System.currentTimeMillis();
         for (int userId = 0; userId < USER_COUNT; userId++) {
-            if (userId > 0 && userId % (USER_COUNT / 100) == 0) {
-                double t1 = (System.currentTimeMillis() - t0) / 1000.0;
-                double t2 = USER_COUNT * t1 / userId;
-                System.out.printf("%d\t%.0f\t%.1f\n",
-                        userId, 100.0 * userId / USER_COUNT, t2 - t1);
-            }
             JsonNode sample = s.sample();
             merchantHistory.clear();
             boolean userHasFraud = false;

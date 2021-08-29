@@ -55,10 +55,8 @@ public class TermGeneratorTest {
 
         assertEquals(10000, counts.size());
         assertTrue("Should have some common words", counts.elementSet().size() < 10000);
-        List<Integer> k = Lists.newArrayList(
-                counts.elementSet().stream()
-                        .map(counts::count)
-                        .collect(Collectors.toList()));
+        List<Integer> k = counts.elementSet().stream()
+                .map(counts::count).collect(Collectors.toList());
 //        System.out.printf("%s\n", Ordering.natural().reverse().sortedCopy(k).subList(0, 30));
 //        System.out.printf("%s\n", Iterables.transform(Iterables.filter(counts.elementSet(), new Predicate<String>() {
 //            public boolean apply(String s) {
@@ -76,26 +74,28 @@ public class TermGeneratorTest {
 
     @Test
     public void distinctVocabularies() {
-        TermGenerator x1 = new TermGenerator(WORDS, 1, 0.8);
+        TermGenerator x1 = new TermGenerator(WORDS, 10, 0.2);
         final Multiset<String> k1 = HashMultiset.create();
         for (int i = 0; i < 50000; i++) {
             k1.add(x1.sample());
         }
 
-        TermGenerator x2 = new TermGenerator(WORDS, 1, 0.8);
+        TermGenerator x2 = new TermGenerator(WORDS, 10, 0.2);
         final Multiset<String> k2 = HashMultiset.create();
         for (int i = 0; i < 50000; i++) {
             k2.add(x2.sample());
         }
 
         final NormalDistribution normal = new NormalDistribution();
-        List<Double> scores = Ordering.natural().sortedCopy(
-                k1.elementSet().stream()
+
+        List<Double> scores =
+                Sets.union(k1.elementSet(), k2.elementSet()).stream()
                         .map(s -> normal.cumulativeProbability(
                                 LogLikelihood.rootLogLikelihoodRatio(
                                         k1.count(s), 50000 - k1.count(s),
                                         k2.count(s), 50000 - k2.count(s))))
-                        .collect(Collectors.toList()));
+                        .sorted(Ordering.natural())
+                        .collect(Collectors.toList());
         int n = scores.size();
 //        System.out.printf("%.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f", scores.get(0), scores.get((int) (0.05*n)), scores.get(n / 4), scores.get(n / 2), scores.get(3 * n / 4), scores.get((int) (0.95 * n)), scores.get(n - 1));
         int i = 0;
@@ -113,7 +113,7 @@ public class TermGeneratorTest {
         final boolean transpose = false;
 
         // generate an example of species sampled on multiple days
-        LongTail<Integer> terms = new LongTail<Integer>(0.5, 0.3) {
+        LongTail<Integer> terms = new LongTail<>(0.5, 0.3) {
             int max = 0;
 
             @Override
@@ -138,48 +138,32 @@ public class TermGeneratorTest {
             r.add(counts);
         }
 
-        if (transpose) {
-            for (Multiset<Integer> day : r) {
-                vocabulary.addAll(day.elementSet());
-            }
-
-            System.out.printf("%d\n", vocabulary.size());
-            for (Integer s : vocabulary) {
-                String sep = "";
-                for (Multiset<Integer> day : r) {
-                    System.out.printf("%s%s", sep, day.count(s));
-                    sep = "\t";
-                }
-                System.out.print("\n");
-            }
-        } else {
-            System.out.printf("%d\n", vocabulary.size());
-            for (Multiset<Integer> day : r) {
-                vocabulary.addAll(day.elementSet());
-                String sep = "";
-                System.out.printf("%s%s", sep, vocabulary.size());
-                sep = "\t";
-                for (Integer s : vocabulary) {
-                    System.out.printf("%s%s", sep, day.count(s));
-                    sep = "\t";
-                }
-                System.out.print("\n");
-            }
-
-            Multiset<Integer> total = HashMultiset.create();
-            for (Multiset<Integer> day : r) {
-                for (Integer species : day.elementSet()) {
-                    total.add(species, day.count(species));
-                }
-            }
+        System.out.printf("%d\n", vocabulary.size());
+        for (Multiset<Integer> day : r) {
+            vocabulary.addAll(day.elementSet());
             String sep = "";
-            System.out.printf("%s%s", sep, total.elementSet().size());
+            System.out.printf("%s%s", sep, vocabulary.size());
             sep = "\t";
             for (Integer s : vocabulary) {
-                System.out.printf("%s%s", sep, total.count(s));
+                System.out.printf("%s%s", sep, day.count(s));
                 sep = "\t";
             }
             System.out.print("\n");
         }
+
+        Multiset<Integer> total = HashMultiset.create();
+        for (Multiset<Integer> day : r) {
+            for (Integer species : day.elementSet()) {
+                total.add(species, day.count(species));
+            }
+        }
+        String sep = "";
+        System.out.printf("%s%s", sep, total.elementSet().size());
+        sep = "\t";
+        for (Integer s : vocabulary) {
+            System.out.printf("%s%s", sep, total.count(s));
+            sep = "\t";
+        }
+        System.out.print("\n");
     }
 }

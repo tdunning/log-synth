@@ -19,14 +19,55 @@
 
 package com.mapr.synth;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Ordering;
 import org.junit.Test;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class LogGeneratorTest {
     @Test
     public void testSample() {
-        LogGenerator gen = new LogGenerator(200);
-        for (int i = 0; i < 100; i++) {
-            System.out.printf("%s\n", gen.sample());
+        LogGenerator gen = new LogGenerator(500);
+        Multiset<String> ipCounter = HashMultiset.create();
+        Multiset<String> wordCounter = HashMultiset.create();
+        Multiset<Long> cookieCounter = HashMultiset.create();
+        for (int i = 0; i < 100000; i++) {
+            LogLine sample = gen.sample();
+            ipCounter.add(sample.getIp().toString());
+            wordCounter.addAll(sample.getQuery());
+            cookieCounter.add(sample.getCookie());
         }
+
+        // the values for these tests were derived empirically and examined for plausibility
+        // there is nothing particularly principled about them
+
+        List<Integer> k1 = count(wordCounter);
+        assertTrue(String.format("Bad number of words %d", k1.size()), k1.size() > 1000 && k1.size() < 15000);
+        assertTrue(k1.get(0) > 1000);
+        assertTrue(k1.get(500) < 100);
+
+        k1 = count(ipCounter);
+        assertTrue(String.format("Bad number of IP addresses %d", k1.size()), k1.size() >= 200 && k1.size() < 400);
+        assertEquals(25, (double) k1.get(0) / k1.get(k1.size() / 2), 22.);
+        double r = (double) k1.get(0) / k1.get(k1.size() - 1);
+        // very long-tailed distribution here
+        assertEquals(75.0, r, 65.0);
+
+        k1 = count(cookieCounter);
+        assertEquals(String.format("Bad number of cookies %d", k1.size()), gen.getUserCount(), k1.size());
+        double ratio = (double) k1.get(0) / k1.get(k1.size() - 1);
+        assertEquals(5.0, ratio, 4.1);
+    }
+
+    private static <T> List<Integer> count(Multiset<T> counter) {
+        return counter.elementSet().stream()
+                .map(counter::count).sorted(Ordering.natural().reversed())
+                .collect(Collectors.toList());
     }
 }
