@@ -19,6 +19,10 @@
 
 package com.mapr.synth.samplers;
 
+import org.jgrapht.*;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,6 +33,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mapr.synth.Util;
+import com.mapr.synth.constraint.Constraint;
+
 import org.apache.mahout.math.random.Sampler;
 
 import java.io.File;
@@ -50,7 +56,9 @@ public class SchemaSampler implements Sampler<JsonNode> {
     public static final String FLAT_SEQUENCE_MARKER = ">>flatten-me<<";
 
     private List<FieldSampler> schema;
+    private List<Constraint> constraints;
     private Set<String> fields;
+    private Map<String, FieldSampler> fieldMap;
     private Queue<JsonNode> buffer = new ArrayDeque<>();
 
     public SchemaSampler(List<FieldSampler> s) {
@@ -89,20 +97,35 @@ public class SchemaSampler implements Sampler<JsonNode> {
     private void init(List<FieldSampler> s) {
         schema = s;
         fields = Sets.newLinkedHashSet();
+        constraints = Lists.newLinkedList();
+        fieldMap = Maps.newHashMap();
         for (FieldSampler sampler : s) {
             sampler.getNames(fields);
+            if(sampler instanceof Constraint) {
+            	constraints.add((Constraint)sampler);
+            	fields.remove(sampler.getName());
+            }
+            else {
+            	fieldMap.putIfAbsent(sampler.getName(), sampler);            	
+            }
         }
+        s.removeAll(constraints);
+        
     }
 
     @Override
     public JsonNode sample() {
         // we may have buffered records
         JsonNode x = buffer.poll();
+        
+        Graph<FieldSampler, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
+        
+        
+        
         while (x == null) {
             // nothing buffered ... generate some data
             Map<String, JsonNode> generators = Maps.newTreeMap();
             ObjectNode r = nodeFactory.objectNode();
-            Iterator<String> fx = fields.iterator();
             for (FieldSampler s : schema) {
                 String fieldName = s.getName();
                 if (s.isFlat()) {
