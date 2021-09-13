@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.mapr.synth.OperatingSystemSampler;
+import com.mapr.synth.constraint.Constraint;
 import com.mapr.synth.drive.Commuter;
 import org.apache.mahout.math.random.Sampler;
 
@@ -71,6 +72,7 @@ import java.util.Set;
         @JsonSubTypes.Type(value = VectorSampler.class, name = "vector"),
         @JsonSubTypes.Type(value = VinSampler.class, name = "vin"),
         @JsonSubTypes.Type(value = WordSampler.class, name = "word"),
+        @JsonSubTypes.Type(value = Constraint.class, name = "constraint"),
         @JsonSubTypes.Type(value = ZipSampler.class, name = "zip"),
 
 })

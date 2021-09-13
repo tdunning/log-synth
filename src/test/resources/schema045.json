@@ -1,0 +1,5 @@
+[
+  {"name":"id", "class":"id"},
+  {"name":"foo", "class":"id"},
+  {"name":"c1", "class":"constraint", "att1":"id", "att2":"foo", "relationship":"equals"}
+]
