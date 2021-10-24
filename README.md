@@ -818,6 +818,84 @@ If you only want the zip code as a string without all the supporting information
 }
 ```
 
+## Constraints
+
+In this version of log-synth there is the possibility to use constraints in order to bound attributes of a row to specific values. A constraint puts in a relationship two attributes (or FieldSamplers), forcing one attribute to take certain values. It is possible to force multiple constraints to an attribute. There are four type of constraints :
+- `greater-than-constraint` to make an attribute greater than another 
+- `lower-than-constraint` to make an attribute lower than another
+- `equals-to-constraint` to make an attribute equals to another
+- `dependency-constaint` to make an attribute assume specific values depending on the value assumed by another attribute
+
+At the current stage of implementation, only certain FieldSamplers can be constrained with `greater-than-constraint`, `lower-than-constraint` and `equals-to-constraint`. DateSampler and IntegerSampler.
+
+#### `greater-than-constraint`
+Instructs one attribute att1 to be greater than another attribute att2
+
+```json
+[
+    {"name":"e", "class":"date", "start":"2014-01-31", "end":"2014-02-07"},
+    {"name":"f", "class":"date", "end":"2015-02-07"},
+    {"name":"c2", "class":"greater-than-constraint", "att1":"f", "att2":"e"}
+]
+```
+
+#### `lower-than-constraint`
+Instructs one attribute att1 to be lower than another attribute att2
+
+```json
+[
+    {"name":"a", "class":"int"},
+    {"name":"c", "class":"int", "min":102, "max":1000},
+    {"name":"c2", "class":"lower-than-constraint", "att1":"a", "att2":"c"}
+]
+```
+#### `equals-to-constraint`
+Instructs one attribute att1 to be exactly equals to another attribute att2
+
+```json
+[
+    {"name":"a", "class":"int"},
+    {"name":"d", "class":"int", "min":10, "max":100},
+    {"name":"c3", "class":"equals-to-constraint", "att1":"d", "att2":"a"}
+]
+```
+
+#### `dependency-constraint`
+Instructs one attribute to assume values according to the previous value sampled by another.
+
+```json
+[
+    {"name":"h", "class":"string", "dist":{"1":50, "2":50}},
+    {"name":"i", "class":"string"},
+    {"name":"c6", "class":"dependency-constraint", "att1":"i", "att2":"h",
+        "dependency": {
+        "1": {"name":"i1", "class":"string", "dist":{"A":0.3, "B":0.4, "C":0.3}},
+        "2": {"name":"i2", "class":"string", "dist":{"D":0.4, "E":0.2, "F":0.4}}
+        }
+    }
+]
+```
+In this example, if h assume value 1 than attribute i will assume one of {A,B,C} with the distribution specified by the sampler i1. The samplers i1 and i2 are specified to define which values will be picked, but will not show up in the resulting row
+
+#### Combined constaints
+As described, it is possible to combine two or more constraints. We can have a to be, for example, greater than b but lower than c.
+
+```json
+[
+    {"name":"a", "class":"int"},
+    {"name":"b", "class":"int", "min":10, "max":100},
+    {"name":"c", "class":"int", "min":102, "max":1000},
+    {"name":"c1", "class":"greater-than-constraint", "att1":"a", "att2":"b"},
+    {"name":"c2", "class":"lower-than-constraint", "att1":"a", "att2":"c"},
+]
+```
+
+##### N.B
+It is important to notice that whenever a non-uniform distribution is applied to a costrained sampler, during the creation of each row, the distribution changes the boundaries and gets recomputed in order not to assume wrong values.
+
+##### N.B #2
+At this stage of implementation, in case of constraints that are impossible to satisfy, there is no warning. It simply throws an exception.
+
 ## Longer Examples
 ### Star schema
 The following schema generates a typical fact table from a simulated star schema:
