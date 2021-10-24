@@ -10,6 +10,10 @@ about the web log generator.
 
 Please note that contributions are very welcome, but you will need to agree to a contributor license agreement similar to the Apache ICLA before any significant changes are accepted. Ping me (ted.dunning@gmail.com) for details. Ping me if you need a different language or output structure as well.
 
+Notes for this Fork
+=====================
+In this fork there is the possibility for the user to specify [Constraints](#Constraints) in order to bound values assumed by attributes
+
 Schema-driven Data Generation
 =====================
 
