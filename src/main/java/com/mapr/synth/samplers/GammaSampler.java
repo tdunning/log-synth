@@ -45,7 +45,7 @@ class GammaSampler extends FieldSampler {
     private Gamma rand = new Gamma(alpha, 1 / beta, new Random());
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         return new DoubleNode(rand.nextDouble());
     }
 

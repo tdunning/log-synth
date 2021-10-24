@@ -98,7 +98,7 @@ public class NameSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
       synchronized (this) {
         switch (type) {
             case FIRST:

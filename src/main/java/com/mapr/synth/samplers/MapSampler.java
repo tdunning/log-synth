@@ -63,7 +63,7 @@ public class MapSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         Preconditions.checkState(base != null, "Need to specify definition");
         return base.sample();
     }

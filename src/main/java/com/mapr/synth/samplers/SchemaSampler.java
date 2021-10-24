@@ -22,6 +22,7 @@ package com.mapr.synth.samplers;
 import org.jgrapht.*;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -118,15 +119,17 @@ public class SchemaSampler implements Sampler<JsonNode> {
         // we may have buffered records
         JsonNode x = buffer.poll();
         
-        Graph<FieldSampler, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
+        //creation of Dependency graph that defines the precedence order of samplers based on the costraints
+        Graph<FieldSampler, DefaultEdge> dependencyGraph = extractDependencyGraph();
+        TopologicalOrderIterator<FieldSampler, DefaultEdge> ti = new TopologicalOrderIterator<>(dependencyGraph);
         
-        
-        
+      
         while (x == null) {
             // nothing buffered ... generate some data
             Map<String, JsonNode> generators = Maps.newTreeMap();
             ObjectNode r = nodeFactory.objectNode();
-            for (FieldSampler s : schema) {
+            while (ti.hasNext()){
+            	FieldSampler s = ti.next();
                 String fieldName = s.getName();
                 if (s.isFlat()) {
                     if (fieldName == null) {
@@ -144,6 +147,7 @@ public class SchemaSampler implements Sampler<JsonNode> {
                         r.set(fieldName, v);
                     }
                 } else {
+            
                     r.set(fieldName, s.sample());
                 }
             }
@@ -162,6 +166,28 @@ public class SchemaSampler implements Sampler<JsonNode> {
         // yes, there was a buffered record
         return x;
     }
+
+    //extracts dependency graph
+	private Graph<FieldSampler, DefaultEdge> extractDependencyGraph() {
+		Graph<FieldSampler, DefaultEdge> g = new DefaultDirectedGraph<>(DefaultEdge.class);
+		
+        for (FieldSampler sampler : schema) {
+			g.addVertex(sampler);
+		}
+        
+        //for each constraint add create a dependency from att2 to att1
+        //meaning that we first need att2 before creating att1
+        for(Constraint constraint : constraints) {
+        	FieldSampler att1 = fieldMap.get(constraint.getAtt1());
+        	FieldSampler att2 = fieldMap.get(constraint.getAtt2());
+        	g.addEdge(att2, att1);
+        	constraint.setInRelationshipWith(att1, att2);
+        	att1.addCostraint(constraint);
+        }
+                
+        
+		return g;
+	}
 
     // exposed for testing
     public static void crossProduct(Queue<JsonNode> buffer, ObjectNode r, List<String> fields, Map<String, JsonNode> generators, int currentFieldIndex) {

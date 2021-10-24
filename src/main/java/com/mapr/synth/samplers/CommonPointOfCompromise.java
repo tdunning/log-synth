@@ -146,7 +146,7 @@ class CommonPointOfCompromise extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         ArrayNode r = nodeFactory.arrayNode();
 
         double t = start;

@@ -118,16 +118,16 @@ public class HeaderSampler extends FieldSampler {
         if (headerType == Type.ABABIL) {
             return "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;)";
         }
-        String br = browser.sample().asText();
+        String br = browser.doSample().asText();
         StringSampler s = headers.get(br.toLowerCase());
         if (s == null) {
             throw new IllegalStateException("Illegal browser");
         }
-        return s.sample().asText();
+        return s.doSample().asText();
     }
 
     String language() {
-        String lang = language.sample().asText();
+        String lang = language.doSample().asText();
         if (headerType == Type.ABABIL) {
             return "fr";
         } else {
@@ -154,7 +154,7 @@ public class HeaderSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         boolean isImage = gen.nextDouble() < 0.3;
         Map<String, String> params = ImmutableMap.<String, String>builder()
                 .put("url", url(isImage))

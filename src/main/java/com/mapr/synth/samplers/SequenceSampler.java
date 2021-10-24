@@ -69,7 +69,7 @@ public class SequenceSampler extends FieldSampler {
     private FieldSampler exponential(final double length) {
         return new FieldSampler() {
             @Override
-            public JsonNode sample() {
+            public JsonNode doSample() {
                 int n = (int) Math.floor(-length * Math.log(gen.nextDouble()));
                 return new IntNode(n);
             }
@@ -83,7 +83,7 @@ public class SequenceSampler extends FieldSampler {
         } else {
             length = new FieldSampler() {
                 @Override
-                public JsonNode sample() {
+                public JsonNode doSample() {
                     return value;
                 }
             };
@@ -126,18 +126,18 @@ public class SequenceSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         Preconditions.checkState(array != null || base != null, "Need to specify either base or array");
         ArrayNode r = nodeFactory.arrayNode();
         if (base != null) {
             base.restart();
-            int n = (int) length.sample().asDouble();
+            int n = (int) length.doSample().asDouble();
             for (int i = 0; i < n; i++) {
-                r.add(base.sample());
+                r.add(base.doSample());
             }
         } else {
             for (FieldSampler sampler : array) {
-                r.add(sampler.sample());
+                r.add(sampler.doSample());
             }
         }
         return r;

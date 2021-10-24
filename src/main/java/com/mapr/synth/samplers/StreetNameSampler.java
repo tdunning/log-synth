@@ -60,7 +60,7 @@ public class StreetNameSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         synchronized (this) {
           return new TextNode(sampler.get(0).sample() + " " + sampler.get(1).sample() + " " + sampler.get(2).sample());
         }

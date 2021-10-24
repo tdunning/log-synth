@@ -220,13 +220,13 @@ class Changer extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         ArrayNode history = new ArrayNode(nodeFactory);
 
         Map<String, JsonNode> current = Maps.newLinkedHashMap();
         Map<String, JsonNode> changes = Maps.newLinkedHashMap();
         for (int i = 0; i < fieldNames.size(); i++) {
-            current.put(fieldNames.get(i), fields.get(i).sample());
+            current.put(fieldNames.get(i), fields.get(i).doSample());
             changes.put(fieldNames.get(i), IntNode.valueOf(0));
         }
 
@@ -235,7 +235,7 @@ class Changer extends FieldSampler {
             Date now = new Date((long) t);
 
             int change = pickField();
-            JsonNode newValue = fields.get(change).sample();
+            JsonNode newValue = fields.get(change).doSample();
 
             if (fields.get(change).isFlat()) {
                 Iterator<String> fx = newValue.fieldNames();

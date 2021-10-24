@@ -58,7 +58,7 @@ public class VinSamplerTest {
         vs.setSeed(13);
 
         for (int i = 0; i < 10; i++) {
-            JsonNode vin = vs.sample();
+            JsonNode vin = vs.doSample();
             assertTrue(vin.get("manufacturer").asText().contains("Ford"));
             assertTrue(vin.get("VIN").asText().startsWith("1F"));
             int year = vin.get("year").asInt();
@@ -75,7 +75,7 @@ public class VinSamplerTest {
         Multiset<String> prefixCounts = TreeMultiset.create();
 
         for (int i = 0; i < 100; i++) {
-            JsonNode vin = vs.sample();
+            JsonNode vin = vs.doSample();
             assertTrue(vin.get("manufacturer").asText().contains("Ford"));
             prefixCounts.add(vin.get("VIN").asText().substring(0, 2));
             int year = vin.get("year").asInt();

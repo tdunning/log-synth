@@ -111,7 +111,7 @@ public class VinSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         ObjectNode r = new ObjectNode(nodeFactory);
 
         String manufacturer = randomCode(legalCodes);

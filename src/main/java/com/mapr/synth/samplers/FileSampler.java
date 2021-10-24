@@ -66,7 +66,7 @@ class FileSampler extends FieldSampler {
     private void setupIndex() {
         index = new IntegerSampler();
         index.setMinAsInt(0);
-        index.setMaxasInt(data.size());
+        index.setMaxAsInt(data.size());
         if (skew != Integer.MAX_VALUE) {
             index.setSkew(skew);
         }
@@ -135,9 +135,9 @@ class FileSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
       synchronized (this) {
-        return data.get(index.sample().asInt());
+        return data.get(index.doSample().asInt());
       }
     }
 }

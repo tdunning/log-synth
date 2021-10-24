@@ -45,7 +45,7 @@ public class UUIDSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         int a = rand.nextInt();
         int b = rand.nextInt(1 << 16);
         int c = 0x4000 + rand.nextInt(1 << 12);

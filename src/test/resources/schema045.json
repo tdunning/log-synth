@@ -1,5 +1,16 @@
 [
-  {"name":"id", "class":"id"},
-  {"name":"foo", "class":"id"},
-  {"name":"c1", "class":"constraint", "att1":"id", "att2":"foo", "relationship":"equals"}
+  {"name":"a", "class":"int"},
+  {"name":"notouch", "class":"int"},
+  {"name":"b", "class":"int", "min":10, "max":100},
+  {"name":"c", "class":"int", "min":102, "max":1000},
+  {"name":"d", "class":"int", "min":10, "max":100},
+  {"name":"h", "class":"string", "dist":{"1":50, "2":50}},
+  {"name":"i", "class":"string"},
+  {"name":"e", "class":"date", "start":"2014-01-31", "end":"2014-02-07"},
+  {"name":"f", "class":"date", "end":"2015-02-07"},
+  {"name":"c1", "class":"greater-than-constraint", "att1":"a", "att2":"b", "relationship":"greater"},
+  {"name":"c2", "class":"lower-than-constraint", "att1":"a", "att2":"c", "relationship":"lower"},
+  {"name":"c3", "class":"equals-to-constraint", "att1":"d", "att2":"a", "relationship":"equals"},
+  {"name":"c4", "class":"greater-than-constraint", "att1":"f", "att2":"e", "relationship":"gratear"},
+  {"name":"c6", "class":"dependency-constraint", "att1":"i", "att2":"h", "dependency": {"1": {"name":"e", "class":"string", "dist":{"EnelX":0.3, "Enel Energia":0.4, "Enel 21":0.3}},"2" : {"name":"e", "class":"string", "dist":{"Enel Chile":0.4, "Enel Ceara":0.2, "Rio":0.4}}}}
 ]

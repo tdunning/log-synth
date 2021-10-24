@@ -96,7 +96,7 @@ public class NormalSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         double x;
         do {
             x = rand.nextDouble();

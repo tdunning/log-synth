@@ -42,7 +42,7 @@ public class IdSampler extends FieldSampler {
   }
 
   @Override
-  public JsonNode sample() {
+  public JsonNode doSample() {
     return new IntNode(current.getAndIncrement());
   }
 

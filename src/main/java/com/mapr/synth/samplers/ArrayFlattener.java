@@ -40,8 +40,8 @@ class ArrayFlattener extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
-        JsonNode value = delegate.sample();
+    public JsonNode doSample() {
+        JsonNode value = delegate.doSample();
 
         ArrayNode r = nodeFactory.arrayNode();
 

@@ -42,13 +42,13 @@ public class RandomWalkSampler extends FieldSampler {
 
     private FieldSampler sd = new FieldSampler() {
         @Override
-        public JsonNode sample() {
+        public JsonNode doSample() {
             return ONE;
         }
     };
     private FieldSampler mean = new FieldSampler() {
         @Override
-        public JsonNode sample() {
+        public JsonNode doSample() {
             return ZERO;
         }
     };
@@ -66,12 +66,12 @@ public class RandomWalkSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         double step;
         if (stepDistribution == null) {
-            step = rand.nextGaussian() * sd.sample().asDouble() + mean.sample().asDouble();
+            step = rand.nextGaussian() * sd.doSample().asDouble() + mean.doSample().asDouble();
         } else {
-            step = stepDistribution.sample().asDouble();
+            step = stepDistribution.doSample().asDouble();
         }
         double newState = state.addAndGet(step);
 
@@ -121,8 +121,8 @@ public class RandomWalkSampler extends FieldSampler {
                 FieldSampler base = FieldSampler.newSampler(value.toString());
 
                 @Override
-                public JsonNode sample() {
-                    return new DoubleNode(Math.sqrt(1 / base.sample().asDouble()));
+                public JsonNode doSample() {
+                    return new DoubleNode(Math.sqrt(1 / base.doSample().asDouble()));
                 }
             };
         } else {
@@ -138,8 +138,8 @@ public class RandomWalkSampler extends FieldSampler {
                 FieldSampler base = FieldSampler.newSampler(value.toString());
 
                 @Override
-                public JsonNode sample() {
-                    return new DoubleNode(Math.sqrt(base.sample().asDouble()));
+                public JsonNode doSample() {
+                    return new DoubleNode(Math.sqrt(base.doSample().asDouble()));
                 }
             };
         } else {
@@ -155,8 +155,8 @@ public class RandomWalkSampler extends FieldSampler {
                 FieldSampler base = FieldSampler.newSampler(value.toString());
 
                 @Override
-                public JsonNode sample() {
-                    return new DoubleNode(base.sample().asDouble());
+                public JsonNode doSample() {
+                    return new DoubleNode(base.doSample().asDouble());
                 }
             };
         } else {

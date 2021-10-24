@@ -33,7 +33,7 @@ public class WordSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         return new TextNode(gen.sample());
     }
 }

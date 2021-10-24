@@ -38,7 +38,7 @@ public class LongTailSampler extends FieldSampler     {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         return new IntNode(dist.sample());
     }
 }

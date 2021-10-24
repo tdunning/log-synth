@@ -90,7 +90,7 @@ public class ArrivalSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         synchronized (this) {
             TextNode r = new TextNode(df.format(new Date((long) now)));
             double interval = -meanInterval * Math.log(1.0 - base.nextDouble());

@@ -5,6 +5,6 @@
 	"value": [
             {"name": "a", "class": "int", "min": 3, "max": 4},
             {"name": "b", "class": "int", "min": 4, "max": 5}
-	]
+	] 
     }
 ]

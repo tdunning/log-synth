@@ -21,6 +21,8 @@ package com.mapr.synth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mapr.synth.samplers.ForeignKeySampler;
+import com.mapr.synth.samplers.MySampler;
+
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.random.Sampler;
 import org.junit.Test;
@@ -42,10 +44,10 @@ public class ForeignKeySamplerTest {
         };
     }
 
-    private void check(int n, DoubleFunction distribution, Sampler<JsonNode> s) {
+    private void check(int n, DoubleFunction distribution, MySampler<JsonNode> s) {
         int[] counts = new int[n];
         for (int i = 0; i < 100000; i++) {
-            counts[s.sample().asInt()]++;
+            counts[s.doSample().asInt()]++;
         }
 
         double sum = 0;

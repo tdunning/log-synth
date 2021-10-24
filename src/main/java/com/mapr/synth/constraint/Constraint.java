@@ -1,16 +1,20 @@
 package com.mapr.synth.constraint;
 
+import java.text.ParseException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mapr.synth.samplers.FieldSampler;
 
-public class Constraint extends FieldSampler{
+public class Constraint<T> extends FieldSampler{
 	
 	private String att1 = "";
 	private String att2 = "";
 	private String relationship = "";
+	protected FieldSampler referenceField;
+	protected FieldSampler inRelationshipWith;
 
 	@Override
-	public JsonNode sample() {
+	public JsonNode doSample() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -37,6 +41,23 @@ public class Constraint extends FieldSampler{
 
 	public void setRelationship(String relationship) {
 		this.relationship = relationship;
+	}
+	
+	public void setInRelationshipWith(FieldSampler referenceField, FieldSampler field) {
+		this.referenceField = referenceField;
+		this.inRelationshipWith = field;
+	}
+	
+	@Override
+	public String toString() {
+		return att1 + " " + relationship + " " + att2;
+	}
+	
+	public void applyConstraint() {
+	}
+	
+	public void resetConstraint() {
+		
 	}
 
 }

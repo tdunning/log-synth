@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.mapr.synth.samplers.FieldSampler;
 import com.mapr.synth.samplers.SchemaSampler;
 
 public class ConstraintTest {
@@ -15,7 +16,8 @@ public class ConstraintTest {
 	 @Test
 	    public void testDeserialization() throws IOException {
 	        SchemaSampler s = SchemaSampler.fromResource("schema045.json");
-	        int t = 1;
+	        JsonNode ss = s.sample();
+	        System.out.println(ss);
 	    }
 
 }

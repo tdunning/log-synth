@@ -36,7 +36,7 @@ import java.util.Random;
  * Thread safe
  */
 
-class IntegerSampler extends FieldSampler {
+public class IntegerSampler extends FieldSampler implements ComparableField {
     private int min = 0;
     private int max = 100;
     private int power = 0;
@@ -62,7 +62,7 @@ class IntegerSampler extends FieldSampler {
     }
 
     @SuppressWarnings("SameParameterValue")
-    void setMinAsInt(int min) {
+    public void setMinAsInt(int min) {
         this.min = min;
     }
 
@@ -93,7 +93,7 @@ class IntegerSampler extends FieldSampler {
         }
     }
 
-    void setMaxasInt(int max) {
+    public void setMaxAsInt(int max) {
         this.max = max;
     }
 
@@ -122,7 +122,7 @@ class IntegerSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         synchronized (this) {
             if (dist == null) {
                 int r = power >= 0 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
@@ -146,7 +146,8 @@ class IntegerSampler extends FieldSampler {
             }
         }
     }
-
+    
+    
     public int getMin() {
         return min;
     }
@@ -154,5 +155,46 @@ class IntegerSampler extends FieldSampler {
     public int getMax() {
         return max;
     }
+
+	@Override
+	public String getMaxAsString() {
+		return String.valueOf(max);
+	}
+
+	@Override
+	public String getMinAsString() {
+		return String.valueOf(min);
+	}
+
+	@Override
+	public int compareTo(String c) {
+		return lastSampled.intValue() - Integer.valueOf(c);
+	}
+
+	@Override
+	public void setMaxAsString(String c, boolean plusOne) {
+		int i = 0;
+		if(plusOne) {
+			i = 1;
+		}
+		max = Integer.valueOf(c) + i;
+		
+	}
+
+	@Override
+	public void setMinAsString(String c, boolean plusOne) {
+		int i = 0;
+		if(plusOne) {
+			i = 1;
+		}
+		min = Integer.valueOf(c) + i;
+		
+	}
+
+	@Override
+	public String getLastSampledAsString() {
+		return lastSampled.asText();
+		
+	}
 
 }

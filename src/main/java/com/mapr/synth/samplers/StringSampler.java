@@ -89,7 +89,7 @@ public class StringSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
       synchronized (this) {
         return new TextNode(distribution.get().sample());
       }

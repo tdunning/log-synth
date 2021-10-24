@@ -132,7 +132,7 @@ public class DnsSampler extends FieldSampler {
                 if (i < topNames.size()) {
                     return topNames.get(i++);
                 } else {
-                    return names.sample().asText() + tld.sample();
+                    return names.doSample().asText() + tld.sample();
                 }
             }
         };
@@ -345,7 +345,7 @@ public class DnsSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         restart();
 
         InetAddress address = ip.sample();

@@ -70,8 +70,8 @@ public class FlattenSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
-        JsonNode value = delegate.sample();
+    public JsonNode doSample() {
+        JsonNode value = delegate.doSample();
 
         if (value.isObject()) {
             ObjectNode r = new ObjectNode(nodeFactory);

@@ -206,7 +206,7 @@ public class ZipSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         while (true) {
             int i = rand.nextInt(zipCount);
             ObjectNode r = new ObjectNode(nodeFactory);

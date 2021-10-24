@@ -43,8 +43,8 @@ import java.util.concurrent.TimeUnit;
  *
  * Thread safe
  */
-class DateSampler extends FieldSampler {
-    private static final long EPOCH = new GregorianCalendar(2013, Calendar.AUGUST, 1).getTimeInMillis();
+public class DateSampler extends FieldSampler implements ComparableField{
+    private static final long EPOCH = new GregorianCalendar(2021, Calendar.AUGUST, 1).getTimeInMillis();
     private long start = 0;
     private long end = EPOCH;
 
@@ -71,12 +71,84 @@ class DateSampler extends FieldSampler {
         this.end = df.parse(end).getTime();
         base = new Uniform(0, this.end - this.start, RandomUtils.getRandom());
     }
+    
+    public FancyTimeFormatter getFormat() {
+    	return df;
+    }
 
-    @Override
-    public JsonNode sample() {
+    public long getStart() {
+		return start;
+	}
+
+	public void setStartL(long start) {
+		this.start = start;
+		base = new Uniform(0, this.end - this.start, RandomUtils.getRandom());
+	}
+
+	public long getEnd() {
+		return end;
+	}
+
+	public void setEndL(long end) {
+		this.end = end;
+        base = new Uniform(0, this.end - this.start, RandomUtils.getRandom());
+	}
+
+	@Override
+    public JsonNode doSample() {
       synchronized (this) {
         long t = (long) Math.rint(base.nextDouble());
         return new TextNode(df.format(new java.util.Date(end - t)));
       }
     }
+
+	@Override
+	public String getMaxAsString() {
+		return df.format(new java.util.Date(end));
+	}
+
+	@Override
+	public String getMinAsString() {
+		return df.format(new java.util.Date(start));
+	}
+
+	@Override
+	public int compareTo(String c) {
+		try {
+			System.out.println("doff " + (df.parse(lastSampled.asText()).getTime() - df.parse(c).getTime()));
+			long l = (df.parse(lastSampled.asText()).getTime() - df.parse(c).getTime());
+			if(l > 0) return 1;
+			if(l == 0) return 0;
+			if(l < 0) return -1;
+ 		} catch (NumberFormatException | ParseException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	@Override
+	public void setMaxAsString(String c, boolean plusOne) {
+		try {
+			setEnd(c);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	@Override
+	public void setMinAsString(String c, boolean plusOne) {
+		try {
+			System.out.println("old start " + start);
+			setStart(c);
+			System.out.println("new start " + start);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public String getLastSampledAsString() {
+		return lastSampled.asText();
+	}
 }

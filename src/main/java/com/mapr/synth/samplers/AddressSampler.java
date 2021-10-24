@@ -38,7 +38,7 @@ class AddressSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
-        return new TextNode(number.sample().asInt() + " " + street.sample().asText());
+    public JsonNode doSample() {
+        return new TextNode(number.doSample().asInt() + " " + street.doSample().asText());
     }
 }

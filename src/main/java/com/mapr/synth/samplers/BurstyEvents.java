@@ -284,10 +284,10 @@ public class BurstyEvents extends FieldSampler {
 
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         JsonNode r;
         if (value != null) {
-            r = value.sample();
+            r = value.doSample();
         } else {
             r = new ObjectNode(factory);
         }

@@ -119,11 +119,11 @@ public class VectorSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         init();
 
         ArrayNode r = new ArrayNode(nodeFactory);
-        int n = (int) length.sample().asDouble();
+        int n = (int) length.doSample().asDouble();
         for (int i = 0; i < n; i++) {
             r.add(sampler.eval());
         }

@@ -117,7 +117,7 @@ public class Commuter extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         final Car car = new Car();
         if (extraSchema != null) {
             extrasSampler = new SchemaSampler(extraSchema);
@@ -125,10 +125,10 @@ public class Commuter extends FieldSampler {
         car.setSampleTime(sampleTime);
         car.getEngine().setTime(start);
 
-        JsonNode homeLocation = homeSampler.sample();
+        JsonNode homeLocation = homeSampler.doSample();
         GeoPoint home = new GeoPoint(Util.toDegrees(homeLocation, "latitude"), Util.toDegrees(homeLocation, "longitude"));
 
-        double radius = workSampler.sample().asDouble();
+        double radius = workSampler.doSample().asDouble();
         GeoPoint work = home.nearby(radius, rand);
 
         //---------------
@@ -313,8 +313,8 @@ public class Commuter extends FieldSampler {
                 FieldSampler base = FieldSampler.newSampler(value.toString());
 
                 @Override
-                public JsonNode sample() {
-                    return new DoubleNode(Math.sqrt(1 / base.sample().asDouble()));
+                public JsonNode doSample() {
+                    return new DoubleNode(Math.sqrt(1 / base.doSample().asDouble()));
                 }
             };
         } else if (value.isNumber()) {

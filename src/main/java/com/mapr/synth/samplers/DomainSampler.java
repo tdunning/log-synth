@@ -65,7 +65,7 @@ public class DomainSampler extends FieldSampler {
                 if (i < topNames.size()) {
                     return topNames.get(i++);
                 } else {
-                    return names.sample().asText() + tld.sample();
+                    return names.doSample().asText() + tld.sample();
                 }
             }
         };
@@ -113,7 +113,7 @@ public class DomainSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         ObjectNode r = new ObjectNode(factory);
 
         String domain = domainDistribution.sample();

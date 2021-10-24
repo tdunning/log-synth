@@ -111,7 +111,7 @@ public class HeaderSamplerTest {
         s.setType("normal");
         List<String> headers = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
-            headers.add(s.sample().asText());
+            headers.add(s.doSample().asText());
         }
         System.out.print("foo\n");
     }

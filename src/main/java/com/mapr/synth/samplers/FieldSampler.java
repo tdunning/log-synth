@@ -26,12 +26,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.DoubleNode;
+import com.google.common.collect.Lists;
 import com.mapr.synth.OperatingSystemSampler;
 import com.mapr.synth.constraint.Constraint;
+import com.mapr.synth.constraint.DependencyConstraint;
+import com.mapr.synth.constraint.EqualsToConstraint;
+import com.mapr.synth.constraint.GreaterThanConstraint;
+import com.mapr.synth.constraint.LowerThanConstraint;
 import com.mapr.synth.drive.Commuter;
 import org.apache.mahout.math.random.Sampler;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "class")
@@ -72,20 +78,26 @@ import java.util.Set;
         @JsonSubTypes.Type(value = VectorSampler.class, name = "vector"),
         @JsonSubTypes.Type(value = VinSampler.class, name = "vin"),
         @JsonSubTypes.Type(value = WordSampler.class, name = "word"),
-        @JsonSubTypes.Type(value = Constraint.class, name = "constraint"),
+        @JsonSubTypes.Type(value = GreaterThanConstraint.class, name = "greater-than-constraint"),
+        @JsonSubTypes.Type(value = LowerThanConstraint.class, name = "lower-than-constraint"),
+        @JsonSubTypes.Type(value = EqualsToConstraint.class, name = "equals-to-constraint"),
+        @JsonSubTypes.Type(value = DependencyConstraint.class, name = "dependency-constraint"),
         @JsonSubTypes.Type(value = ZipSampler.class, name = "zip"),
 
 })
-public abstract class FieldSampler implements Sampler<JsonNode> {
+public abstract class FieldSampler implements MySampler<JsonNode> {
     private String name;
     private boolean flattener = false;
+    protected JsonNode lastSampled;
+
+	protected List<Constraint> costraints = Lists.newLinkedList();
 
     protected static FieldSampler newSampler(String def) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-
+        
         return mapper.readValue(def, new TypeReference<>() {
         });
     }
@@ -105,11 +117,15 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
             private DoubleNode sd = new DoubleNode(v);
 
             @Override
-            public JsonNode sample() {
+            public JsonNode doSample() {
                 return sd;
             }
         };
     }
+    
+	/*
+	 * protected isConstrained() { // true se ce constraint con att1 uguale a this }
+	 */
 
     /**
      * Restart should back up any variables to the minimum values, but should not reseed any
@@ -143,4 +159,53 @@ public abstract class FieldSampler implements Sampler<JsonNode> {
     public void getNames(Set<String> fields) {
         fields.add(name);
     }
+    
+    @Override
+    public String toString() {
+    	// TODO Auto-generated method stub
+    	return name;
+    }
+    
+    public JsonNode sample() {
+    	if(!costraints.isEmpty())
+    		System.out.println(costraints);
+    	
+    	//I beg you pardon for this horridness
+    	for (Constraint constraint : costraints) {
+    		if(constraint instanceof DependencyConstraint) {
+    			
+    			DependencyConstraint c = (DependencyConstraint) constraint;
+    			c.applyConstraint();
+
+        		lastSampled = c.getDependentField().doSample();
+        		return lastSampled;
+    		}
+    		
+		}
+    	
+    	//apply constraints before sampling hoping it doesn't messes everything up
+    	for (Constraint constraint : costraints) {
+    		constraint.applyConstraint();
+		}
+    	
+    	lastSampled = doSample();
+    	
+    	//apply constraints before sampling hoping it doesn't messes everything up
+    	for (Constraint constraint : costraints) {
+    		constraint.resetConstraint();
+    		
+		}
+    	System.out.println(this.name + " - " + lastSampled);
+    	return lastSampled;
+    }
+   
+
+	public void addCostraint(Constraint c) {
+    	this.costraints.add(c);
+    }
+	
+    public JsonNode getLastSampled() {
+		return lastSampled;
+	}
+
 }

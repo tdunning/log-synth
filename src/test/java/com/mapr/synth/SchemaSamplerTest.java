@@ -384,7 +384,7 @@ public class SchemaSamplerTest {
 
             Multiset<String> counts = HashMultiset.create();
             for (int i = 0; i < 1000; i++) {
-                counts.add(s.sample().asText());
+                counts.add(s.doSample().asText());
             }
 
             assertEquals(3, counts.elementSet().size());

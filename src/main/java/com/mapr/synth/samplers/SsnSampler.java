@@ -116,7 +116,7 @@ public class SsnSampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
         while (true) {
             int i = rand.nextInt(codes.size());
             List<String> fields = values.get(codes.get(i));

@@ -72,7 +72,7 @@ public class ForeignKeySampler extends FieldSampler {
     }
 
     @Override
-    public JsonNode sample() {
+    public JsonNode doSample() {
       synchronized (this) {
         return new IntNode(base.sample());
       }
