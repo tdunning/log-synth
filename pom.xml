@@ -165,48 +165,48 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>com.carrotsearch.randomizedtesting</groupId>
-                <artifactId>junit4-maven-plugin</artifactId>
-                <version>2.7.8</version>
-                <executions>
-                    <execution>
-                        <id>tests</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>junit4</goal>
-                        </goals>
-                        <configuration>
-                            <includes>
-                                <include>**/*Test.class</include>
-                            </includes>
-                            <systemProperties>
-                                <runSlowTests>${runSlowTests}</runSlowTests>
-                            </systemProperties>
-                            <seed>${tests.seed}</seed>
-                            <jvmOutputAction>pipe</jvmOutputAction>
-                            <parallelism>1</parallelism>
-                            <listeners>
-                                <report-ant-xml mavenExtensions="true"
-                                                dir="${project.build.directory}/surefire-reports"/>
-                                <report-text
-                                        showThrowable="true"
-                                        showStackTraces="true"
-                                        showOutput="always"
-                                        showStatusOk="false"
-                                        showStatusError="true"
-                                        showStatusFailure="true"
-                                        showStatusIgnored="true"
-                                        showSuiteSummary="true"
-                                        timestamps="false"/>
-                            </listeners>
-                            <assertions>
-                                <enable/>
-                            </assertions>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>com.carrotsearch.randomizedtesting</groupId>-->
+<!--                <artifactId>junit4-maven-plugin</artifactId>-->
+<!--                <version>2.7.8</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>tests</id>-->
+<!--                        <phase>test</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>junit4</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <includes>-->
+<!--                                <include>**/*Test.class</include>-->
+<!--                            </includes>-->
+<!--                            <systemProperties>-->
+<!--                                <runSlowTests>${runSlowTests}</runSlowTests>-->
+<!--                            </systemProperties>-->
+<!--                            <seed>${tests.seed}</seed>-->
+<!--                            <jvmOutputAction>pipe</jvmOutputAction>-->
+<!--                            <parallelism>1</parallelism>-->
+<!--                            <listeners>-->
+<!--                                <report-ant-xml mavenExtensions="true"-->
+<!--                                                dir="${project.build.directory}/surefire-reports"/>-->
+<!--                                <report-text-->
+<!--                                        showThrowable="true"-->
+<!--                                        showStackTraces="true"-->
+<!--                                        showOutput="always"-->
+<!--                                        showStatusOk="false"-->
+<!--                                        showStatusError="true"-->
+<!--                                        showStatusFailure="true"-->
+<!--                                        showStatusIgnored="true"-->
+<!--                                        showSuiteSummary="true"-->
+<!--                                        timestamps="false"/>-->
+<!--                            </listeners>-->
+<!--                            <assertions>-->
+<!--                                <enable/>-->
+<!--                            </assertions>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 </project>
