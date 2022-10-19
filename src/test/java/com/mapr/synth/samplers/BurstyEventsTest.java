@@ -39,15 +39,16 @@ public class BurstyEventsTest {
             counts[(int) (24 * Util.fractionalPart(t / Util.ONE_DAY))]++;
         }
         for (int i = 0; i < 24; i++) {
-            System.out.printf("%5d,%5d ", i, counts[i]);
+//            System.out.printf("%5d,%5d ", i, counts[i]);
             if (i >= 1 && i < 19) {
-                System.out.print("N\n");
+//                System.out.print("N\n");
                 assertTrue("Too much activity in the night", counts[i] < 100);
-            } else if ((i == 0) || (i == 19)) {
-                System.out.print("E\n");
+            } else //noinspection StatementWithEmptyBody
+                if ((i == 0) || (i == 19)) {
+//                System.out.print("E\n");
                 // don't care
             } else {
-                System.out.print("D\n");
+//                System.out.print("D\n");
                 assertTrue("Too little activity during the day", counts[i] > 500);
             }
         }
