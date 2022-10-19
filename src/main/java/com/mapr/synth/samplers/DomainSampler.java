@@ -45,6 +45,7 @@ public class DomainSampler extends FieldSampler {
     // distribution parameters for domain names
     private double alpha = 1000;
     private double discount = 0.3;
+    private boolean verbose = true;
 
     public DomainSampler() throws IOException {
         List<String> topNames = Lists.newArrayList();
@@ -57,7 +58,7 @@ public class DomainSampler extends FieldSampler {
         });
         Multinomial<String> tld = Util.readTable(onComma, "tld.csv");
         NameSampler names = new NameSampler(NameSampler.Type.LAST);
-        domainDistribution = new LongTail<String>(alpha, discount) {
+        domainDistribution = new LongTail<>(alpha, discount) {
             int i = 0;
 
             @Override
@@ -94,6 +95,11 @@ public class DomainSampler extends FieldSampler {
         setFlattener(isFlat);
     }
 
+    @SuppressWarnings("UnusedDeclaration")
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
+    }
+
     @Override
     public void getNames(Set<String> fields) {
         if (isFlat()) {
@@ -114,15 +120,19 @@ public class DomainSampler extends FieldSampler {
 
     @Override
     public JsonNode sample() {
-        ObjectNode r = new ObjectNode(factory);
-
         String domain = domainDistribution.sample();
-        r.set(getFieldName("domain"), new TextNode(domain));
-        List<String> parts = Arrays.asList(domain.split("\\."));
-        Collections.reverse(parts);
-        String reversed = String.join(".", parts);
-        r.set(getFieldName("revDomain"), new TextNode(reversed));
+        if (verbose) {
+            ObjectNode r = new ObjectNode(factory);
 
-        return r;
+            r.set(getFieldName("domain"), new TextNode(domain));
+            List<String> parts = Arrays.asList(domain.split("\\."));
+            Collections.reverse(parts);
+            String reversed = String.join(".", parts);
+            r.set(getFieldName("revDomain"), new TextNode(reversed));
+
+            return r;
+        } else {
+            return new TextNode(domain);
+        }
     }
 }
