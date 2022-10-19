@@ -31,7 +31,7 @@ import java.util.Set;
 /**
  * Delegate to another sampler which generates an object.  The fields of this object inserted into the
  * parent of this sampler.  This is handy when working with samplers that return complex types such as
- * VIN an ZIP.  If you want, for instance, the zip-code, latitude and longitude as three variables in a
+ * VIN or ZIP.  If you want, for instance, the zip-code, latitude and longitude as three variables in a
  * record, you can do this:
  *
  * <per>
