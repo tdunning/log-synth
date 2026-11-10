@@ -19,15 +19,15 @@
 
 package com.mapr.synth;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UtilTest {
     private static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -42,7 +42,7 @@ public class UtilTest {
     private double t3;
     private double t4;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         t0 = df.parse("2019-03-09 00:00:00").getTime();
         t1 = df.parse("2019-03-09 00:00:00").getTime();

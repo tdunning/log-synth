@@ -25,7 +25,7 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
 import com.mapr.synth.samplers.SchemaSampler;
 import org.apache.mahout.math.stats.LogLikelihood;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

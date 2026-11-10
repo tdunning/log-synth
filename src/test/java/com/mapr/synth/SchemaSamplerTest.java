@@ -28,8 +28,8 @@ import com.google.common.collect.*;
 import com.mapr.synth.samplers.SchemaSampler;
 import com.mapr.synth.samplers.StringSampler;
 import org.apache.mahout.math.stats.OnlineSummarizer;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -46,10 +46,10 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SchemaSamplerTest {
     @Test
@@ -105,7 +105,7 @@ public class SchemaSamplerTest {
             counts.add(s.sample().get("size").asText());
         }
         for (int i = 10; i < 99; i++) {
-            Assert.assertTrue(counts.elementSet().contains(i + ""));
+            Assertions.assertTrue(counts.elementSet().contains(i + ""));
         }
         assertEquals(99 - 10, counts.elementSet().size());
     }

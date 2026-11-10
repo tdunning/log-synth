@@ -21,11 +21,11 @@ package com.mapr.synth.samplers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mapr.synth.Util;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BurstyEventsTest {
     @Test
@@ -42,14 +42,14 @@ public class BurstyEventsTest {
 //            System.out.printf("%5d,%5d ", i, counts[i]);
             if (i >= 1 && i < 19) {
 //                System.out.print("N\n");
-                assertTrue("Too much activity in the night", counts[i] < 100);
+                assertTrue(counts[i] < 100, "Too much activity in the night");
             } else //noinspection StatementWithEmptyBody
                 if ((i == 0) || (i == 19)) {
 //                System.out.print("E\n");
                 // don't care
             } else {
 //                System.out.print("D\n");
-                assertTrue("Too little activity during the day", counts[i] > 500);
+                assertTrue(counts[i] > 500, "Too little activity during the day");
             }
         }
     }

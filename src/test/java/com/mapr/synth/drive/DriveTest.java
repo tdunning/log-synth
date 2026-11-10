@@ -20,8 +20,8 @@
 package com.mapr.synth.drive;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,8 +29,8 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DriveTest {
     @Test
@@ -117,7 +117,7 @@ public class DriveTest {
             for (Car.Segment segment : plan.subList(1, plan.size())) {
                 double distance = old.distance(segment.getEnd());
                 if (distance > 100 || Double.isNaN(distance)) {
-                    Assert.fail("Got bad distance");
+                    Assertions.fail("Got bad distance");
                 }
                 old = segment.getEnd();
             }

@@ -23,14 +23,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FlattenSamplerTest {
     @Test
@@ -51,7 +51,8 @@ public class FlattenSamplerTest {
                 illegalFields.add(name);
             }
         }
-        assertEquals(String.format("Expected all fields to start with q- or r-, but found %s", illegalFields),0, illegalFields.size());
+        assertEquals(0, illegalFields.size(),
+                String.format("Expected all fields to start with q- or r-, but found %s", illegalFields));
     }
 
     @Test
