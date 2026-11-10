@@ -25,16 +25,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ZipSamplerTest {
 
@@ -83,13 +83,14 @@ public class ZipSamplerTest {
             latitudeFuzzy += y;
 
             laCounts.add(v.get("zLosAngeles").get("zip").asText());
-            assertTrue("Unexpected zip code in LA", v.get("zLosAngeles").get("zip").asText().matches("(9[0123]...)|(89...)"));
+            assertTrue(v.get("zLosAngeles").get("zip").asText().matches("(9[0123]...)|(89...)"),
+                    "Unexpected zip code in LA");
 
             assertTrue(v.get("zFlat").asText().matches("\\d\\d\\d\\d\\d"));
         }
 
-        assertFalse("Expected non-continental samples", allInside1);
-        assertTrue("Should not have had non-continental samples", allInside2);
+        assertFalse(allInside1, "Expected non-continental samples");
+        assertTrue(allInside2, "Should not have had non-continental samples");
 
         longitude = longitude / N;
         latitude = latitude / N;

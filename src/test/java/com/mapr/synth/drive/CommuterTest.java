@@ -26,7 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
 import com.mapr.synth.samplers.SchemaSampler;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -38,8 +38,8 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CommuterTest {
     private final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
@@ -65,8 +65,9 @@ public class CommuterTest {
             }
             int n = r.get("trip").get("trips").size();
             System.out.printf("%d,%d\n", total, n);
-            assertTrue(String.format("Expected lots of detail but only saw %d records", total), total > 500 && total < 100000);
-            assertTrue(String.format("But only a few trips (saw %d)", n), n > 2 && n < 40);
+            assertTrue(total > 500 && total < 100000,
+                    String.format("Expected lots of detail but only saw %d records", total));
+            assertTrue(n > 2 && n < 40, String.format("But only a few trips (saw %d)", n));
         }
     }
 
@@ -100,7 +101,7 @@ public class CommuterTest {
 
         for (String vin : counts.elementSet()) {
             int n = counts.count(vin);
-            assertTrue(String.format("Vehicle samples = %d", n), n > 10 && n < 100000);
+            assertTrue(n > 10 && n < 100000, String.format("Vehicle samples = %d", n));
         }
 
         int max = 0;
@@ -122,8 +123,8 @@ public class CommuterTest {
 
     private void verifyFields(JsonNode jsonNode, Collection<String> expectedFields) {
         TreeSet<String> c = Sets.newTreeSet(Lists.newArrayList(jsonNode.fieldNames()));
-        assertEquals(String.format("Expected fields %s but got %s", expectedFields.toString(), c.toString()),
-                expectedFields.size(), Sets.intersection(c, Sets.newTreeSet(expectedFields)).size());
+        assertEquals(expectedFields.size(), Sets.intersection(c, Sets.newTreeSet(expectedFields)).size(),
+                String.format("Expected fields %s but got %s", expectedFields, c));
     }
 
     @Test
@@ -131,7 +132,8 @@ public class CommuterTest {
         Commuter c = new Commuter();
         double t1 = df.parse("2015-09-23 23:15:06 PDT").getTime() / 1000.0;
         double t2 = df.parse("2015-09-23 23:00:00 PDT").getTime() / 1000.0;
-        assertEquals(String.format("Got %s", df.format(new Date(Util.evenHour(t1) * 1000))), t2, Util.evenHour(t1), 0);
+        assertEquals(t2, Util.evenHour(t1), 0,
+                String.format("Got %s", df.format(new Date(Util.evenHour(t1) * 1000))));
     }
 
     @Test

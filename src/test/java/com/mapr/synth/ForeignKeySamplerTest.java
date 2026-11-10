@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.mapr.synth.samplers.ForeignKeySampler;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.random.Sampler;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ForeignKeySamplerTest {
     @Test

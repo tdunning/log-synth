@@ -31,15 +31,15 @@ import com.mapr.synth.distributions.LongTail;
 import com.mapr.synth.distributions.TermGenerator;
 import com.mapr.synth.distributions.WordGenerator;
 import org.apache.mahout.math.stats.LogLikelihood;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TermGeneratorTest {
 
@@ -54,7 +54,7 @@ public class TermGeneratorTest {
         }
 
         assertEquals(10000, counts.size());
-        assertTrue("Should have some common words", counts.elementSet().size() < 10000);
+        assertTrue(counts.elementSet().size() < 10000, "Should have some common words");
         List<Integer> k = counts.elementSet().stream()
                 .map(counts::count).collect(Collectors.toList());
 //        System.out.printf("%s\n", Ordering.natural().reverse().sortedCopy(k).subList(0, 30));

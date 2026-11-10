@@ -19,14 +19,14 @@
 
 package com.mapr.synth.drive;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EngineTest {
     @SuppressWarnings("WeakerAccess")
@@ -40,9 +40,9 @@ public class EngineTest {
         while (car.getSpeed() < 60 * MPH_TO_M_S) {
             t += 0.1;
             car.stepToTime(t, 90 * MPH_TO_M_S, 0);
-            assertTrue("RPM limits", car.getRpm() >= 200 && car.getRpm() <= 2000);
+            assertTrue(car.getRpm() >= 200 && car.getRpm() <= 2000, "RPM limits");
         }
-        assertEquals("Time to 60", t, (6.5 + 8) / 2, (8 - 6.5) / 2);
+        assertEquals(t, (6.5 + 8) / 2, (8 - 6.5) / 2, "Time to 60");
     }
 
     @Test
@@ -69,12 +69,12 @@ public class EngineTest {
             t += 0.1;
             car.stepToTime(t, target, 0);
         }
-        assertTrue("Convergence to target time", t - t0 < timeToTarget);
+        assertTrue(t - t0 < timeToTarget, "Convergence to target time");
         double limit = t + 10;
         while (t < limit) {
             t += 0.1;
             car.stepToTime(t, target, 0);
-            assertEquals("Maintain speed", target, car.getSpeed(), 0.5);
+            assertEquals(target, car.getSpeed(), 0.5, "Maintain speed");
         }
         return t;
     }

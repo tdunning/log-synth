@@ -22,13 +22,13 @@ package com.mapr.synth;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Ordering;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LogGeneratorTest {
     @Test
@@ -48,19 +48,21 @@ public class LogGeneratorTest {
         // there is nothing particularly principled about them
 
         List<Integer> k1 = count(wordCounter);
-        assertTrue(String.format("Bad number of words %d", k1.size()), k1.size() > 1000 && k1.size() < 15000);
+        assertTrue(k1.size() > 1000 && k1.size() < 15000,
+                String.format("Bad number of words %d", k1.size()));
         assertTrue(k1.get(0) > 1000);
         assertTrue(k1.get(500) < 100);
 
         k1 = count(ipCounter);
-        assertTrue(String.format("Bad number of IP addresses %d", k1.size()), k1.size() >= 200 && k1.size() < 400);
+        assertTrue(k1.size() >= 200 && k1.size() < 400,
+                String.format("Bad number of IP addresses %d", k1.size()));
         assertEquals(25, (double) k1.get(0) / k1.get(k1.size() / 2), 22.);
         double r = (double) k1.get(0) / k1.get(k1.size() - 1);
         // very long-tailed distribution here
         assertEquals(75.0, r, 65.0);
 
         k1 = count(cookieCounter);
-        assertEquals(String.format("Bad number of cookies %d", k1.size()), gen.getUserCount(), k1.size());
+        assertEquals(gen.getUserCount(), k1.size(), String.format("Bad number of cookies %d", k1.size()));
         double ratio = (double) k1.get(0) / k1.get(k1.size() - 1);
         assertEquals(5.0, ratio, 4.1);
     }
