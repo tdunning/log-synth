@@ -1,6 +1,8 @@
 log-synth
 =========
 
+[![Maven Tests](https://github.com/tdunning/log-synth/actions/workflows/maven.yml/badge.svg)](https://github.com/tdunning/log-synth/actions/workflows/maven.yml)
+
 The basic idea here is to have a random data generator build fairly
 realistic files for analysis. The primary use of log-synth has been to
 generate data based on a specified schema, but there is an older
@@ -1109,4 +1111,3 @@ EMAIL;TYPE=PREF,INTERNET:gkittle@example.com
 REV:2013-07-14 01:37:08+0100
 END:VCARDBEGIN:VCARD
 ```
-
